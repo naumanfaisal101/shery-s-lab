@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daiba passport photo set maker by Nusrat Shaheen inc.</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Cropper.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .cropper-container {
+            width: 100%;
+            max-height: 500px;
+            background-color: #e5e7eb;
+        }
+        #resultPreview {
+            width: 100%;
+            max-width: 400px; /* Represents the 4x6 ratio visually */
+            height: auto;
+            aspect-ratio: 4 / 6;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: block;
+            margin: 0 auto;
+        }
+        /* Perspective SVG styles */
+        .handle {
+            cursor: move;
+            fill: white;
+            stroke: #3b82f6;
+            stroke-width: 3px;
+            transition: r 0.1s;
+        }
+        .handle:hover {
+            r: 12px;
+            fill: #eff6ff;
+        }
+        #perspectiveWrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            overflow: hidden;
+            background: #e5e7eb;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <a href="../index.html" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; background: #1e3a8a; color: white; padding: 12px 20px; text-decoration: none; border-radius: 50px; font-family: sans-serif; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.3s;">
+    ← Back to Dashboard
+    </a>
+
+    <div class="max-w-5xl mx-auto">
+        <header class="mb-10 flex flex-col sm:flex-row items-center justify-center gap-6 bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
+            <div class="relative shrink-0">
+                <!-- Decorative glow behind the image -->
+                <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 via-red-400 to-yellow-400 blur-md opacity-60 scale-110"></div>
+                <!-- Profile Image with fallback to prevent broken icon -->
+                <img src="Gemini_Generated_Image_57wlmt57wlmt57wl.jpg" 
+                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Daiba&background=ec4899&color=fff&size=200&font-size=0.4';" 
+                     alt="Daiba Logo" 
+                     class="relative w-28 h-28 sm:w-36 sm:h-36 object-cover object-top rounded-full border-4 border-white shadow-lg z-10 bg-white">
+            </div>
+            
+            <div class="text-center sm:text-left">
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-purple-600 mb-3 tracking-tight">
+                    Daiba Passport Photo Set Maker
+                </h1>
+                <div class="mb-3">
+                    <span class="inline-block bg-gradient-to-r from-blue-50 to-purple-50 text-purple-800 border border-purple-100 py-1 px-4 rounded-full text-xs sm:text-sm font-semibold tracking-wide shadow-sm">
+                        by Nusrat Shaheen inc.
+                    </span>
+                </div>
+                <p class="text-gray-600 text-sm sm:text-base max-w-md mx-auto sm:mx-0 leading-relaxed">
+                    Crop to 35x45mm, rotate, aur alag alag photos ko ek hi 4x6 sheet par lagayein taake koi jagah zaya na ho.
+                </p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Left Column: Upload & Crop -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">1. Upload & Crop</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" for="imageUpload">Upload Photo</label>
+                    <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/jpg" 
+                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors border border-gray-300 rounded-md p-1">
+                </div>
+
+                <!-- Crop Mode Toggle -->
+                <div id="cropModeToggle" class="mb-4 hidden flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-100">
+                    <span class="text-sm font-medium text-gray-700">Crop Mode:</span>
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="perspectiveToggle" class="sr-only peer">
+                        <div class="relative w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <span class="ml-3 text-sm font-bold text-blue-700" id="modeLabelText">Flat Box Selection</span>
+                    </label>
+                </div>
+
+                <!-- Standard Crop Tool Container -->
+                <div class="cropper-container rounded-lg overflow-hidden border border-gray-200 mb-4 hidden" id="cropperWrapper">
+                    <img id="imageToCrop" src="" alt="Picture to crop">
+                </div>
+
+                <!-- Rotation Controls for Flat Mode -->
+                <div id="rotationControls" class="mb-4 hidden bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Rotate Photo (Seedha Karein)</label>
+                    <div class="flex items-center gap-3">
+                        <button id="rotateLeftBtn" class="w-10 h-10 flex items-center justify-center bg-gray-50 border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="Rotate Left 1 Degree">
+                            <i class="fa-solid fa-rotate-left text-gray-600"></i>
+                        </button>
+                        <input type="range" id="rotationSlider" min="-45" max="45" value="0" step="0.1" class="flex-grow h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
+                        <button id="rotateRightBtn" class="w-10 h-10 flex items-center justify-center bg-gray-50 border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="Rotate Right 1 Degree">
+                            <i class="fa-solid fa-rotate-right text-gray-600"></i>
+                        </button>
+                        <button id="rotateResetBtn" class="px-3 h-10 flex items-center justify-center bg-red-50 border border-red-200 text-red-600 rounded hover:bg-red-100 transition-colors text-sm font-medium" title="Reset Rotation">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Perspective Crop Tool Container -->
+                <div class="relative rounded-lg overflow-hidden border border-gray-200 mb-4 hidden" id="perspectiveWrapper">
+                    <div class="relative inline-block" id="perspectiveImgContainer" style="line-height: 0;">
+                        <img id="perspectiveImg" src="" class="max-w-full max-h-[500px] pointer-events-none" style="display:block;">
+                        <svg id="perspectiveSvg" class="absolute top-0 left-0 w-full h-full pointer-events-auto" style="z-index: 10;">
+                            <polygon id="perspectivePoly" points="0,0 0,0 0,0 0,0" fill="rgba(59, 130, 246, 0.2)" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4"/>
+                            <circle cx="0" cy="0" r="10" class="handle" data-index="0" />
+                            <circle cx="0" cy="0" r="10" class="handle" data-index="1" />
+                            <circle cx="0" cy="0" r="10" class="handle" data-index="2" />
+                            <circle cx="0" cy="0" r="10" class="handle" data-index="3" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div id="cropSettings" class="hidden">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Kitni copies chahiye? (Is photo ki)</label>
+                        <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded">Khali Jagah: <span id="availableSlotsText">8</span>/8</span>
+                    </div>
+                    <select id="photoCount" class="block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 mb-4">
+                        <!-- Options generated dynamically based on available slots -->
+                    </select>
+
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Capture Date</label>
+                            <input type="date" id="captureDate" class="block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Photo Number (Auto)</label>
+                            <input type="text" id="photoNumber" readonly class="block w-full border border-gray-300 rounded-md py-2 px-3 bg-gray-100 text-gray-500 cursor-not-allowed focus:outline-none">
+                        </div>
+                    </div>
+
+                    <button id="addToSheetBtn" class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Sheet Mein Shamil Karein
+                    </button>
+                </div>
+                
+                <div id="initialMessage" class="text-center py-12 text-gray-400 border-2 border-dashed border-gray-300 rounded-lg">
+                    <i class="fa-solid fa-image text-4xl mb-3"></i>
+                    <p>Sheet shuru karne ke liye photo upload karein.</p>
+                </div>
+            </div>
+
+            <!-- Right Column: Preview & Actions -->
+            <div class="bg-white rounded-xl shadow-md p-6 flex flex-col">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">2. Preview & Download</h2>
+                
+                <div id="resultContainer" class="flex-grow flex flex-col items-center justify-center hidden">
+                    
+                    <div class="w-full flex justify-between items-center mb-3">
+                        <span class="text-sm font-medium text-gray-700">Sheet Preview (<span id="previewSlotsText">0</span>/8 bhari hui)</span>
+                        <button id="clearSheetBtn" class="text-xs text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1 rounded border border-red-200 transition-colors flex items-center gap-1">
+                            <i class="fa-solid fa-trash-can"></i> Sheet Saaf Karein
+                        </button>
+                    </div>
+
+                    <!-- Image preview of the 4x6 canvas -->
+                    <img id="resultPreview" alt="4x6 Print Sheet Preview">
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full mt-6">
+                        <button id="downloadJpgBtn" class="bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-900 transition flex justify-center items-center gap-2 text-sm">
+                            <i class="fa-solid fa-file-image"></i> Save JPG
+                        </button>
+                        <button id="downloadPdfBtn" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition flex justify-center items-center gap-2 text-sm">
+                            <i class="fa-solid fa-file-pdf"></i> Save PDF
+                        </button>
+                        <button id="printBtn" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition flex justify-center items-center gap-2 text-sm">
+                            <i class="fa-solid fa-print"></i> Quick Print
+                        </button>
+                    </div>
+                </div>
+
+                <div id="resultPlaceholder" class="flex-grow flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-300 rounded-lg min-h-[400px]">
+                    <div class="text-center">
+                        <i class="fa-regular fa-file-image text-4xl mb-3"></i>
+                        <p>Aapki tayar karda print sheet yahan aayegi.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+        let cropper = null;
+        let finalOutputDataUrl = null;
+        let isPerspectiveMode = false;
+        
+        // Naya array photos ko sheet mein store karne ke liye
+        let printSheetSlots = [];
+        const MAX_SLOTS = 8;
+
+        // Elements
+        const imageUpload = document.getElementById('imageUpload');
+        const imageToCrop = document.getElementById('imageToCrop');
+        const cropperWrapper = document.getElementById('cropperWrapper');
+        const cropSettings = document.getElementById('cropSettings');
+        const initialMessage = document.getElementById('initialMessage');
+        const addToSheetBtn = document.getElementById('addToSheetBtn');
+        const photoCountSelect = document.getElementById('photoCount');
+        const captureDateInput = document.getElementById('captureDate');
+        const photoNumberInput = document.getElementById('photoNumber');
+        const cropModeToggle = document.getElementById('cropModeToggle');
+        const perspectiveToggle = document.getElementById('perspectiveToggle');
+        const modeLabelText = document.getElementById('modeLabelText');
+        const rotationControls = document.getElementById('rotationControls');
+        const rotationSlider = document.getElementById('rotationSlider');
+        const rotateLeftBtn = document.getElementById('rotateLeftBtn');
+        const rotateRightBtn = document.getElementById('rotateRightBtn');
+        const rotateResetBtn = document.getElementById('rotateResetBtn');
+        const perspectiveWrapper = document.getElementById('perspectiveWrapper');
+        const perspectiveImg = document.getElementById('perspectiveImg');
+        const perspectiveSvg = document.getElementById('perspectiveSvg');
+        const perspectivePoly = document.getElementById('perspectivePoly');
+        
+        const resultContainer = document.getElementById('resultContainer');
+        const resultPlaceholder = document.getElementById('resultPlaceholder');
+        const resultPreview = document.getElementById('resultPreview');
+        const availableSlotsText = document.getElementById('availableSlotsText');
+        const previewSlotsText = document.getElementById('previewSlotsText');
+        const clearSheetBtn = document.getElementById('clearSheetBtn');
+        
+        const downloadJpgBtn = document.getElementById('downloadJpgBtn');
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        const printBtn = document.getElementById('printBtn');
+
+        // Initialize Date
+        captureDateInput.value = new Date().toISOString().split('T')[0];
+
+        // Unique ID Generator using Local Storage
+        function getNextPhotoNumber() {
+            let lastNum = localStorage.getItem('daiba_last_photo_number');
+            if (!lastNum) {
+                lastNum = 10000; // Starting sequence
+            } else {
+                lastNum = parseInt(lastNum, 10);
+            }
+            lastNum++;
+            localStorage.setItem('daiba_last_photo_number', lastNum.toString());
+            return 'DB-' + lastNum;
+        }
+
+        // --- DYNAMIC DROPDOWN UPDATE ---
+        function updatePhotoCountDropdown() {
+            const remaining = MAX_SLOTS - printSheetSlots.length;
+            photoCountSelect.innerHTML = '';
+
+            if (remaining === 0) {
+                const opt = document.createElement('option');
+                opt.value = 0;
+                opt.text = "Sheet Full (Jagah Nahi Hai)";
+                photoCountSelect.appendChild(opt);
+                addToSheetBtn.disabled = true;
+                addToSheetBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                availableSlotsText.innerText = '0';
+                return;
+            }
+
+            addToSheetBtn.disabled = false;
+            addToSheetBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            for (let i = 1; i <= remaining; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.text = `${i} Photo${i > 1 ? 's' : ''}`;
+                // Select maximum available by default to quickly fill
+                if (i === remaining) opt.selected = true; 
+                photoCountSelect.appendChild(opt);
+            }
+            availableSlotsText.innerText = remaining;
+        }
+
+        // Initialize dropdown on load
+        updatePhotoCountDropdown();
+
+
+        // --- PERSPECTIVE TOOL LOGIC ---
+        // Points: Top-Left, Top-Right, Bottom-Right, Bottom-Left (stored as % 0 to 1)
+        let perspectivePts = [
+            {x: 0.15, y: 0.1},
+            {x: 0.85, y: 0.1},
+            {x: 0.85, y: 0.9},
+            {x: 0.15, y: 0.9}
+        ];
+        let activeHandle = null;
+
+        function renderPerspectiveUI() {
+            const w = perspectiveImg.clientWidth;
+            const h = perspectiveImg.clientHeight;
+            if(w === 0 || h === 0) return;
+
+            const handles = document.querySelectorAll('.handle');
+            let pointsStr = '';
+            
+            perspectivePts.forEach((p, i) => {
+                const px = p.x * w;
+                const py = p.y * h;
+                pointsStr += `${px},${py} `;
+                handles[i].setAttribute('cx', px);
+                handles[i].setAttribute('cy', py);
+            });
+            perspectivePoly.setAttribute('points', pointsStr.trim());
+        }
+
+        function startDrag(e) {
+            if(e.target.classList.contains('handle')) {
+                e.preventDefault();
+                activeHandle = parseInt(e.target.getAttribute('data-index'));
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('touchmove', drag, {passive: false});
+                document.addEventListener('mouseup', endDrag);
+                document.addEventListener('touchend', endDrag);
+            }
+        }
+
+        function drag(e) {
+            if (activeHandle !== null) {
+                e.preventDefault();
+                const rect = perspectiveImg.getBoundingClientRect();
+                let clientX = e.clientX;
+                let clientY = e.clientY;
+                if(e.touches && e.touches.length > 0) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                }
+
+                let nx = (clientX - rect.left) / rect.width;
+                let ny = (clientY - rect.top) / rect.height;
+
+                // Clamp to boundaries
+                nx = Math.max(0, Math.min(1, nx));
+                ny = Math.max(0, Math.min(1, ny));
+
+                perspectivePts[activeHandle] = {x: nx, y: ny};
+                renderPerspectiveUI();
+            }
+        }
+
+        function endDrag() {
+            activeHandle = null;
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchend', endDrag);
+        }
+
+        perspectiveSvg.addEventListener('mousedown', startDrag);
+        perspectiveSvg.addEventListener('touchstart', startDrag, {passive: false});
+        perspectiveImg.onload = renderPerspectiveUI;
+        window.addEventListener('resize', renderPerspectiveUI);
+
+        // --- ROTATION CONTROLS LOGIC (For Flat Box) ---
+        function updateRotation() {
+            if (cropper) {
+                cropper.rotateTo(parseFloat(rotationSlider.value));
+            }
+        }
+
+        rotationSlider.addEventListener('input', updateRotation);
+        
+        rotateLeftBtn.addEventListener('click', () => {
+            rotationSlider.value = Math.max(-45, parseFloat(rotationSlider.value) - 1);
+            updateRotation();
+        });
+
+        rotateRightBtn.addEventListener('click', () => {
+            rotationSlider.value = Math.min(45, parseFloat(rotationSlider.value) + 1);
+            updateRotation();
+        });
+
+        rotateResetBtn.addEventListener('click', () => {
+            rotationSlider.value = 0;
+            updateRotation();
+        });
+
+        // Bilinear Unskew/Perspective Extraction
+        function extractPerspectiveCanvas(imgElement, ptsPercent, outW, outH) {
+            const natW = imgElement.naturalWidth;
+            const natH = imgElement.naturalHeight;
+            
+            // Draw to temp canvas to extract pixel data
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = natW;
+            tempCanvas.height = natH;
+            const tCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+            tCtx.drawImage(imgElement, 0, 0);
+            const srcData = tCtx.getImageData(0, 0, natW, natH);
+
+            // Output canvas setup
+            const outCanvas = document.createElement('canvas');
+            outCanvas.width = outW;
+            outCanvas.height = outH;
+            const oCtx = outCanvas.getContext('2d');
+            const outData = oCtx.createImageData(outW, outH);
+
+            const pts = ptsPercent.map(p => ({ x: p.x * natW, y: p.y * natH }));
+
+            for (let y = 0; y < outH; y++) {
+                const ny = y / outH;
+                for (let x = 0; x < outW; x++) {
+                    const nx = x / outW;
+
+                    // Bilinear interpolation for coordinates mapping
+                    const srcX = pts[0].x * (1 - nx) * (1 - ny) +
+                                 pts[1].x * nx * (1 - ny) +
+                                 pts[2].x * nx * ny +
+                                 pts[3].x * (1 - nx) * ny;
+
+                    const srcY = pts[0].y * (1 - nx) * (1 - ny) +
+                                 pts[1].y * nx * (1 - ny) +
+                                 pts[2].y * nx * ny +
+                                 pts[3].y * (1 - nx) * ny;
+
+                    const sx = Math.floor(srcX);
+                    const sy = Math.floor(srcY);
+
+                    // Copy Pixels
+                    const outIndex = (y * outW + x) * 4;
+                    if (sx >= 0 && sx < natW && sy >= 0 && sy < natH) {
+                        const srcIndex = (sy * natW + sx) * 4;
+                        outData.data[outIndex] = srcData.data[srcIndex];
+                        outData.data[outIndex+1] = srcData.data[srcIndex+1];
+                        outData.data[outIndex+2] = srcData.data[srcIndex+2];
+                        outData.data[outIndex+3] = srcData.data[srcIndex+3];
+                    } else {
+                        // White padding if out of bounds
+                        outData.data[outIndex] = 255;
+                        outData.data[outIndex+1] = 255;
+                        outData.data[outIndex+2] = 255;
+                        outData.data[outIndex+3] = 255;
+                    }
+                }
+            }
+            oCtx.putImageData(outData, 0, 0);
+            return outCanvas;
+        }
+
+        // --- TOGGLE EVENT ---
+        perspectiveToggle.addEventListener('change', function(e) {
+            isPerspectiveMode = e.target.checked;
+            if (isPerspectiveMode) {
+                modeLabelText.innerText = "Perspective Selection (Tirchi Photos)";
+                modeLabelText.classList.remove('text-blue-700');
+                modeLabelText.classList.add('text-purple-700');
+                cropperWrapper.classList.add('hidden');
+                rotationControls.classList.add('hidden');
+                perspectiveWrapper.classList.remove('hidden');
+                renderPerspectiveUI();
+            } else {
+                modeLabelText.innerText = "Flat Box Selection";
+                modeLabelText.classList.remove('text-purple-700');
+                modeLabelText.classList.add('text-blue-700');
+                perspectiveWrapper.classList.add('hidden');
+                cropperWrapper.classList.remove('hidden');
+                if (imageToCrop.src) {
+                    rotationControls.classList.remove('hidden');
+                }
+            }
+        });
+
+
+        // 1. Handle Image Upload & Initialize Cropper
+        imageUpload.addEventListener('change', function(e) {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                
+                // Refresh dropdown just in case
+                updatePhotoCountDropdown();
+                if (printSheetSlots.length >= MAX_SLOTS) {
+                    alert("Sheet already full hai. Pehle 'Sheet Saaf Karein' par click karein.");
+                    imageUpload.value = '';
+                    return;
+                }
+
+                // Assign a new unique photo number on every new upload
+                photoNumberInput.value = getNextPhotoNumber();
+
+                const file = files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    imageToCrop.src = event.target.result;
+                    perspectiveImg.src = event.target.result; // Send to perspective tool as well
+                    
+                    // Toggle visibility
+                    initialMessage.classList.add('hidden');
+                    cropModeToggle.classList.remove('hidden');
+                    cropSettings.classList.remove('hidden');
+                    
+                    if (isPerspectiveMode) {
+                        perspectiveWrapper.classList.remove('hidden');
+                        rotationControls.classList.add('hidden');
+                    } else {
+                        cropperWrapper.classList.remove('hidden');
+                        rotationControls.classList.remove('hidden');
+                    }
+
+                    rotationSlider.value = 0; // Reset rotation on new upload
+
+                    // Destroy old cropper instance if exists
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+
+                    // Initialize new cropper with 35:45 aspect ratio
+                    cropper = new Cropper(imageToCrop, {
+                        aspectRatio: 35 / 45,
+                        viewMode: 1,
+                        dragMode: 'move',
+                        autoCropArea: 0.8,
+                        restore: false,
+                        guides: true,
+                        center: true,
+                        highlight: false,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                        toggleDragModeOnDblclick: false,
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 2. Render the final sheet based on array items
+        function renderFinalSheet() {
+            // Target output: 4x6 inches at 300 DPI
+            const sheetWidth = 1200;
+            const sheetHeight = 1800;
+
+            const rotW = 531; // cropH
+            const rotH = 413; // cropW
+
+            // Create the final 4x6 inch Canvas
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = sheetWidth;
+            finalCanvas.height = sheetHeight;
+            const fCtx = finalCanvas.getContext('2d');
+
+            // Fill with white background
+            fCtx.fillStyle = '#ffffff';
+            fCtx.fillRect(0, 0, sheetWidth, sheetHeight);
+
+            // Layout Calculation
+            const cols = 2;
+            const maxRows = 4;
+
+            // Calculate gaps so images are evenly distributed
+            const marginX = (sheetWidth - (cols * rotW)) / (cols + 1);
+            const marginY = (sheetHeight - (maxRows * rotH)) / (maxRows + 1);
+
+            // Draw each photo from the slots array onto the sheet
+            for (let i = 0; i < printSheetSlots.length; i++) {
+                let slot = printSheetSlots[i];
+                let c = i % 2; // Column index (0 or 1)
+                let r = Math.floor(i / 2); // Row index
+
+                let posX = marginX + (c * (rotW + marginX));
+                let posY = marginY + (r * (rotH + marginY));
+
+                // Draw the rotated photo
+                fCtx.drawImage(slot.canvas, posX, posY);
+
+                // Add a very subtle thin gray border for cutting guidelines
+                fCtx.strokeStyle = '#cccccc';
+                fCtx.lineWidth = 2;
+                fCtx.strokeRect(posX, posY, rotW, rotH);
+                
+                // Draw rotated text in the vertical middle gap
+                fCtx.save();
+                fCtx.fillStyle = '#666666';
+                fCtx.font = '16px monospace';
+                fCtx.textAlign = 'center';
+                fCtx.textBaseline = 'middle';
+                
+                // Position text in the center dividing white space
+                let textX = c === 0 ? posX + rotW + (marginX / 2) - 8 : posX - (marginX / 2) + 8;
+                let textY = posY + (rotH / 2);
+                
+                fCtx.translate(textX, textY);
+                fCtx.rotate(Math.PI / 2); // 90 degree rotation
+                fCtx.fillText(slot.metaText, 0, 0);
+                fCtx.restore();
+            }
+
+            // Export to preview
+            finalOutputDataUrl = finalCanvas.toDataURL('image/jpeg', 1.0);
+            resultPreview.src = finalOutputDataUrl;
+
+            // Show Result Panel
+            resultPlaceholder.classList.add('hidden');
+            resultContainer.classList.remove('hidden');
+            previewSlotsText.innerText = printSheetSlots.length;
+        }
+
+        // Button click triggers adding to array and re-rendering sheet
+        addToSheetBtn.addEventListener('click', function() {
+            if (!imageToCrop.src) return;
+
+            // Target passport photo size: 35mm x 45mm at 300 DPI -> ~413px x 531px
+            const cropW = 413;
+            const cropH = 531;
+            let croppedCanvas;
+
+            // Check which tool is active and get canvas accordingly
+            if (isPerspectiveMode) {
+                croppedCanvas = extractPerspectiveCanvas(perspectiveImg, perspectivePts, cropW, cropH);
+            } else {
+                if (!cropper) return;
+                croppedCanvas = cropper.getCroppedCanvas({
+                    width: cropW,
+                    height: cropH,
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high'
+                });
+            }
+
+            // Rotate 90 degrees canvas
+            const rotW = cropH; // 531
+            const rotH = cropW; // 413
+            const rotatedCanvas = document.createElement('canvas');
+            rotatedCanvas.width = rotW;
+            rotatedCanvas.height = rotH;
+            const rCtx = rotatedCanvas.getContext('2d');
+
+            rCtx.translate(rotW / 2, rotH / 2);
+            rCtx.rotate(90 * Math.PI / 180);
+            rCtx.drawImage(croppedCanvas, -cropW / 2, -cropH / 2, cropW, cropH);
+
+            const copies = parseInt(photoCountSelect.value);
+            const metaDate = captureDateInput.value || 'No Date';
+            const metaNum = photoNumberInput.value || 'No ID';
+            const metaText = `${metaDate} | ${metaNum}`;
+
+            // Add copies to our slots array
+            for (let i = 0; i < copies; i++) {
+                if (printSheetSlots.length < MAX_SLOTS) {
+                    printSheetSlots.push({
+                        canvas: rotatedCanvas,
+                        metaText: metaText
+                    });
+                }
+            }
+
+            // Re-render sheet and update dropdown
+            renderFinalSheet();
+            updatePhotoCountDropdown();
+
+            // Reset Left Panel so user can upload more photos if space is left
+            cropperWrapper.classList.add('hidden');
+            perspectiveWrapper.classList.add('hidden');
+            cropSettings.classList.add('hidden');
+            rotationControls.classList.add('hidden');
+            cropModeToggle.classList.add('hidden');
+
+            initialMessage.classList.remove('hidden');
+            
+            const remaining = MAX_SLOTS - printSheetSlots.length;
+            if (remaining > 0) {
+                initialMessage.innerHTML = `
+                    <i class="fa-solid fa-circle-check text-green-500 text-5xl mb-3"></i>
+                    <p class="text-gray-800 font-bold text-lg mb-1">Photos Sheet Mein Add Ho Gayin!</p>
+                    <p class="text-gray-600 mb-3">Sheet par abhi bhi <span class="font-bold text-blue-600">${remaining} photos</span> ki jagah baqi hai.</p>
+                    <p class="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">Sheet ka hisa zaya hone se bachanay ke liye, doosri photo <b>"Upload Photo"</b> par click karke upload karein aur baqi jagah pur karein.</p>
+                `;
+            } else {
+                initialMessage.innerHTML = `
+                    <i class="fa-solid fa-star text-yellow-500 text-5xl mb-3"></i>
+                    <p class="text-gray-800 font-bold text-lg mb-1">Sheet Mukammal Bhar Gayi Hai (8/8)</p>
+                    <p class="text-gray-600">Ab aap dayen (right) janib se sheet download ya print kar sakte hain.</p>
+                `;
+            }
+
+            // Clear input value so same file can be re-uploaded if needed
+            imageUpload.value = '';
+            imageToCrop.src = '';
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+
+            // Scroll to preview on mobile
+            if(window.innerWidth < 1024) {
+                resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+
+        // 3. Clear Sheet Button Event
+        clearSheetBtn.addEventListener('click', function() {
+            printSheetSlots = []; // Empty the array
+            updatePhotoCountDropdown();
+            previewSlotsText.innerText = '0';
+            resultContainer.classList.add('hidden');
+            resultPlaceholder.classList.remove('hidden');
+            finalOutputDataUrl = null;
+
+            // Reset Initial message only if no crop is active
+            if (cropSettings.classList.contains('hidden')) {
+                initialMessage.innerHTML = `
+                    <i class="fa-solid fa-image text-4xl mb-3"></i>
+                    <p>Nayi sheet shuru karne ke liye photo upload karein.</p>
+                `;
+                initialMessage.classList.remove('hidden');
+            }
+        });
+
+        // Helper function to generate clean filenames
+        function getSafeFileName() {
+            const dDate = captureDateInput.value || 'Date';
+            return `Daiba_Photosheet_${dDate}`.replace(/[^a-zA-Z0-9-]/g, '_');
+        }
+
+        // 4. Download JPG
+        downloadJpgBtn.addEventListener('click', function() {
+            if (!finalOutputDataUrl) return;
+            const link = document.createElement('a');
+            link.download = `${getSafeFileName()}.jpg`;
+            link.href = finalOutputDataUrl;
+            link.click();
+        });
+
+        // 5. Download PDF
+        downloadPdfBtn.addEventListener('click', function() {
+            if (!finalOutputDataUrl) return;
+            const { jsPDF } = window.jspdf;
+            
+            // Create a 4x6 inch PDF
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'in',
+                format: [4, 6]
+            });
+
+            // Add the generated image. Fills the entire 4x6 page (0,0 to 4,6)
+            doc.addImage(finalOutputDataUrl, 'JPEG', 0, 0, 4, 6);
+            doc.save(`${getSafeFileName()}.pdf`);
+        });
+
+        // 6. Quick Print
+        printBtn.addEventListener('click', function() {
+            if (!finalOutputDataUrl) return;
+
+            // Open a new window for printing to ensure exact 4x6 scaling without browser UI bleeding in
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) {
+                alert("Please allow popups for this site to use the print feature.");
+                return;
+            }
+
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Print Passport Photos</title>
+                    <style>
+                        /* CSS Print Page Setup for 4x6 inch */
+                        @page {
+                            size: 4in 6in;
+                            margin: 0;
+                        }
+                        body, html {
+                            margin: 0;
+                            padding: 0;
+                            width: 4in;
+                            height: 6in;
+                            background-color: white;
+                        }
+                        img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                            display: block;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <img src="${finalOutputDataUrl}" onload="window.print(); window.close();" />
+                </body>
+                </html>
+            `;
+            
+            printWindow.document.open();
+            printWindow.document.write(html);
+            printWindow.document.close();
+        });
+    </script>
+</body>
+</html>

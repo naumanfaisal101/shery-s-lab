@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZOHAN PRO - Ultra Fast ID Studio</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        
+        /* The Outer Bleed Boundary (58x90mm) */
+        .card-wrapper {
+            width: 58mm;
+            height: 90mm;
+            box-sizing: border-box;
+            position: relative;
+            outline: 0.5px dashed #94a3b8; /* Persistent Dotted cutting boundary */
+            outline-offset: -0.5px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            flex-shrink: 0; /* Prevents cards from shrinking in flex preview */
+        }
+
+        /* The Actual ID Card (54x86mm) */
+        .id-card {
+            width: 54mm;
+            height: 86mm;
+            box-sizing: border-box;
+            position: relative;
+            background: white;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        /* Circular Cropper View */
+        .cropper-view-box,
+        .cropper-face {
+            border-radius: 50%;
+        }
+        .cropper-view-box {
+            outline: 3px solid #3b82f6; 
+            outline-color: rgba(59, 130, 246, 0.8);
+        }
+
+        /* ----- PRINT OPTIMIZATIONS ----- */
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                box-sizing: border-box !important;
+            }
+            
+            html, body {
+                background: none !important;
+                background-color: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100%;
+                height: 100%; 
+            }
+            
+            body > *:not(#print-container) { display: none !important; }
+            
+            #print-container {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                /* Mathematically centering the 3x3 grid on an A4 page (210x297mm) */
+                width: 182mm !important; /* 3 cols * 58mm + 2 gaps * 4mm = 182mm */
+                height: 278mm !important; /* 3 rows * 90mm + 2 gaps * 4mm = 278mm */
+                margin: 9.5mm auto !important; /* Top/Bottom margin calculated to perfect center */
+                padding: 0 !important; 
+                gap: 4mm !important; /* Flawless inner gaps */
+                justify-content: flex-start !important;
+                align-content: flex-start !important;
+            }
+
+            .card-wrapper {
+                box-shadow: none !important;
+                margin: 0 !important; 
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 0mm !important; /* Zero margin forces manual centered alignment */
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 h-screen flex overflow-hidden">
+
+    <a href="../index.html" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; background: #1e3a8a; color: white; padding: 12px 20px; text-decoration: none; border-radius: 50px; font-family: sans-serif; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.3s;">
+    ← Back to Dashboard
+</a>
+
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col no-print shrink-0">
+        <div class="h-16 flex items-center px-6 border-b border-slate-800">
+            <img src="Gemini_Generated_Image_jstdc1jstdc1jstd.jpg" alt="Zohan Pro Logo" class="h-8 w-8 rounded-md mr-2 object-cover shadow-sm border border-slate-700" onerror="this.outerHTML='<div class=\'bg-blue-600 text-white font-bold px-2 py-1 rounded mr-2\'>ZP</div>'">
+            <span class="font-bold text-white tracking-wide">ZOHAN PRO</span>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto custom-scrollbar">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-700 text-white font-medium transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                Dashboard
+            </button>
+            <button onclick="switchTab('data')" id="nav-data" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                Student Data
+            </button>
+            <button onclick="switchTab('print')" id="nav-print" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                Print Fronts
+            </button>
+            <button onclick="switchTab('printBack')" id="nav-printBack" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors border border-slate-700/50">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11h.01"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11h.01"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11h.01"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15h.01"></path></svg>
+                Print Backsides
+            </button>
+            <button onclick="switchTab('settings')" id="nav-settings" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors mt-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Settings
+            </button>
+            <button onclick="switchTab('about')" id="nav-about" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                About Us
+            </button>
+        </nav>
+        <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center shrink-0">
+            Nusrat Shaheen Inc.<br>Ultra-Fast Edition 5.3
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full relative no-print">
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+            <h1 class="text-xl font-bold" id="header-title">Dashboard</h1>
+            <div class="flex items-center gap-4">
+                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold" id="org-name-display">SHAHEEN HIGH SCHOOL</span>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-auto p-8 custom-scrollbar">
+            
+            <!-- VIEW: DASHBOARD -->
+            <div id="view-dashboard" class="view-section">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-slate-500 text-sm font-medium">Total Students Loaded</p>
+                        <p class="text-3xl font-bold mt-2" id="stat-students">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-slate-500 text-sm font-medium">Theme Primary Color</p>
+                        <div class="flex items-center gap-3 mt-2">
+                            <div id="stat-color-preview" class="w-8 h-8 rounded shadow-sm border border-slate-200" style="background-color: #1d4ed8;"></div>
+                            <p class="text-xl font-bold text-slate-800" id="stat-color-text">Custom</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-green-500">
+                        <p class="text-slate-500 text-sm font-medium">Print Engine Status</p>
+                        <p class="text-xl font-bold mt-2 text-green-600">Ultra-Fast Mode Active</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border border-slate-200 p-6 mb-8 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                            Project Data Management
+                        </h3>
+                        <p class="text-slate-500 text-sm mt-1 max-w-lg">Your work is <strong class="text-green-600">Auto-Saved</strong> to the browser. However, you can download a full backup file of your students and settings to move them to another computer.</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                        <button onclick="exportProject()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2.5 rounded-lg font-semibold transition flex items-center justify-center gap-2 border border-blue-200">
+                            Download Backup
+                        </button>
+                        <label class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-lg font-semibold transition flex items-center justify-center gap-2 cursor-pointer shadow-md">
+                            Restore Backup
+                            <input type="file" class="hidden" accept=".zohan,.json" onchange="importProject(event)">
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl border border-slate-200 p-8 text-center shadow-sm">
+                    <!-- Adjusted aspect ratio for Intro App Logo to exactly 1632 x 2594 -->
+                    <div class="mx-auto mb-6 shadow-lg border-[6px] border-slate-100 rounded-xl overflow-hidden bg-slate-100" style="width: 140px; aspect-ratio: 1632 / 2594;">
+                        <img src="Gemini_Generated_Image_jstdc1jstdc1jstd.jpg" alt="Zohan Pro App Logo" class="w-full h-full object-cover" onerror="this.outerHTML='<div class=\'w-full h-full flex items-center justify-center text-blue-600\'><svg class=\'w-8 h-8\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M13 10V3L4 14h7v7l9-11h-7z\'></path></svg></div>'">
+                    </div>
+                    <h2 class="text-2xl font-bold mb-2">Welcome to the Fast Engine</h2>
+                    <p class="text-slate-500 mb-6 max-w-lg mx-auto">This lightweight version is optimized for generating thousands of cards instantly without lag. Head over to <b>Student Data</b> to paste your records and upload individual photos.</p>
+                    <button onclick="switchTab('data')" class="bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-800 transition shadow-md">
+                        Load Students Now
+                    </button>
+                </div>
+            </div>
+
+            <div id="view-data" class="view-section hidden">
+                <div class="flex justify-between items-end mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold">Bulk Student Entry</h2>
+                        <p class="text-sm text-slate-500">Add students manually or paste from Excel/CSV (Class is now set globally in Settings)</p>
+                    </div>
+                    <button onclick="clearStudents()" class="text-red-600 text-sm hover:underline font-medium flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Clear All Data</button>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+                        
+                        <div class="flex border-b border-slate-200 mb-4 shrink-0">
+                            <button onclick="toggleDataInput('manual')" id="tab-manual" class="flex-1 py-2 text-sm font-bold border-b-2 border-blue-600 text-blue-600 transition-colors">Manual Entry</button>
+                            <button onclick="toggleDataInput('bulk')" id="tab-bulk" class="flex-1 py-2 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors">Bulk CSV</button>
+                        </div>
+
+                        <div id="input-manual" class="flex flex-col space-y-3 flex-1">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 mb-1 block">Student Name</label>
+                                <input type="text" id="manual-name" class="w-full border border-slate-300 rounded p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none uppercase font-medium" placeholder="e.g. ALI HASSAN">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 mb-1 block">Father Name</label>
+                                <input type="text" id="manual-father" class="w-full border border-slate-300 rounded p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none uppercase font-medium" placeholder="e.g. MUHAMMAD ALI">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-600 mb-1 block">Roll No</label>
+                                <input type="text" id="manual-roll" class="w-full border border-slate-300 rounded p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none uppercase font-mono" placeholder="1001" onkeydown="if(event.key === 'Enter') { event.preventDefault(); addSingleStudent(); }">
+                            </div>
+                            <div class="mt-auto pt-4">
+                                <button onclick="addSingleStudent()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-md">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Add Student
+                                </button>
+                                <p class="text-[10px] text-center text-slate-400 mt-2">Press Enter in Roll No field to add quickly</p>
+                            </div>
+                        </div>
+
+                        <div id="input-bulk" class="hidden flex-col h-full flex-1">
+                            <label class="font-semibold text-sm mb-1 block">Quick Paste (CSV format)</label>
+                            <p class="text-xs text-slate-500 mb-2">Format: Name, Father, Roll No</p>
+                            <textarea id="csv-input" onkeydown="if(event.ctrlKey && event.key === 'Enter') { event.preventDefault(); importCSV(); }" class="w-full flex-1 border border-slate-300 rounded-lg p-3 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none resize-none min-h-[180px]" placeholder="Muhammad Ali, Ahmed Ali, 101&#10;Fatima Bibi, Zahid, 102"></textarea>
+                            <div class="mt-auto pt-4">
+                                <button onclick="importCSV()" class="w-full bg-green-600 text-white font-semibold py-2.5 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-md">
+                                    Generate Cards <span class="bg-green-800 text-green-100 px-2 py-0.5 rounded text-[10px] font-normal border border-green-500/30">Ctrl + Enter</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col h-[500px]">
+                        <div class="overflow-y-auto flex-1 custom-scrollbar">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 sticky top-0 border-b border-slate-200 z-10 shadow-sm">
+                                    <tr>
+                                        <th class="px-4 py-3 font-semibold text-slate-600 w-16 text-center">Photo</th>
+                                        <th class="px-4 py-3 font-semibold text-slate-600">Name</th>
+                                        <th class="px-4 py-3 font-semibold text-slate-600">Father Name</th>
+                                        <th class="px-4 py-3 font-semibold text-slate-600">Roll No</th>
+                                        <th class="px-4 py-3 font-semibold text-slate-600 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="student-table-body" class="divide-y divide-slate-100">
+                                    </tbody>
+                            </table>
+                        </div>
+                        <div class="bg-slate-50 p-3 border-t border-slate-200 text-right flex justify-between items-center">
+                            <p class="text-xs text-slate-500 font-medium ml-2" id="table-limit-notice"></p>
+                            <button onclick="switchTab('print')" class="bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-800 transition shadow-sm">
+                                Go to Print Engine &rarr;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: PRINT ENGINE (FRONTS) -->
+            <div id="view-print" class="view-section hidden">
+                <div class="bg-slate-900 rounded-xl p-6 text-white flex justify-between items-center mb-6 shadow-lg">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                            Ultra-Fast Print Engine (Fronts)
+                        </h2>
+                        <p class="text-slate-400 text-sm mt-1">Ready to print <span id="print-count" class="font-bold text-blue-400">0</span> cards on A4 Paper.</p>
+                        <p id="preview-notice" class="text-yellow-400 text-xs mt-1 font-medium hidden flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Showing visual preview of first 9 cards only to ensure zero lag. All cards will be generated instantly when you click PRINT NOW.
+                        </p>
+                    </div>
+                    <button onclick="executeBulkPrint()" id="print-btn" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-lg font-bold flex items-center gap-2 transition text-lg shadow-blue-500/50 shadow-lg whitespace-nowrap min-w-[200px] justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        PRINT FRONTS
+                    </button>
+                </div>
+
+                <div class="bg-gray-300 p-8 rounded-xl overflow-y-auto max-h-[600px] border-4 border-dashed border-gray-400 custom-scrollbar flex flex-wrap gap-6 justify-center shadow-inner" id="screen-preview-container">
+                    </div>
+            </div>
+
+            <!-- VIEW: PRINT ENGINE (BACKSIDES) -->
+            <div id="view-printBack" class="view-section hidden">
+                <div class="bg-emerald-900 rounded-xl p-6 text-white flex justify-between items-center mb-6 shadow-lg">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11h.01"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11h.01"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11h.01"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15h.01"></path></svg>
+                            Backside Print Engine (Global A4)
+                        </h2>
+                        <p class="text-emerald-100 text-sm mt-1 max-w-2xl">This will print a single A4 page containing 9 identical backsides perfectly aligned to your card grid. Flip your printed front sheets and feed them back into the printer to print these backsides.</p>
+                    </div>
+                    <button onclick="executeBulkPrintBack()" id="print-back-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-lg font-bold flex items-center gap-2 transition text-lg shadow-emerald-500/50 shadow-lg whitespace-nowrap min-w-[200px] justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        PRINT BACKSIDES
+                    </button>
+                </div>
+
+                <div class="bg-gray-300 p-8 rounded-xl overflow-y-auto max-h-[600px] border-4 border-dashed border-gray-400 custom-scrollbar flex flex-wrap gap-6 justify-center shadow-inner" id="screen-preview-back-container">
+                    </div>
+            </div>
+
+            <!-- VIEW: SETTINGS -->
+            <div id="view-settings" class="view-section hidden">
+                <div class="mb-6 flex justify-between items-end">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Institution Settings</h2>
+                        <p class="text-sm text-slate-500">Configure global branding, typography, and layout for all cards.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                    <div class="xl:col-span-2 space-y-6">
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 pb-6 border-b border-slate-100">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Global Class / Grade</label>
+                                    <input type="text" id="setting-globalClass" oninput="renderLivePreview()" value="10TH GRADE" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-sm uppercase">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Global Validity / Expiry</label>
+                                    <input type="text" id="setting-validityText" oninput="renderLivePreview()" value="SESSION: 2024-2025" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-sm uppercase">
+                                </div>
+                            </div>
+
+                            <div class="space-y-4 mb-6 pb-6 border-b border-slate-100">
+                                <h3 class="text-sm font-bold text-slate-800">Header Typography</h3>
+                                
+                                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Organization Name</label>
+                                    <input type="text" id="setting-orgName" oninput="renderLivePreview()" value="SHAHEEN HIGH SCHOOL" class="w-full border border-slate-300 rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none font-bold uppercase mb-2">
+                                    <div class="flex flex-wrap gap-2 items-center">
+                                        <select id="setting-orgNameFont" onchange="renderLivePreview()" class="border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                            <option value="'Inter', sans-serif">Font: Inter</option>
+                                            <option value="Arial, sans-serif">Font: Arial</option>
+                                            <option value="'Times New Roman', serif">Font: Times New Roman</option>
+                                            <option value="'Courier New', monospace">Font: Courier New</option>
+                                            <option value="Georgia, serif">Font: Georgia</option>
+                                        </select>
+                                        <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-2">
+                                            <span class="text-xs text-slate-500">Size:</span>
+                                            <input type="number" id="setting-orgNameSize" oninput="renderLivePreview()" value="11" class="w-12 p-1 text-xs focus:outline-none" title="Font Size in px">
+                                            <span class="text-xs text-slate-500">px</span>
+                                        </div>
+                                        <select id="setting-orgNameWeight" onchange="renderLivePreview()" class="border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                            <option value="bold">Bold</option>
+                                            <option value="normal">Normal</option>
+                                        </select>
+                                        <div class="flex items-center gap-1 border border-slate-300 rounded bg-white p-1">
+                                            <span class="text-xs text-slate-500">Color:</span>
+                                            <input type="color" id="setting-orgNameColor" oninput="renderLivePreview()" value="#ffffff" class="h-5 w-6 cursor-pointer border-0 p-0">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Address / Tagline</label>
+                                    <input type="text" id="setting-orgAddress" oninput="renderLivePreview()" value="Lahore Rd, near Gol chowk, Pindi Bhattian" class="w-full border border-slate-300 rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm uppercase mb-2">
+                                    <div class="flex flex-wrap gap-2 items-center">
+                                        <select id="setting-orgAddressFont" onchange="renderLivePreview()" class="border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                            <option value="'Inter', sans-serif">Font: Inter</option>
+                                            <option value="Arial, sans-serif">Font: Arial</option>
+                                            <option value="'Times New Roman', serif">Font: Times New Roman</option>
+                                        </select>
+                                        <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-2">
+                                            <span class="text-xs text-slate-500">Size:</span>
+                                            <input type="number" id="setting-orgAddressSize" oninput="renderLivePreview()" value="6" class="w-12 p-1 text-xs focus:outline-none">
+                                            <span class="text-xs text-slate-500">px</span>
+                                        </div>
+                                        <select id="setting-orgAddressWeight" onchange="renderLivePreview()" class="border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                            <option value="normal">Normal</option>
+                                            <option value="bold">Bold</option>
+                                        </select>
+                                        <div class="flex items-center gap-1 border border-slate-300 rounded bg-white p-1">
+                                            <span class="text-xs text-slate-500">Color:</span>
+                                            <input type="color" id="setting-orgAddressColor" oninput="renderLivePreview()" value="#ffffff" class="h-5 w-6 cursor-pointer border-0 p-0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4 mb-6 pb-6 border-b border-slate-100">
+                                <h3 class="text-sm font-bold text-slate-800">Body & Footer Typography</h3>
+                                <p class="text-xs text-slate-500 mb-3">Customize fonts, sizes, and colors for the rest of the card.</p>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">Student Name</label>
+                                        <div class="flex flex-wrap gap-2 items-center">
+                                            <select id="setting-studentNameFont" onchange="renderLivePreview()" class="w-full border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                                <option value="'Inter', sans-serif">Font: Inter</option>
+                                                <option value="Arial, sans-serif">Font: Arial</option>
+                                                <option value="'Times New Roman', serif">Font: Times New Roman</option>
+                                            </select>
+                                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-2">
+                                                <span class="text-xs text-slate-500">Sz:</span>
+                                                <input type="number" id="setting-studentNameSize" oninput="renderLivePreview()" value="14" class="w-10 p-1 text-xs focus:outline-none">
+                                            </div>
+                                            <select id="setting-studentNameWeight" onchange="renderLivePreview()" class="border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                                <option value="bold">Bold</option>
+                                                <option value="normal">Norm</option>
+                                            </select>
+                                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white p-1">
+                                                <input type="color" id="setting-studentNameColor" oninput="renderLivePreview()" value="#1d4ed8" class="h-5 w-5 cursor-pointer border-0 p-0">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">Class / Grade</label>
+                                        <div class="flex flex-wrap gap-2 items-center">
+                                            <select id="setting-classNameFont" onchange="renderLivePreview()" class="w-full border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                                <option value="'Inter', sans-serif">Font: Inter</option>
+                                                <option value="Arial, sans-serif">Font: Arial</option>
+                                                <option value="'Times New Roman', serif">Font: Times New Roman</option>
+                                            </select>
+                                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-2">
+                                                <span class="text-xs text-slate-500">Sz:</span>
+                                                <input type="number" id="setting-classNameSize" oninput="renderLivePreview()" value="9" class="w-10 p-1 text-xs focus:outline-none">
+                                            </div>
+                                            <select id="setting-classNameWeight" onchange="renderLivePreview()" class="border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                                <option value="600">Bold</option>
+                                                <option value="normal">Norm</option>
+                                            </select>
+                                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white p-1">
+                                                <input type="color" id="setting-classNameColor" oninput="renderLivePreview()" value="#475569" class="h-5 w-5 cursor-pointer border-0 p-0">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">Field Labels <span class="text-[10px] text-slate-400 font-normal">(Father, Roll No)</span></label>
+                                        <div class="flex flex-wrap gap-2 items-center">
+                                            <select id="setting-labelFont" onchange="renderLivePreview()" class="w-full border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                                <option value="'Inter', sans-serif">Font: Inter</option>
+                                                <option value="Arial, sans-serif">Font: Arial</option>
+                                                <option value="'Times New Roman', serif">Font: Times New Roman</option>
+                                            </select>
+                                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-2">
+                                                <span class="text-xs text-slate-500">Sz:</span>
+                                                <input type="number" id="setting-labelSize" oninput="renderLivePreview()" value="8" class="w-10 p-1 text-xs focus:outline-none">
+                                            </div>
+                                            <select id="setting-labelWeight" onchange="renderLivePreview()" class="border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                                <option value="bold">Bold</option>
+                                                <option value="normal">Norm</option>
+                                            </select>
+                                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white p-1">
+                                                <input type="color" id="setting-labelColor" oninput="renderLivePreview()" value="#64748b" class="h-5 w-5 cursor-pointer border-0 p-0">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">Field Values <span class="text-[10px] text-slate-400 font-normal">(Actual Data)</span></label>
+                                        <div class="flex flex-wrap gap-2 items-center">
+                                            <select id="setting-valueFont" onchange="renderLivePreview()" class="w-full border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                                <option value="'Inter', sans-serif">Font: Inter</option>
+                                                <option value="Arial, sans-serif">Font: Arial</option>
+                                                <option value="'Times New Roman', serif">Font: Times New Roman</option>
+                                            </select>
+                                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-2">
+                                                <span class="text-xs text-slate-500">Sz:</span>
+                                                <input type="number" id="setting-valueSize" oninput="renderLivePreview()" value="8" class="w-10 p-1 text-xs focus:outline-none">
+                                            </div>
+                                            <select id="setting-valueWeight" onchange="renderLivePreview()" class="border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                                <option value="600">Bold</option>
+                                                <option value="normal">Norm</option>
+                                            </select>
+                                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white p-1">
+                                                <input type="color" id="setting-valueColor" oninput="renderLivePreview()" value="#0f172a" class="h-5 w-5 cursor-pointer border-0 p-0">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 md:col-span-2">
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">Footer Text</label>
+                                        <div class="flex flex-wrap gap-2 items-center">
+                                            <select id="setting-footerFont" onchange="renderLivePreview()" class="flex-1 border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                                <option value="'Inter', sans-serif">Font: Inter</option>
+                                                <option value="Arial, sans-serif">Font: Arial</option>
+                                            </select>
+                                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-2">
+                                                <span class="text-xs text-slate-500">Sz:</span>
+                                                <input type="number" id="setting-footerSize" oninput="renderLivePreview()" value="7" class="w-10 p-1 text-xs focus:outline-none">
+                                            </div>
+                                            <select id="setting-footerWeight" onchange="renderLivePreview()" class="border border-slate-300 rounded p-1.5 text-xs focus:outline-none">
+                                                <option value="normal">Norm</option>
+                                                <option value="bold">Bold</option>
+                                            </select>
+                                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white p-1">
+                                                <input type="color" id="setting-footerColor" oninput="renderLivePreview()" value="#ffffff" class="h-5 w-5 cursor-pointer border-0 p-0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-t pt-6 border-slate-100">
+                                <h3 class="text-sm font-bold text-slate-800 mb-2">School Logo (Foreground / Header)</h3>
+                                <p class="text-xs text-slate-500 mb-3">This logo is displayed vividly at the top of every card alongside the school name.</p>
+                                <div class="flex items-center gap-4 mb-4">
+                                    <input type="file" id="setting-headerLogo" accept="image/*" onchange="handleLiveImageUpload(this, 'headerLogoDataUrl')" class="flex-1 border border-slate-300 rounded-lg p-2 text-sm bg-slate-50 cursor-pointer">
+                                    <button type="button" onclick="clearSettingImage('headerLogoDataUrl', 'setting-headerLogo')" class="text-red-500 hover:text-red-700 text-sm font-medium px-4 border border-red-200 rounded-lg py-2 hover:bg-red-50 transition">Clear</button>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Logo Alignment</label>
+                                        <select id="setting-headerLogoPosition" onchange="renderLivePreview()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50">
+                                            <option value="left">Left side of text</option>
+                                            <option value="center">Centered above text</option>
+                                            <option value="right">Right side of text</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Logo Size: <span id="header-size-val" class="text-blue-600">12</span> mm</label>
+                                        <input type="range" id="setting-headerLogoSize" min="5" max="20" step="1" value="12" class="w-full cursor-pointer mt-2" oninput="document.getElementById('header-size-val').innerText = this.value; renderLivePreview()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-t pt-6 border-slate-100 mt-6">
+                                <h3 class="text-sm font-bold text-slate-800 mb-2">Authority Signature / Stamp</h3>
+                                <p class="text-xs text-slate-500 mb-3">Upload a transparent PNG signature or stamp to appear on all cards automatically.</p>
+                                <div class="flex items-center gap-4 mb-4">
+                                    <input type="file" id="setting-signature" accept="image/*" onchange="handleLiveImageUpload(this, 'signatureDataUrl')" class="flex-1 border border-slate-300 rounded-lg p-2 text-sm bg-slate-50 cursor-pointer">
+                                    <button type="button" onclick="clearSettingImage('signatureDataUrl', 'setting-signature')" class="text-red-500 hover:text-red-700 text-sm font-medium px-4 border border-red-200 rounded-lg py-2 hover:bg-red-50 transition">Clear</button>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Signature Label Text</label>
+                                        <input type="text" id="setting-signatureText" oninput="renderLivePreview()" value="AUTHORITY SIGNATURE" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none uppercase font-semibold bg-slate-50">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Label Text Color</label>
+                                        <input type="color" id="setting-signatureTextColor" oninput="renderLivePreview()" value="#1d4ed8" class="w-full h-10 border border-slate-300 rounded-lg cursor-pointer p-1">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Alignment</label>
+                                        <select id="setting-signaturePosition" onchange="renderLivePreview()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50">
+                                            <option value="right">Bottom Right</option>
+                                            <option value="center">Bottom Center</option>
+                                            <option value="left">Bottom Left</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Size: <span id="sig-size-val" class="text-blue-600">15</span> mm</label>
+                                        <input type="range" id="setting-signatureSize" min="5" max="40" step="1" value="15" class="w-full cursor-pointer mt-2" oninput="document.getElementById('sig-size-val').innerText = this.value; renderLivePreview()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Opacity: <span id="sig-opacity-val" class="text-blue-600">0.8</span></label>
+                                        <input type="range" id="setting-signatureOpacity" min="0.1" max="1.0" step="0.1" value="0.8" class="w-full cursor-pointer mt-2" oninput="document.getElementById('sig-opacity-val').innerText = this.value; renderLivePreview()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Vertical Offset: <span id="sig-bottom-val" class="text-blue-600">10</span> mm from bottom</label>
+                                        <input type="range" id="setting-signatureBottom" min="2" max="40" step="1" value="10" class="w-full cursor-pointer mt-2" oninput="document.getElementById('sig-bottom-val').innerText = this.value; renderLivePreview()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BACK SIDE SETTINGS (NEW) -->
+                            <div class="border-t pt-6 border-slate-100 mt-6 bg-emerald-50 -mx-6 px-6 py-6 border-b border-slate-200">
+                                <h3 class="text-sm font-bold text-emerald-800 mb-2">Card Back Side Settings</h3>
+                                <p class="text-xs text-emerald-600 mb-4">Configure the global backside design (prints identically on all 9 cards).</p>
+                                
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Location QR Code / Image</label>
+                                        <div class="flex items-center gap-4">
+                                            <input type="file" id="setting-backQrImage" accept="image/*" onchange="handleLiveImageUpload(this, 'backQrDataUrl')" class="flex-1 border border-emerald-200 rounded-lg p-2 text-sm bg-white cursor-pointer">
+                                            <button type="button" onclick="clearSettingImage('backQrDataUrl', 'setting-backQrImage')" class="text-red-500 hover:text-red-700 text-sm font-medium px-4 border border-red-200 rounded-lg py-2 hover:bg-red-50 transition bg-white">Clear</button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Return Instructions Text</label>
+                                        <input type="text" id="setting-backReturnText" oninput="renderLivePreview()" value="IF FOUND, PLEASE RETURN TO:" class="w-full border border-emerald-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none uppercase font-semibold bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Emergency / Contact Phone Number</label>
+                                        <input type="text" id="setting-backContactNo" oninput="renderLivePreview()" value="+92 300 7716245" class="w-full border border-emerald-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none font-semibold bg-white">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-t pt-6 border-slate-100 mt-6">
+                                <h3 class="text-sm font-bold text-slate-800 mb-3">Card Layout Features</h3>
+                                <label class="flex items-center gap-2 cursor-pointer w-max">
+                                    <input type="checkbox" id="setting-lanyardHole" onchange="renderLivePreview()" checked class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer border-slate-300">
+                                    <span class="text-sm font-semibold text-slate-700">Show Lanyard Punch Hole Guide (Top Center)</span>
+                                </label>
+                            </div>
+
+                            <div class="border-t pt-6 border-slate-100 mt-6">
+                                <h3 class="text-sm font-bold text-slate-800 mb-3">Card Border / Cutting Guide</h3>
+                                <p class="text-xs text-slate-500 mb-3">Applies a precise stroke that bleeds perfectly to the outer dotted line while leaving your specified margin inside the card.</p>
+                                <label class="flex items-center gap-2 cursor-pointer w-max mb-4">
+                                    <input type="checkbox" id="setting-showCutGuide" onchange="renderLivePreview()" checked class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer border-slate-300">
+                                    <span class="text-sm font-semibold text-slate-700">Enable Print/Cut Border</span>
+                                </label>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Border Color</label>
+                                        <input type="color" id="setting-cutGuideColor" oninput="renderLivePreview()" value="#cbd5e1" class="w-full h-10 border border-slate-300 rounded-lg cursor-pointer p-1">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Inside Margin (mm)</label>
+                                        <input type="number" id="setting-cutGuideWidth" step="0.5" min="0" max="10" oninput="renderLivePreview()" value="1.5" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50">
+                                        <p class="text-[10px] text-slate-400 mt-1">1.5mm ≈ 1/16th inch</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Border Style</label>
+                                        <select id="setting-cutGuideStyle" onchange="renderLivePreview()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50">
+                                            <option value="solid">Solid</option>
+                                            <option value="dashed">Dashed</option>
+                                            <option value="dotted">Dotted</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-6 border-slate-100 mt-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Primary Color (Main Header)</label>
+                                    <input type="color" id="setting-primaryColor" value="#1d4ed8" oninput="renderLivePreview()" class="w-full h-12 border border-slate-300 rounded-lg cursor-pointer p-1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Secondary Color (Footer)</label>
+                                    <input type="color" id="setting-secondaryColor" value="#1e3a8a" oninput="renderLivePreview()" class="w-full h-12 border border-slate-300 rounded-lg cursor-pointer p-1">
+                                </div>
+                            </div>
+
+                            <div class="border-t pt-6 border-slate-100 mt-6">
+                                <h3 class="text-sm font-bold text-slate-800 mb-2">Global Background Logo (Watermark)</h3>
+                                <p class="text-xs text-slate-500 mb-3">This logo will appear faintly in the center background of all ID cards.</p>
+                                <div class="flex items-center gap-4 mb-4">
+                                    <input type="file" id="setting-logo" accept="image/*" onchange="handleLiveImageUpload(this, 'logoDataUrl')" class="flex-1 border border-slate-300 rounded-lg p-2 text-sm bg-slate-50 cursor-pointer">
+                                    <button type="button" onclick="clearSettingImage('logoDataUrl', 'setting-logo')" class="text-red-500 hover:text-red-700 text-sm font-medium px-4 border border-red-200 rounded-lg py-2 hover:bg-red-50 transition">Clear</button>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Watermark Opacity: <span id="opacity-val" class="text-blue-600">0.1</span></label>
+                                    <input type="range" id="setting-logoOpacity" min="0.0" max="1.0" step="0.05" value="0.1" class="w-full cursor-pointer" oninput="document.getElementById('opacity-val').innerText = this.value; renderLivePreview()">
+                                    <div class="flex justify-between text-xs text-slate-400 mt-1">
+                                        <span>Faint (0.0)</span>
+                                        <span>Solid (1.0)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-6 border-t border-slate-100 mt-6 flex justify-end">
+                                <button onclick="saveSettings()" class="bg-blue-700 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-800 transition w-full md:w-auto shadow-md flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    Save & Apply Settings
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="xl:col-span-1">
+                        <div class="sticky top-0 bg-slate-200 rounded-xl border border-slate-300 shadow-inner p-6 flex flex-col items-center min-h-[400px] overflow-y-auto max-h-[calc(100vh-100px)] custom-scrollbar">
+                            <h3 class="font-bold text-slate-700 mb-6 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                Live Preview
+                            </h3>
+                            <div class="w-full flex flex-col gap-6 items-center">
+                                <div class="text-center">
+                                    <span class="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm mb-2 inline-block">FRONT SIDE</span>
+                                    <div id="settings-live-preview" class="shadow-2xl m-4"></div>
+                                </div>
+                                <div class="text-center">
+                                    <span class="bg-emerald-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm mb-2 inline-block">BACK SIDE</span>
+                                    <div id="settings-live-preview-back" class="shadow-2xl m-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-about" class="view-section hidden">
+                <div class="max-w-3xl mx-auto bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center md:text-left">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2 border-b pb-4">About the Developers</h3>
+                    <p class="font-bold text-xl text-blue-700 mt-6 mb-2">Nusrat Shaheen Inc.</p>
+                    <p class="text-md text-slate-600 mb-6 font-semibold border-l-4 border-blue-500 pl-3">Founder: M Nauman Faisal</p>
+                    
+                    <p class="text-slate-600 mb-8 leading-relaxed">
+                        We are dedicated to simplifying administrative tasks for educational institutions and corporations. 
+                        Zohan Pro Fast Edition is optimized for extremely fast bulk printing and seamless ID card generation directly in your browser.
+                    </p>
+
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200 text-left">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-6 h-6 text-blue-600 mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <div>
+                                <p class="font-bold text-slate-800 mb-1 text-base">Contact Email</p>
+                                <p class="text-blue-600 font-medium text-lg"><a href="mailto:naumanfaisal101@gmail.com">naumanfaisal101@gmail.com</a></p>
+                                <p class="text-slate-500 mt-1 text-xs">Reach out for support, feedback, or business inquiries.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="print-container" class="hidden">
+        </div>
+
+    <div id="crop-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <h3 class="font-bold text-lg text-slate-800">Adjust Student Photo</h3>
+                <button onclick="closeCropModal()" class="text-slate-400 hover:text-slate-600 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="p-4 bg-slate-900 flex-1 relative flex items-center justify-center min-h-[300px] max-h-[60vh]">
+                <img id="crop-image" src="" alt="Picture to crop" class="max-w-full block">
+            </div>
+
+            <div class="p-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center bg-slate-50 gap-4">
+                <div class="flex gap-2">
+                    <button onclick="cropper.zoom(0.1)" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 p-2.5 rounded-lg shadow-sm transition" title="Zoom In">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg>
+                    </button>
+                    <button onclick="cropper.zoom(-0.1)" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 p-2.5 rounded-lg shadow-sm transition" title="Zoom Out">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path></svg>
+                    </button>
+                    <div class="flex items-center ml-2 border-l pl-4 border-slate-300 text-xs text-slate-500 font-medium">
+                        Drag photo to align,<br>Use buttons to zoom
+                    </div>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="closeCropModal()" class="flex-1 sm:flex-none px-4 py-2 text-slate-600 font-medium hover:bg-slate-200 rounded-lg transition">Cancel</button>
+                    <button onclick="saveCrop()" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold shadow-md transition">Apply & Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- STATE ---
+        let students = [];
+
+        let settings = {
+            orgName: "SHAHEEN HIGH SCHOOL",
+            orgAddress: "Lahore Rd, near Gol chowk, Pindi Bhattian",
+            orgNameFont: "'Inter', sans-serif",
+            orgNameSize: 11,
+            orgNameWeight: "bold",
+            orgNameColor: "#ffffff",
+            orgAddressFont: "'Inter', sans-serif",
+            orgAddressSize: 6,
+            orgAddressWeight: "normal",
+            orgAddressColor: "#ffffff",
+
+            studentNameFont: "'Inter', sans-serif",
+            studentNameSize: 14,
+            studentNameWeight: "bold",
+            studentNameColor: "#1d4ed8",
+            classNameFont: "'Inter', sans-serif",
+            classNameSize: 9,
+            classNameWeight: "600",
+            classNameColor: "#475569",
+            labelFont: "'Inter', sans-serif",
+            labelSize: 8,
+            labelWeight: "bold",
+            labelColor: "#64748b",
+            valueFont: "'Inter', sans-serif",
+            valueSize: 8,
+            valueWeight: "600",
+            valueColor: "#0f172a",
+            footerFont: "'Inter', sans-serif",
+            footerSize: 7,
+            footerWeight: "normal",
+            footerColor: "#ffffff",
+
+            globalClass: "10TH GRADE",
+            validityText: "SESSION: 2024-2025",
+            primaryColor: "#1d4ed8",
+            secondaryColor: "#1e3a8a",
+            logoDataUrl: null,
+            logoOpacity: 0.1,
+            headerLogoDataUrl: null,
+            headerLogoPosition: 'left',
+            headerLogoSize: 12,
+            signatureDataUrl: null,
+            signatureText: "AUTHORITY SIGNATURE",
+            signatureTextColor: "#1d4ed8",
+            signaturePosition: 'right',
+            signatureSize: 15,
+            signatureOpacity: 0.8,
+            signatureBottom: 10,
+            showLanyardHole: true,
+            
+            showCutGuide: true,
+            cutGuideColor: "#cbd5e1",
+            cutGuideWidth: 1.5,
+            cutGuideStyle: "solid",
+
+            // Backside Settings
+            backQrDataUrl: null,
+            backReturnText: "IF FOUND, PLEASE RETURN TO:",
+            backContactNo: "+92 300 7716245"
+        };
+
+        // Cropper Variables
+        let cropper = null;
+        let currentCropStudentId = null;
+
+        // --- CORE FUNCTIONS ---
+        
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        // Toggle Manual vs Bulk Input Tabs
+        function toggleDataInput(mode) {
+            const btnManual = document.getElementById('tab-manual');
+            const btnBulk = document.getElementById('tab-bulk');
+            const divManual = document.getElementById('input-manual');
+            const divBulk = document.getElementById('input-bulk');
+
+            if (mode === 'manual') {
+                btnManual.className = "flex-1 py-2 text-sm font-bold border-b-2 border-blue-600 text-blue-600 transition-colors";
+                btnBulk.className = "flex-1 py-2 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors";
+                divManual.classList.remove('hidden');
+                divManual.classList.add('flex');
+                divBulk.classList.add('hidden');
+                divBulk.classList.remove('flex');
+                document.getElementById('manual-name').focus();
+            } else {
+                btnBulk.className = "flex-1 py-2 text-sm font-bold border-b-2 border-blue-600 text-blue-600 transition-colors";
+                btnManual.className = "flex-1 py-2 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors";
+                divBulk.classList.remove('hidden');
+                divBulk.classList.add('flex');
+                divManual.classList.add('hidden');
+                divManual.classList.remove('flex');
+                document.getElementById('csv-input').focus();
+            }
+        }
+
+        // Add Single Student from Form
+        function addSingleStudent() {
+            const nameField = document.getElementById('manual-name');
+            const fatherField = document.getElementById('manual-father');
+            const rollField = document.getElementById('manual-roll');
+
+            if (!nameField.value.trim()) return alert('Student Name is required!');
+
+            students.unshift({ 
+                id: generateId(),
+                name: nameField.value.trim(),
+                father: fatherField.value.trim() || '-',
+                roll: rollField.value.trim() || '-',
+                photo: null
+            });
+
+            nameField.value = '';
+            fatherField.value = '';
+            rollField.value = '';
+            
+            updateDataTable();
+            saveToLocalStorage();
+            nameField.focus(); 
+        }
+
+        // Tab Switching
+        function switchTab(tabId) {
+            document.querySelectorAll('aside nav button').forEach(btn => {
+                btn.classList.remove('bg-blue-700', 'text-white');
+                btn.classList.remove('border-blue-500', 'border');
+                btn.classList.add('hover:bg-slate-800', 'hover:text-white', 'border-transparent');
+                if(btn.id === 'nav-printBack') {
+                     btn.classList.add('border-slate-700/50');
+                }
+            });
+            let activeBtn = document.getElementById('nav-' + tabId);
+            activeBtn.classList.remove('hover:bg-slate-800', 'hover:text-white', 'border-transparent');
+            if(tabId === 'printBack') {
+                activeBtn.classList.add('bg-emerald-700', 'text-white', 'border-emerald-500', 'border');
+            } else {
+                activeBtn.classList.add('bg-blue-700', 'text-white');
+            }
+
+            document.querySelectorAll('.view-section').forEach(view => {
+                view.classList.add('hidden');
+            });
+
+            document.getElementById('view-' + tabId).classList.remove('hidden');
+
+            const titles = { 
+                'dashboard': 'Dashboard', 
+                'data': 'Bulk Student Data', 
+                'print': 'Fast Print Engine (Fronts)', 
+                'printBack': 'Fast Print Engine (Backsides)',
+                'settings': 'Settings & Live Preview',
+                'about': 'About ZOHAN PRO'
+            };
+            document.getElementById('header-title').innerText = titles[tabId];
+
+            if (tabId === 'print') previewPrintCards();
+            if (tabId === 'printBack') previewPrintBackCards();
+            if (tabId === 'settings') { syncSettingsToUI(); renderLivePreview(); }
+        }
+
+        // CSV Import
+        function importCSV() {
+            const input = document.getElementById('csv-input').value;
+            if(!input.trim()) return alert('Please paste some text first.');
+
+            const lines = input.split('\n');
+            const newStudents = [];
+
+            lines.forEach(line => {
+                const parts = line.split(',');
+                if (parts.length >= 2) { 
+                    newStudents.push({
+                        id: generateId(),
+                        name: parts[0]?.trim() || '',
+                        father: parts[1]?.trim() || '',
+                        roll: parts[2]?.trim() || '-',
+                        photo: null
+                    });
+                }
+            });
+
+            students = [...newStudents, ...students]; // Add new ones to top
+            document.getElementById('csv-input').value = ''; 
+            updateDataTable();
+            saveToLocalStorage();
+            alert(`Successfully loaded ${newStudents.length} new records!`);
+        }
+
+        function clearStudents() {
+            if(confirm("Delete all student records?")) {
+                students = [];
+                updateDataTable();
+                saveToLocalStorage();
+            }
+        }
+
+        function deleteStudent(id) {
+            students = students.filter(s => s.id !== id);
+            updateDataTable();
+            saveToLocalStorage();
+        }
+
+        // QUICK DUPLICATE (COPY)
+        function duplicateStudent(id) {
+            const target = students.find(s => s.id === id);
+            if(target) {
+                const clone = { ...target, id: generateId() };
+                const index = students.findIndex(s => s.id === id);
+                students.splice(index + 1, 0, clone);
+                updateDataTable();
+                saveToLocalStorage();
+            }
+        }
+
+        // --- CROPPER / PHOTO EDITING LOGIC ---
+        function uploadStudentPhoto(event, id) {
+            const file = event.target.files[0];
+            if(!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentCropStudentId = id;
+                const image = document.getElementById('crop-image');
+                image.src = e.target.result;
+                
+                document.getElementById('crop-modal').classList.remove('hidden');
+                
+                if (cropper) { cropper.destroy(); }
+                
+                cropper = new Cropper(image, {
+                    aspectRatio: 1, 
+                    viewMode: 1, 
+                    dragMode: 'move', 
+                    autoCropArea: 1, 
+                    guides: false, 
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: false, 
+                    cropBoxResizable: false, 
+                    toggleDragModeOnDblclick: false,
+                });
+            };
+            reader.readAsDataURL(file);
+            event.target.value = ''; 
+        }
+
+        function closeCropModal() {
+            document.getElementById('crop-modal').classList.add('hidden');
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            currentCropStudentId = null;
+        }
+
+        // ULTRA OPTIMIZATION 1: Drastically reduce cropper output resolution to save print memory
+        function saveCrop() {
+            if (!cropper || !currentCropStudentId) return;
+            
+            const canvas = cropper.getCroppedCanvas({
+                width: 150, 
+                height: 150, 
+                fillColor: '#fff' 
+            });
+            
+            const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.7); 
+            
+            const student = students.find(s => s.id === currentCropStudentId);
+            if (student) {
+                student.photo = croppedDataUrl;
+                updateDataTable();
+                saveToLocalStorage();
+            }
+            closeCropModal();
+        }
+
+        // ULTRA OPTIMIZATION 2: Render limit for DOM UI
+        function updateDataTable() {
+            const tbody = document.getElementById('student-table-body');
+            const displayLimit = 100;
+            const displayStudents = students.slice(0, displayLimit);
+            
+            let html = '';
+            
+            displayStudents.forEach((s) => {
+                const avatarContent = s.photo 
+                    ? `<img src="${s.photo}" class="w-full h-full object-cover">`
+                    : `<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>`;
+
+                html += `
+                <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                    <td class="px-4 py-2 text-center w-16">
+                        <label class="cursor-pointer bg-slate-200 hover:bg-slate-300 w-8 h-8 rounded-full flex items-center justify-center overflow-hidden inline-flex border border-slate-300 relative group" title="Click to Upload Photo">
+                            ${avatarContent}
+                            <div class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center">
+                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            </div>
+                            <input type="file" class="hidden" accept="image/*" onchange="uploadStudentPhoto(event, '${s.id}')">
+                        </label>
+                    </td>
+                    <td class="px-4 py-2 font-medium uppercase">${s.name}</td>
+                    <td class="px-4 py-2 text-slate-600 uppercase">${s.father}</td>
+                    <td class="px-4 py-2 font-mono text-slate-500 uppercase">${s.roll}</td>
+                    <td class="px-4 py-2 text-right w-32">
+                        <div class="flex justify-end gap-1">
+                            <button onclick="duplicateStudent('${s.id}')" class="text-blue-600 hover:text-blue-800 text-xs font-semibold px-2 py-1 rounded hover:bg-blue-50 border border-blue-200 shadow-sm" title="Quick Duplicate">Copy</button>
+                            <button onclick="deleteStudent('${s.id}')" class="text-red-500 hover:text-red-700 text-xs font-semibold px-2 py-1 rounded hover:bg-red-50 border border-red-200 shadow-sm">Del</button>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            
+            if(students.length === 0) {
+                html = `<tr><td colspan="5" class="px-4 py-8 text-center text-slate-400">No students loaded. Paste data above.</td></tr>`;
+            }
+
+            tbody.innerHTML = html;
+            
+            const noticeEl = document.getElementById('table-limit-notice');
+            if(students.length > displayLimit) {
+                noticeEl.innerText = `Showing ${displayLimit} recent entries. (${students.length - displayLimit} hidden from view to prevent lag).`;
+                noticeEl.classList.add('text-orange-500');
+            } else {
+                noticeEl.innerText = `Showing all ${students.length} entries.`;
+                noticeEl.classList.remove('text-orange-500');
+            }
+
+            document.getElementById('stat-students').innerText = students.length;
+            document.getElementById('print-count').innerText = students.length;
+        }
+
+        // GENERATE FRONT CARD HTML
+        function generateCardHTML(student, opts = settings) {
+            const photoHtml = student.photo 
+                ? `<img src="${student.photo}" style="width:100%; height:100%; object-fit:cover;">`
+                : `<svg style="width:2rem; height:2rem; color:#94a3b8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>`;
+
+            const watermarkHtml = opts.logoDataUrl 
+                ? `<div style="position:absolute; top:25mm; left:5mm; right:5mm; bottom:10mm; background-image:url('${opts.logoDataUrl}'); background-size:contain; background-position:center; background-repeat:no-repeat; opacity:${opts.logoOpacity}; z-index:5;"></div>` 
+                : '';
+
+            const headerLogoHtml = opts.headerLogoDataUrl 
+                ? `<img src="${opts.headerLogoDataUrl}" style="height: ${opts.headerLogoSize}mm; width: auto; max-width: 24mm; object-fit: contain; flex-shrink: 0;">`
+                : '';
+
+            let footerSvgPath = '';
+            if (opts.signaturePosition === 'right') {
+                footerSvgPath = 'M 0,0 C 45,0 55,16 100,16 L 100,25 L 0,25 Z';
+            } else if (opts.signaturePosition === 'left') {
+                footerSvgPath = 'M 100,0 C 55,0 45,16 0,16 L 0,25 L 100,25 Z';
+            } else { // center
+                footerSvgPath = 'M 0,0 C 20,0 30,16 50,16 C 70,16 80,0 100,0 L 100,25 L 0,25 Z';
+            }
+            
+            let signatureHtml = '';
+            if (opts.signatureDataUrl || opts.signatureText) {
+                const alignStyle = opts.signaturePosition === 'center' 
+                    ? 'left: 50%; transform: translateX(-50%); text-align: center;' 
+                    : `${opts.signaturePosition}: 2mm; text-align: ${opts.signaturePosition};`;
+                
+                const flexAlign = opts.signaturePosition === 'center' ? 'align-items: center;' : (opts.signaturePosition === 'left' ? 'align-items: flex-start;' : 'align-items: flex-end;');
+
+                const imgHtml = opts.signatureDataUrl ? `<img src="${opts.signatureDataUrl}" style="height: ${opts.signatureSize}mm; width: auto; max-width: 45mm; object-fit: contain; opacity: ${opts.signatureOpacity}; margin-bottom: 1px;">` : '';
+                
+                const textHtml = opts.signatureText ? `<div style="font-size: 5px; font-weight: bold; color: ${opts.signatureTextColor}; border-top: 0.5px solid ${opts.signatureTextColor}; padding-top: 1px; margin-top: 1px; line-height: 1;">${opts.signatureText.toUpperCase()}</div>` : '';
+
+                signatureHtml = `
+                <div style="position: absolute; bottom: ${opts.signatureBottom}mm; ${alignStyle} z-index: 8; pointer-events: none; display: flex; flex-direction: column; justify-content: flex-end; ${flexAlign}">
+                    ${imgHtml}
+                    ${textHtml}
+                </div>`;
+            }
+
+            const lanyardHoleHtml = opts.showLanyardHole 
+                ? `<div style="position:absolute; top: 2.5mm; left: 50%; transform: translateX(-50%); width: 14mm; height: 3mm; background-color: #ffffff; border: 0.5px solid #94a3b8; border-radius: 1.5mm; z-index: 50;"></div>` 
+                : '';
+
+            const flexDir = opts.headerLogoPosition === 'left' ? 'flex-row' : (opts.headerLogoPosition === 'right' ? 'flex-row-reverse' : 'flex-col');
+            const textAlign = opts.headerLogoPosition === 'center' ? 'text-center' : (opts.headerLogoPosition === 'left' ? 'text-left' : 'text-right');
+            const alignItems = opts.headerLogoPosition === 'center' ? 'items-center' : (opts.headerLogoPosition === 'left' ? 'items-start' : 'items-end');
+            const gapSize = opts.headerLogoPosition === 'center' ? 'gap-0.5' : 'gap-1.5';
+            const paddingTopStyle = opts.showLanyardHole ? 'padding-top: 5mm;' : 'padding-top: 1mm;';
+
+            // Safe Fallback logic for typography to prevent NaNpx errors
+            const orgNameSize = Number(opts.orgNameSize) || 11;
+            const orgAddressSize = Number(opts.orgAddressSize) || 6;
+            const studentNameSize = Number(opts.studentNameSize) || 14;
+            const classNameSize = Number(opts.classNameSize) || 9;
+            const labelSize = Number(opts.labelSize) || 8;
+            const valueSize = Number(opts.valueSize) || 8;
+            const footerSize = Number(opts.footerSize) || 7;
+
+            return `
+            <div class="card-wrapper shadow-xl print:shadow-none bg-transparent">
+                
+                <div class="id-card">
+                    <div class="absolute top-0 left-0 w-full h-[22mm] z-0" style="background-color: ${opts.primaryColor}"></div>
+                    <div class="absolute top-[22mm] left-0 w-full h-[2mm] z-0" style="background-color: ${opts.secondaryColor}"></div>
+                    
+                    <div class="absolute bottom-0 left-0 z-0" style="width: calc(100% + 2px); margin-left: -1px; height: 12mm;">
+                        <svg viewBox="0 0 100 25" preserveAspectRatio="none" style="width: 100%; height: 100%; display: block;">
+                            <path d="${footerSvgPath}" fill="${opts.secondaryColor}" />
+                        </svg>
+                    </div>
+                    
+                    ${watermarkHtml}
+                    ${signatureHtml}
+                    ${lanyardHoleHtml}
+                    
+                    <div class="relative z-10 flex flex-col items-center w-full h-full">
+                        <div class="w-full h-[22mm] flex ${flexDir} items-center justify-center ${gapSize} px-2" style="${paddingTopStyle}">
+                            ${headerLogoHtml}
+                            <div class="flex flex-col ${alignItems} justify-center min-w-0 flex-1 overflow-hidden">
+                                <h2 class="leading-tight ${textAlign} tracking-wide w-full break-words uppercase" style="color: ${opts.orgNameColor}; font-family: ${opts.orgNameFont}; font-size: ${orgNameSize}px; font-weight: ${opts.orgNameWeight}; line-height: 1.1;">${opts.orgName}</h2>
+                                <p class="${textAlign} mt-0.5 break-words w-full uppercase opacity-90" style="color: ${opts.orgAddressColor}; font-family: ${opts.orgAddressFont}; font-size: ${orgAddressSize}px; font-weight: ${opts.orgAddressWeight}; line-height: 1.2;">${opts.orgAddress}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="w-[22mm] h-[22mm] bg-slate-200 rounded-full border-2 border-white -mt-[2mm] mb-1 flex items-center justify-center overflow-hidden shrink-0 relative z-20">
+                            ${photoHtml}
+                        </div>
+
+                        <h1 class="uppercase text-center w-full px-2 truncate leading-none mb-1 relative z-20" style="color: ${opts.studentNameColor}; font-family: ${opts.studentNameFont}; font-size: ${studentNameSize}px; font-weight: ${opts.studentNameWeight};">${student.name.toUpperCase()}</h1>
+                        <p class="text-center w-full px-2 truncate mb-2 relative z-20 uppercase" style="color: ${opts.classNameColor}; font-family: ${opts.classNameFont}; font-size: ${classNameSize}px; font-weight: ${opts.classNameWeight};">${opts.globalClass.toUpperCase()}</p>
+
+                        <div class="w-full space-y-1.5 px-2 relative z-20">
+                            <div class="flex border-b border-slate-300/50 pb-0.5 items-end">
+                                <span class="w-12 uppercase" style="color: ${opts.labelColor}; font-family: ${opts.labelFont}; font-size: ${labelSize}px; font-weight: ${opts.labelWeight};">FATHER</span>
+                                <span class="truncate uppercase flex-1 text-right" style="color: ${opts.valueColor}; font-family: ${opts.valueFont}; font-size: ${valueSize}px; font-weight: ${opts.valueWeight};">${student.father.toUpperCase()}</span>
+                            </div>
+                            <div class="flex border-b border-slate-300/50 pb-0.5 items-end">
+                                <span class="w-12 uppercase" style="color: ${opts.labelColor}; font-family: ${opts.labelFont}; font-size: ${labelSize}px; font-weight: ${opts.labelWeight};">ROLL NO</span>
+                                <span class="truncate uppercase flex-1 text-right" style="color: ${opts.valueColor}; font-family: ${opts.valueFont}; font-size: ${valueSize}px; font-weight: ${opts.valueWeight};">${student.roll.toUpperCase()}</span>
+                            </div>
+                            <div class="flex border-b border-slate-300/50 pb-0.5 items-end">
+                                <span class="w-12 uppercase" style="color: ${opts.labelColor}; font-family: ${opts.labelFont}; font-size: ${labelSize}px; font-weight: ${opts.labelWeight};">VALIDITY</span>
+                                <span class="truncate uppercase flex-1 text-right" style="color: ${opts.valueColor}; font-family: ${opts.valueFont}; font-size: ${valueSize}px; font-weight: ${opts.valueWeight};">${opts.validityText.toUpperCase()}</span>
+                            </div>
+                        </div>
+
+                        <div class="w-full relative mt-auto shrink-0 flex items-end justify-center" style="height: 12mm; z-index: 10;">
+                            <div class="w-full text-center px-2 uppercase" style="color: ${opts.footerColor}; font-family: ${opts.footerFont}; font-size: ${footerSize}px; font-weight: ${opts.footerWeight}; padding-bottom: 1.5mm; line-height: 1.1;">
+                                VALID STRICTLY FOR INSTITUTIONAL USE ONLY
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Dynamic Cut Guide / Bleed Overlay -->
+                ${opts.showCutGuide ? `
+                    <div class="absolute inset-0 z-50 pointer-events-none" style="
+                        border: calc(2mm + ${opts.cutGuideWidth}mm) ${opts.cutGuideStyle} ${opts.cutGuideColor};
+                        box-sizing: border-box;
+                    "></div>
+                ` : ''}
+
+            </div>`;
+        }
+
+        // GENERATE BACK CARD HTML
+        function generateBackCardHTML(opts = settings) {
+            const watermarkHtml = opts.logoDataUrl 
+                ? `<div style="position:absolute; top:25mm; left:5mm; right:5mm; bottom:10mm; background-image:url('${opts.logoDataUrl}'); background-size:contain; background-position:center; background-repeat:no-repeat; opacity:${opts.logoOpacity}; z-index:5;"></div>` 
+                : '';
+
+            const lanyardHoleHtml = opts.showLanyardHole 
+                ? `<div style="position:absolute; top: 2.5mm; left: 50%; transform: translateX(-50%); width: 14mm; height: 3mm; background-color: #ffffff; border: 0.5px solid #94a3b8; border-radius: 1.5mm; z-index: 50;"></div>` 
+                : '';
+
+            const qrCodeHtml = opts.backQrDataUrl 
+                ? `<img src="${opts.backQrDataUrl}" style="width: 32mm; height: 32mm; object-fit: contain; margin-bottom: 3mm; border-radius: 2mm; border: 1px solid ${opts.primaryColor}; padding: 1mm; background: white;">`
+                : `<div style="width: 32mm; height: 32mm; border: 2px dashed ${opts.primaryColor}; border-radius: 2mm; display: flex; align-items: center; justify-content: center; margin-bottom: 3mm; color: ${opts.primaryColor}; font-size: 8px; font-weight: bold; opacity: 0.5;">QR CODE AREA</div>`;
+
+            // Safe Fallback logic for typography to prevent NaNpx errors
+            const orgNameSize = Number(opts.orgNameSize) || 11;
+            const orgAddressSize = Number(opts.orgAddressSize) || 6;
+
+            return `
+            <div class="card-wrapper shadow-xl print:shadow-none bg-transparent">
+                <div class="id-card">
+                    <!-- Background Strip -->
+                    <div class="absolute top-0 left-0 w-full h-[15mm] z-0" style="background-color: ${opts.primaryColor}"></div>
+                    
+                    ${watermarkHtml}
+                    ${lanyardHoleHtml}
+                    
+                    <div class="relative z-10 flex flex-col items-center w-full h-full text-center">
+                        <div class="w-full h-[15mm] flex items-end justify-center px-2 pb-2" style="${opts.showLanyardHole ? 'padding-top: 5mm;' : ''}">
+                            <h2 class="leading-tight tracking-wide w-full break-words uppercase" style="color: ${opts.orgNameColor}; font-family: ${opts.orgNameFont}; font-size: ${Math.max(8, orgNameSize - 2)}px; font-weight: ${opts.orgNameWeight};">${opts.orgName}</h2>
+                        </div>
+                        
+                        <div class="flex-1 flex flex-col items-center justify-center w-full px-4 pt-2">
+                            ${qrCodeHtml}
+                            
+                            <p style="font-size: 9px; font-weight: bold; color: ${opts.primaryColor}; margin-bottom: 1.5mm; line-height: 1.2;">${opts.backReturnText}</p>
+                            <p style="font-size: 7px; font-weight: normal; color: #475569; margin-bottom: 4mm; line-height: 1.2;">${opts.orgAddress}</p>
+                            
+                            <div style="background-color: ${opts.secondaryColor}; color: ${opts.footerColor}; padding: 1.5mm 4mm; border-radius: 1mm; width: 100%;">
+                                <p style="font-size: 7px; font-weight: normal; margin-bottom: 0.5mm;">EMERGENCY CONTACT</p>
+                                <p style="font-size: 11px; font-weight: bold; letter-spacing: 0.5px;">${opts.backContactNo}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Cut Guide / Bleed Overlay -->
+                ${opts.showCutGuide ? `
+                    <div class="absolute inset-0 z-50 pointer-events-none" style="
+                        border: calc(2mm + ${opts.cutGuideWidth}mm) ${opts.cutGuideStyle} ${opts.cutGuideColor};
+                        box-sizing: border-box;
+                    "></div>
+                ` : ''}
+
+            </div>`;
+        }
+
+        function renderLivePreview() {
+            const tempOpts = {
+                orgName: document.getElementById('setting-orgName').value || 'ORGANIZATION NAME',
+                orgAddress: document.getElementById('setting-orgAddress').value || 'ADDRESS TAGLINE',
+                orgNameFont: document.getElementById('setting-orgNameFont').value,
+                orgNameSize: document.getElementById('setting-orgNameSize').value,
+                orgNameWeight: document.getElementById('setting-orgNameWeight').value,
+                orgNameColor: document.getElementById('setting-orgNameColor').value,
+                orgAddressFont: document.getElementById('setting-orgAddressFont').value,
+                orgAddressSize: document.getElementById('setting-orgAddressSize').value,
+                orgAddressWeight: document.getElementById('setting-orgAddressWeight').value,
+                orgAddressColor: document.getElementById('setting-orgAddressColor').value,
+                
+                studentNameFont: document.getElementById('setting-studentNameFont').value,
+                studentNameSize: document.getElementById('setting-studentNameSize').value,
+                studentNameWeight: document.getElementById('setting-studentNameWeight').value,
+                studentNameColor: document.getElementById('setting-studentNameColor').value,
+                classNameFont: document.getElementById('setting-classNameFont').value,
+                classNameSize: document.getElementById('setting-classNameSize').value,
+                classNameWeight: document.getElementById('setting-classNameWeight').value,
+                classNameColor: document.getElementById('setting-classNameColor').value,
+                labelFont: document.getElementById('setting-labelFont').value,
+                labelSize: document.getElementById('setting-labelSize').value,
+                labelWeight: document.getElementById('setting-labelWeight').value,
+                labelColor: document.getElementById('setting-labelColor').value,
+                valueFont: document.getElementById('setting-valueFont').value,
+                valueSize: document.getElementById('setting-valueSize').value,
+                valueWeight: document.getElementById('setting-valueWeight').value,
+                valueColor: document.getElementById('setting-valueColor').value,
+                footerFont: document.getElementById('setting-footerFont').value,
+                footerSize: document.getElementById('setting-footerSize').value,
+                footerWeight: document.getElementById('setting-footerWeight').value,
+                footerColor: document.getElementById('setting-footerColor').value,
+
+                globalClass: document.getElementById('setting-globalClass').value || '10TH GRADE',
+                validityText: document.getElementById('setting-validityText').value || 'SESSION: 2024-2025',
+                primaryColor: document.getElementById('setting-primaryColor').value,
+                secondaryColor: document.getElementById('setting-secondaryColor').value,
+                logoOpacity: document.getElementById('setting-logoOpacity').value,
+                headerLogoPosition: document.getElementById('setting-headerLogoPosition').value,
+                headerLogoSize: document.getElementById('setting-headerLogoSize').value,
+                signatureText: document.getElementById('setting-signatureText').value,
+                signatureTextColor: document.getElementById('setting-signatureTextColor').value,
+                signaturePosition: document.getElementById('setting-signaturePosition').value,
+                signatureSize: document.getElementById('setting-signatureSize').value,
+                signatureOpacity: document.getElementById('setting-signatureOpacity').value,
+                signatureBottom: document.getElementById('setting-signatureBottom').value,
+                showLanyardHole: document.getElementById('setting-lanyardHole').checked,
+                
+                showCutGuide: document.getElementById('setting-showCutGuide').checked,
+                cutGuideColor: document.getElementById('setting-cutGuideColor').value,
+                cutGuideWidth: document.getElementById('setting-cutGuideWidth').value,
+                cutGuideStyle: document.getElementById('setting-cutGuideStyle').value,
+                
+                logoDataUrl: settings.logoDataUrl,
+                headerLogoDataUrl: settings.headerLogoDataUrl,
+                signatureDataUrl: settings.signatureDataUrl,
+
+                backQrDataUrl: settings.backQrDataUrl,
+                backReturnText: document.getElementById('setting-backReturnText').value,
+                backContactNo: document.getElementById('setting-backContactNo').value
+            };
+
+            const sampleStudent = {
+                name: "STUDENT NAME",
+                father: "FATHER NAME",
+                roll: "12345",
+                photo: null
+            };
+
+            document.getElementById('settings-live-preview').innerHTML = generateCardHTML(sampleStudent, tempOpts);
+            document.getElementById('settings-live-preview-back').innerHTML = generateBackCardHTML(tempOpts);
+        }
+
+        // PREVIEW FRONT
+        function previewPrintCards() {
+            let cardsHTML = '';
+            const limit = 9;
+            const previewStudents = students.slice(0, limit);
+
+            previewStudents.forEach(s => {
+                cardsHTML += generateCardHTML(s, settings);
+            });
+
+            document.getElementById('screen-preview-container').innerHTML = cardsHTML;
+            document.getElementById('print-count').innerText = students.length;
+
+            const notice = document.getElementById('preview-notice');
+            if(students.length > limit) {
+                notice.classList.remove('hidden');
+            } else {
+                notice.classList.add('hidden');
+            }
+        }
+
+        // PREVIEW BACK (ALWAYS EXACTLY 9 FOR ONE A4 PAGE)
+        function previewPrintBackCards() {
+            let cardsHTML = '';
+            for (let i = 0; i < 9; i++) {
+                cardsHTML += generateBackCardHTML(settings);
+            }
+            document.getElementById('screen-preview-back-container').innerHTML = cardsHTML;
+        }
+
+        function executeBulkPrint() {
+            if(students.length === 0) return alert("No students to print!");
+
+            const btn = document.getElementById('print-btn');
+            const originalHTML = btn.innerHTML;
+            
+            btn.innerHTML = `<svg class="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> PREPARING...`;
+            btn.disabled = true;
+
+            setTimeout(() => {
+                let cardsHTML = '';
+                students.forEach(s => { cardsHTML += generateCardHTML(s, settings); });
+                document.getElementById('print-container').innerHTML = cardsHTML;
+
+                setTimeout(() => {
+                    window.print();
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                    setTimeout(() => { document.getElementById('print-container').innerHTML = ''; }, 500);
+                }, 1000); 
+            }, 50);
+        }
+
+        function executeBulkPrintBack() {
+            const btn = document.getElementById('print-back-btn');
+            const originalHTML = btn.innerHTML;
+            
+            btn.innerHTML = `<svg class="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> PREPARING...`;
+            btn.disabled = true;
+
+            setTimeout(() => {
+                let cardsHTML = '';
+                for (let i = 0; i < 9; i++) {
+                    cardsHTML += generateBackCardHTML(settings);
+                }
+                document.getElementById('print-container').innerHTML = cardsHTML;
+
+                setTimeout(() => {
+                    window.print();
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                    setTimeout(() => { document.getElementById('print-container').innerHTML = ''; }, 500);
+                }, 1000); 
+            }, 50);
+        }
+
+        function resizeImageBase64(base64Str, maxSize) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    let w = img.width;
+                    let h = img.height;
+                    
+                    if (w > maxSize || h > maxSize) {
+                        if (w > h) { h = Math.round((h * maxSize) / w); w = maxSize; }
+                        else { w = Math.round((w * maxSize) / h); h = maxSize; }
+                    } else {
+                        return resolve(base64Str); 
+                    }
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.src = base64Str;
+            });
+        }
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve) => {
+                if (!file) return resolve(null);
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handleLiveImageUpload(input, settingKey) {
+            if(input.files && input.files[0]) {
+                const rawBase64 = await readFileAsDataURL(input.files[0]);
+                settings[settingKey] = await resizeImageBase64(rawBase64, 400); 
+                saveToLocalStorage();
+                renderLivePreview(); 
+            }
+        }
+
+        function clearSettingImage(settingKey, inputId) {
+            settings[settingKey] = null;
+            document.getElementById(inputId).value = "";
+            saveToLocalStorage();
+            renderLivePreview();
+        }
+
+        function syncSettingsToUI() {
+            document.getElementById('setting-orgName').value = settings.orgName || '';
+            document.getElementById('setting-orgNameFont').value = settings.orgNameFont || "'Inter', sans-serif";
+            document.getElementById('setting-orgNameSize').value = settings.orgNameSize || 11;
+            document.getElementById('setting-orgNameWeight').value = settings.orgNameWeight || 'bold';
+            document.getElementById('setting-orgNameColor').value = settings.orgNameColor || '#ffffff';
+
+            document.getElementById('setting-orgAddress').value = settings.orgAddress || '';
+            document.getElementById('setting-orgAddressFont').value = settings.orgAddressFont || "'Inter', sans-serif";
+            document.getElementById('setting-orgAddressSize').value = settings.orgAddressSize || 6;
+            document.getElementById('setting-orgAddressWeight').value = settings.orgAddressWeight || 'normal';
+            document.getElementById('setting-orgAddressColor').value = settings.orgAddressColor || '#ffffff';
+
+            document.getElementById('setting-studentNameFont').value = settings.studentNameFont || "'Inter', sans-serif";
+            document.getElementById('setting-studentNameSize').value = settings.studentNameSize || 14;
+            document.getElementById('setting-studentNameWeight').value = settings.studentNameWeight || 'bold';
+            document.getElementById('setting-studentNameColor').value = settings.studentNameColor || '#1d4ed8';
+
+            document.getElementById('setting-classNameFont').value = settings.classNameFont || "'Inter', sans-serif";
+            document.getElementById('setting-classNameSize').value = settings.classNameSize || 9;
+            document.getElementById('setting-classNameWeight').value = settings.classNameWeight || '600';
+            document.getElementById('setting-classNameColor').value = settings.classNameColor || '#475569';
+
+            document.getElementById('setting-labelFont').value = settings.labelFont || "'Inter', sans-serif";
+            document.getElementById('setting-labelSize').value = settings.labelSize || 8;
+            document.getElementById('setting-labelWeight').value = settings.labelWeight || 'bold';
+            document.getElementById('setting-labelColor').value = settings.labelColor || '#64748b';
+
+            document.getElementById('setting-valueFont').value = settings.valueFont || "'Inter', sans-serif";
+            document.getElementById('setting-valueSize').value = settings.valueSize || 8;
+            document.getElementById('setting-valueWeight').value = settings.valueWeight || '600';
+            document.getElementById('setting-valueColor').value = settings.valueColor || '#0f172a';
+
+            document.getElementById('setting-footerFont').value = settings.footerFont || "'Inter', sans-serif";
+            document.getElementById('setting-footerSize').value = settings.footerSize || 7;
+            document.getElementById('setting-footerWeight').value = settings.footerWeight || 'normal';
+            document.getElementById('setting-footerColor').value = settings.footerColor || '#ffffff';
+
+            document.getElementById('setting-globalClass').value = settings.globalClass || '';
+            document.getElementById('setting-validityText').value = settings.validityText || '';
+            document.getElementById('setting-primaryColor').value = settings.primaryColor || '#1d4ed8';
+            document.getElementById('setting-secondaryColor').value = settings.secondaryColor || '#1e3a8a';
+            document.getElementById('setting-logoOpacity').value = settings.logoOpacity || 0.1;
+            
+            document.getElementById('setting-headerLogoPosition').value = settings.headerLogoPosition || 'left';
+            document.getElementById('setting-headerLogoSize').value = settings.headerLogoSize || 12;
+            
+            document.getElementById('setting-signatureText').value = settings.signatureText || '';
+            document.getElementById('setting-signatureTextColor').value = settings.signatureTextColor || '#1d4ed8';
+            document.getElementById('setting-signaturePosition').value = settings.signaturePosition || 'right';
+            document.getElementById('setting-signatureSize').value = settings.signatureSize || 15;
+            document.getElementById('setting-signatureOpacity').value = settings.signatureOpacity || 0.8;
+            document.getElementById('setting-signatureBottom').value = settings.signatureBottom || 10;
+            
+            document.getElementById('setting-lanyardHole').checked = settings.showLanyardHole;
+
+            document.getElementById('setting-showCutGuide').checked = settings.showCutGuide ?? true;
+            document.getElementById('setting-cutGuideColor').value = settings.cutGuideColor || '#cbd5e1';
+            document.getElementById('setting-cutGuideWidth').value = settings.cutGuideWidth || 1.5;
+            document.getElementById('setting-cutGuideStyle').value = settings.cutGuideStyle || 'solid';
+
+            document.getElementById('setting-backReturnText').value = settings.backReturnText || "IF FOUND, PLEASE RETURN TO:";
+            document.getElementById('setting-backContactNo').value = settings.backContactNo || "+92 300 7716245";
+
+            document.getElementById('org-name-display').innerText = settings.orgName;
+            document.getElementById('stat-color-preview').style.backgroundColor = settings.primaryColor;
+            document.getElementById('stat-color-text').style.color = settings.primaryColor;
+        }
+
+        function saveSettings() {
+            settings.orgName = document.getElementById('setting-orgName').value;
+            settings.orgNameFont = document.getElementById('setting-orgNameFont').value;
+            settings.orgNameSize = document.getElementById('setting-orgNameSize').value;
+            settings.orgNameWeight = document.getElementById('setting-orgNameWeight').value;
+            settings.orgNameColor = document.getElementById('setting-orgNameColor').value;
+
+            settings.orgAddress = document.getElementById('setting-orgAddress').value;
+            settings.orgAddressFont = document.getElementById('setting-orgAddressFont').value;
+            settings.orgAddressSize = document.getElementById('setting-orgAddressSize').value;
+            settings.orgAddressWeight = document.getElementById('setting-orgAddressWeight').value;
+            settings.orgAddressColor = document.getElementById('setting-orgAddressColor').value;
+
+            settings.studentNameFont = document.getElementById('setting-studentNameFont').value;
+            settings.studentNameSize = document.getElementById('setting-studentNameSize').value;
+            settings.studentNameWeight = document.getElementById('setting-studentNameWeight').value;
+            settings.studentNameColor = document.getElementById('setting-studentNameColor').value;
+            
+            settings.classNameFont = document.getElementById('setting-classNameFont').value;
+            settings.classNameSize = document.getElementById('setting-classNameSize').value;
+            settings.classNameWeight = document.getElementById('setting-classNameWeight').value;
+            settings.classNameColor = document.getElementById('setting-classNameColor').value;
+            
+            settings.labelFont = document.getElementById('setting-labelFont').value;
+            settings.labelSize = document.getElementById('setting-labelSize').value;
+            settings.labelWeight = document.getElementById('setting-labelWeight').value;
+            settings.labelColor = document.getElementById('setting-labelColor').value;
+            
+            settings.valueFont = document.getElementById('setting-valueFont').value;
+            settings.valueSize = document.getElementById('setting-valueSize').value;
+            settings.valueWeight = document.getElementById('setting-valueWeight').value;
+            settings.valueColor = document.getElementById('setting-valueColor').value;
+            
+            settings.footerFont = document.getElementById('setting-footerFont').value;
+            settings.footerSize = document.getElementById('setting-footerSize').value;
+            settings.footerWeight = document.getElementById('setting-footerWeight').value;
+            settings.footerColor = document.getElementById('setting-footerColor').value;
+
+            settings.globalClass = document.getElementById('setting-globalClass').value;
+            settings.validityText = document.getElementById('setting-validityText').value;
+            settings.primaryColor = document.getElementById('setting-primaryColor').value;
+            settings.secondaryColor = document.getElementById('setting-secondaryColor').value;
+            settings.logoOpacity = document.getElementById('setting-logoOpacity').value;
+            settings.headerLogoPosition = document.getElementById('setting-headerLogoPosition').value;
+            settings.headerLogoSize = document.getElementById('setting-headerLogoSize').value;
+            
+            settings.signatureText = document.getElementById('setting-signatureText').value;
+            settings.signatureTextColor = document.getElementById('setting-signatureTextColor').value;
+            settings.signaturePosition = document.getElementById('setting-signaturePosition').value;
+            settings.signatureSize = document.getElementById('setting-signatureSize').value;
+            settings.signatureOpacity = document.getElementById('setting-signatureOpacity').value;
+            settings.signatureBottom = document.getElementById('setting-signatureBottom').value;
+            settings.showLanyardHole = document.getElementById('setting-lanyardHole').checked;
+
+            settings.showCutGuide = document.getElementById('setting-showCutGuide').checked;
+            settings.cutGuideColor = document.getElementById('setting-cutGuideColor').value;
+            settings.cutGuideWidth = document.getElementById('setting-cutGuideWidth').value;
+            settings.cutGuideStyle = document.getElementById('setting-cutGuideStyle').value;
+
+            settings.backReturnText = document.getElementById('setting-backReturnText').value;
+            settings.backContactNo = document.getElementById('setting-backContactNo').value;
+
+            saveToLocalStorage();
+            syncSettingsToUI();
+            alert('Settings Saved! All new and printed cards will use these settings.');
+        }
+
+        // --- LOCAL STORAGE DATA SAVING ---
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('zohan_fast_data', JSON.stringify({students, settings}));
+            } catch(e) {
+                console.warn("Storage quota exceeded. Backup your project manually.", e);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            const data = localStorage.getItem('zohan_fast_data');
+            if (data) {
+                try {
+                    const parsed = JSON.parse(data);
+                    if (parsed.students && Array.isArray(parsed.students)) students = parsed.students;
+                    if (parsed.settings) {
+                        // Merge parsed settings over default settings so defaults are preserved for missing keys!
+                        settings = { ...settings, ...parsed.settings }; 
+                    }
+                } catch(e) { console.error("Failed to parse saved data."); }
+            }
+        }
+
+        // --- EXPORT & IMPORT PROJECT (.zohan file) ---
+        function exportProject() {
+            const dataStr = JSON.stringify({ students, settings });
+            const blob = new Blob([dataStr], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Zohan_Project_${new Date().getTime()}.zohan`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importProject(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.students) students = parsed.students;
+                    if (parsed.settings) settings = {...settings, ...parsed.settings};
+                    
+                    saveToLocalStorage();
+                    updateDataTable();
+                    syncSettingsToUI();
+                    
+                    alert("Project Backup Loaded Successfully!");
+                    event.target.value = ''; // Reset input
+                } catch(err) {
+                    alert("Invalid backup file format.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Initialize App
+        window.onload = () => {
+            loadFromLocalStorage(); // Automatically reload previous session
+            updateDataTable();
+            syncSettingsToUI();
+            switchTab('dashboard'); 
+        };
+    </script>
+</body>
+</html>

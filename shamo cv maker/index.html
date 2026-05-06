@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shamo CV Maker by Nusrat Shaheen inc.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Add html2pdf for direct PDF downloading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Cropper.js for Photo Cropping -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+         
+    <style>
+        /* Base A4 Setup */
+        :root {
+            --a4-width: 210mm;
+            --a4-height: 297mm;
+        }
+        body {
+            background-color: #f3f4f6;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        /* CV Preview Container Constraints - STRICT LOCK FOR MOBILE FIX */
+        #preview-container {
+            width: var(--a4-width) !important;
+            height: var(--a4-height) !important;
+            min-width: var(--a4-width) !important;
+            min-height: var(--a4-height) !important;
+            max-width: var(--a4-width) !important;
+            max-height: var(--a4-height) !important;
+            background: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            margin: 0 auto;
+            overflow: hidden;
+            position: relative;
+            transform-origin: top center;
+        }
+        .cv-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            background: white;
+        }
+                 
+        /* Force border-box everywhere inside CV to prevent padding overflows */
+        .cv-wrapper * {
+            box-sizing: border-box;
+        }
+        /* --- Structural Fixes for 1-Page Constraint --- */
+        .cv-header { flex-shrink: 0; }
+        .cv-body { flex: 1; display: flex; }
+        .cv-sidebar { flex-shrink: 0; }
+        .cv-main { flex: 1; }
+        /* Template 1: Modern Blue (Sidebar Left - Redesigned) */
+        .template-1 .cv-header { display: none; }
+        .template-1 .cv-body { flex-direction: row; }
+        .template-1 .cv-sidebar { background: #1e3a8a; color: white; width: 33%; padding: 2.5rem 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+        .template-1 .cv-main { background: white; width: 67%; padding: 2.5rem 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+        .template-1 .name { color: #ffffff; font-size: 2.3rem; font-weight: 800; text-transform: uppercase; line-height: 1.1; margin-bottom: 0.25rem;}
+        .template-1 .title { color: #bfdbfe; font-size: 1.15rem; font-weight: 500; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 1rem;}
+        .template-1 .section-title { color: #1e3a8a; font-size: 1.25rem; font-weight: 800; border-bottom: 2px solid #1e3a8a; padding-bottom: 0.35rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;}
+        .template-1 .sidebar-title { color: white; font-size: 1.1rem; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 0.35rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;}
+        .template-1 .photo { width: 120px; height: 160px; border-radius: 8px; border: 4px solid rgba(255,255,255,0.8); object-fit: cover; margin: 0 auto; display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.2);}
+        .template-1 .skill-item { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); }
+                 
+        /* Template 2: Minimalist Elegance (Top Header, Center) */
+        .template-2 .cv-wrapper { padding: 1.5rem 2.5rem; }
+        .template-2 .cv-header { text-align: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 1.5rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; align-items: center; }
+        .template-2 .cv-body { flex-direction: column; display: block; }
+        .template-2 .cv-sidebar { display: none; }
+         .template-2 .cv-main { width: 100%; padding: 0; }
+        .template-2 .name { color: #111827; font-size: 2.5rem; font-weight: 300; letter-spacing: 2px; line-height: 1.1; }
+        .template-2 .title { color: #4b5563; font-size: 1.1rem; font-style: italic; margin-top: 0.5rem; }
+        .template-2 .section-title { color: #111827; font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.25rem; }
+        .template-2 .photo { width: 100px; height: 133px; border-radius: 8px; object-fit: cover; margin-bottom: 1rem; border: 2px solid #e5e7eb; }
+        .template-2 .contact-row { display: flex; justify-content: center; gap: 1rem; color: #4b5563; font-size: 0.85rem; margin-top: 1rem; flex-wrap: wrap; }
+        /* Template 3: Creative Gradient */
+        .template-3 .cv-header { background: linear-gradient(135deg, #8b5cf6, #ec4899); color: white; padding: 2rem; display: flex; align-items: center; gap: 2rem; }
+        .template-3 .cv-body { flex-direction: row; }
+        .template-3 .cv-sidebar { width: 33%; background: #fdf2f8; padding: 2rem; color: #831843; border-right: 1px solid #fbcfe8; }
+        .template-3 .cv-main { width: 67%; padding: 2rem; background: white; }
+        .template-3 .name { font-size: 2.4rem; font-weight: 800; line-height: 1; margin-bottom: 0.5rem; }
+        .template-3 .title { font-size: 1.1rem; font-weight: 500; opacity: 0.9; }
+        .template-3 .photo { width: 100px; height: 133px; border-radius: 12px; border: 3px solid white; object-fit: cover; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .template-3 .section-title { color: #db2777; font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem; display: inline-block; border-bottom: 3px solid #fbcfe8; text-transform: uppercase; }
+        .template-3 .sidebar-title { color: #9d174d; font-size: 1.1rem; font-weight: bold; margin-bottom: 1rem; border-bottom: 2px solid #fbcfe8; text-transform: uppercase; }
+        .template-3 .skill-item { background: #fbcfe8; color: #831843; }
+        /* Template 4: Corporate Teal */
+        .template-4 .cv-wrapper { background: #f0fdfa; }
+        .template-4 .cv-header { background: #0f766e; color: white; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .template-4 .header-text { flex: 1; }
+        .template-4 .cv-body { flex-direction: row; padding: 1.5rem; gap: 1.5rem; }
+        .template-4 .cv-main { width: 65%; background: white; padding: 1.5rem; border-top: 4px solid #0f766e; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-radius: 4px; }
+        .template-4 .cv-sidebar { width: 35%; background: white; padding: 1.5rem; border-top: 4px solid #14b8a6; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-radius: 4px; }
+        .template-4 .name { font-size: 2.2rem; font-weight: bold; }
+        .template-4 .title { font-size: 1rem; color: #ccfbf1; margin-top: 0.25rem; }
+        .template-4 .photo { width: 90px; height: 120px; object-fit: cover; border-radius: 6px; border: 2px solid white; }
+        .template-4 .section-title, .template-4 .sidebar-title { color: #0f766e; font-size: 1.1rem; font-weight: bold; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #ccfbf1; padding-bottom: 0.25rem; }
+        .template-4 .skill-item { background: #ccfbf1; color: #0f766e; font-weight: 600; }
+        /* Template 5: Dark Contrast */
+        .template-5 .cv-header { display: none; }
+        .template-5 .cv-body { flex-direction: row-reverse; }
+        .template-5 .cv-sidebar { background: #1f2937; color: #f3f4f6; width: 34%; padding: 2.5rem 1.5rem; text-align: center; border-left: 4px solid #f97316; }
+        .template-5 .cv-main { width: 66%; padding: 2.5rem; background: white; }
+        .template-5 .name { color: #ffffff; font-size: 2.6rem; font-weight: 900; line-height: 1; margin-bottom: 0.5rem; }
+        .template-5 .title { color: #f97316; font-size: 1.2rem; font-weight: 600; margin-bottom: 1.5rem; }
+        .template-5 .photo { width: 110px; height: 146px; border-radius: 8px; object-fit: cover; border: 3px solid #374151; margin-bottom: 1.5rem; margin-left: auto; margin-right: auto; display: block;}
+        .template-5 .section-title { color: #111827; font-size: 1.2rem; font-weight: 800; border-left: 4px solid #f97316; padding-left: 0.75rem; margin-bottom: 1.25rem; text-transform: uppercase; }
+        .template-5 .sidebar-title { color: #f97316; font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; text-transform: uppercase; text-align: left; border-bottom: 1px solid #374151; padding-bottom: 0.25rem; }
+        .template-5 .cv-contact { text-align: left; }
+        .template-5 .skill-item { background: #374151; color: white; border-radius: 4px; }
+        /* Common Elements */
+        .cv-item { margin-bottom: 0.85rem; }
+        .cv-item-title { font-weight: 600; font-size: 1rem; color: #111827; }
+        .cv-item-subtitle { color: #4b5563; font-size: 0.9rem; font-weight: 600; }
+        .cv-item-date { color: #6b7280; font-size: 0.8rem; margin-bottom: 0.15rem; font-style: italic;}
+        .cv-item-desc { font-size: 0.85rem; color: #374151; line-height: 1.45; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; margin-top: 0.35rem; text-align: justify;}
+        .skill-item { display: inline-block; padding: 0.3rem 0.7rem; font-size: 0.8rem; margin: 0.25rem; background: rgba(0,0,0,0.05); border-radius: 999px; font-weight: 500;}
+        .cv-section.mb-6 { margin-bottom: 1.5rem !important; }
+        /* Custom Toggle Switch */
+        .toggle-checkbox:checked { right: 0; border-color: #4f46e5; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #4f46e5; }
+        /* Perspective Crop Elements */
+        .perspective-handle {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: #4f46e5;
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: move;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            z-index: 10;
+            touch-action: none;
+        }
+        /* Print Specifics */
+        @media print {
+            body { background: white; margin: 0; padding: 0; }
+            #editor-panel, .print-hidden { display: none !important; }
+            #preview-panel { width: 100% !important; margin: 0 !important; padding: 0 !important; max-height: none !important; overflow: visible !important;}
+            #preview-container { transform: scale(1) !important; box-shadow: none; margin: 0; width: var(--a4-width) !important; height: var(--a4-height) !important; page-break-after: avoid; }
+            /* Force wrapper to fit in print */
+            .cv-wrapper { height: 100% !important; transform: none !important; width: 100% !important; }
+            @page { size: A4; margin: 0; }
+        }
+        /* Scrollbar styling for editor */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+                 
+        /* Cropper customizations */
+        .cropper-view-box,
+        .cropper-face { border-radius: 8px; }
+        /* Custom Scrollbar for Dropdowns */
+        .cb-dropdown::-webkit-scrollbar { width: 6px; }
+        .cb-dropdown::-webkit-scrollbar-thumb { background-color: #a5b4fc; border-radius: 10px; }
+    </style>
+          
+</head>
+<body class="h-screen overflow-hidden flex flex-col md:flex-row bg-gray-100 text-gray-800 relative">
+    <a href="../index.html" class="print-hidden" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; background: #1e3a8a; color: white; padding: 12px 20px; text-decoration: none; border-radius: 50px; font-family: sans-serif; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.3s;">
+          Back to Dashboard
+    </a>
+    <!-- Left Panel: Editor (Takes 60% height on Mobile, Full on Desktop) -->
+    <div id="editor-panel" class="w-full md:w-[450px] h-[60vh] md:h-full overflow-y-auto shadow-xl z-10 flex-shrink-0 flex flex-col relative pb-10">
+                 
+        <!-- BRANDING UPDATED: Fixed Layout for Buttons -->
+        <div class="bg-gradient-to-r from-blue-800 via-indigo-800 to-purple-900 text-white p-4 sticky top-0 z-20 shadow-lg flex flex-col gap-3 border-b border-indigo-500/30">
+            <div class="flex items-center gap-3">
+                <img src="logo.jpg" alt="Shamo Logo" onerror="this.src='https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=100&h=100&fit=crop'" class="w-12 h-12 rounded-full border-2 border-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.6)] object-cover">
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight flex items-center">
+                        <span class="bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-400 drop-shadow-sm">Shamo</span>
+                        <span class="ml-1.5 text-white drop-shadow-md">CV Maker</span>
+                    </h1>
+                    <p class="text-[10px] text-indigo-200 mt-0.5 font-bold tracking-widest uppercase">by Nusrat Shaheen inc.</p>
+                </div>
+            </div>
+            <!-- Buttons in their own row so title isn't displaced -->
+            <div class="flex gap-2 w-full mt-1">
+                <button onclick="printCV()" class="flex-1 flex justify-center items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white py-2 px-1 rounded-lg text-sm font-bold shadow-sm backdrop-blur-sm transition" title="Print CV">
+                    <i class="fa-solid fa-print"></i> Print
+                </button>
+                <button onclick="downloadPDF()" class="flex-1 flex justify-center items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white py-2 px-1 rounded-lg text-sm font-bold shadow-sm backdrop-blur-sm transition" title="Download PDF">
+                    <i class="fa-solid fa-file-pdf"></i> PDF
+                </button>
+                <button onclick="downloadJPG()" class="flex-1 flex justify-center items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white py-2 px-1 rounded-lg text-sm font-bold shadow-sm backdrop-blur-sm transition" title="Download JPG">
+                    <i class="fa-solid fa-image"></i> JPG
+                </button>
+            </div>
+        </div>
+        <div class="p-5 space-y-6 flex-1">
+                         
+            <!-- Template Selection -->
+            <div>
+                <h3 class="font-bold text-gray-700 mb-2 border-b pb-1">1. Choose Template</h3>
+                <div class="grid grid-cols-5 gap-2">
+                    <button onclick="setTemplate(1)" class="h-10 rounded bg-blue-800 text-white font-bold text-xs hover:opacity-80 transition">T1</button>
+                    <button onclick="setTemplate(2)" class="h-10 rounded bg-gray-100 border-2 border-gray-300 text-gray-800 font-bold text-xs hover:bg-gray-200 transition">T2</button>
+                    <button onclick="setTemplate(3)" class="h-10 rounded bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-xs hover:opacity-80 transition">T3</button>
+                    <button onclick="setTemplate(4)" class="h-10 rounded bg-teal-700 text-white font-bold text-xs hover:opacity-80 transition">T4</button>
+                    <button onclick="setTemplate(5)" class="h-10 rounded bg-gray-800 text-orange-500 border border-orange-500 font-bold text-xs hover:opacity-80 transition">T5</button>
+                </div>
+            </div>
+            <!-- Personal Details -->
+            <div>
+                <div class="flex justify-between items-center border-b pb-1 mb-3">
+                    <h3 class="font-bold text-gray-700">2. Personal Info</h3>
+                    <label class="flex items-center space-x-2 text-sm cursor-pointer text-indigo-600 font-medium">
+                        <input type="checkbox" id="show-photo" checked class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" onchange="updatePreview()">
+                        <span>Show Photo</span>
+                    </label>
+                </div>
+                                 
+                <div class="space-y-3">
+                    <div id="photo-upload-container">
+                        <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Profile Picture</label>
+                        <input type="file" id="photo-upload" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" onchange="openCropper(event)">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mt-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Full Name</label>
+                            <input type="text" id="input-name" value="Ali Ahmad" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" oninput="updatePreview()">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Father's Name</label>
+                            <input type="text" id="input-father-name" value="Ahmad Raza" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" oninput="updatePreview()">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Professional Title</label>
+                            <input type="text" id="input-title" value="Software Engineer" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" oninput="updatePreview()">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">CNIC No.</label>
+                            <input type="text" id="input-cnic" value="34301-1234567-1" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" oninput="updatePreview()">
+                        </div>
+                    </div>
+                                         
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Phone</label>
+                            <input type="text" id="input-phone" value="0300-1234567" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" oninput="updatePreview()">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Email</label>
+                            <input type="email" id="input-email" value="ali@example.com" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" oninput="updatePreview()">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Date of Birth</label>
+                            <input type="date" id="input-dob" value="1998-05-15" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" oninput="updatePreview()">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Domicile</label>
+                            <input type="text" id="input-domicile" value="Punjab, Hafizabad" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" oninput="updatePreview()">
+                        </div>
+                    </div>
+                                         
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Marital Status</label>
+                            <select id="input-marital" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white" onchange="updatePreview()">
+                                <option value="Single" selected>Single</option>
+                                <option value="Married">Married</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Address / Location</label>
+                            <input type="text" id="input-address" value="Pindi Bhattian, Punjab, Pakistan" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" oninput="updatePreview()">
+                        </div>
+                    </div>
+                                         
+                    <!-- Universal Summary Section -->
+                    <div class="bg-indigo-50/50 p-3 rounded border border-indigo-100 mt-2">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-[10px] font-bold text-indigo-800 uppercase tracking-wide"><i class="fa-solid fa-bullseye text-indigo-500 mr-1"></i> Objective / Summary</label>
+                        </div>
+                        <textarea id="input-summary" rows="5" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white" oninput="updatePreview()">A highly motivated, hardworking, and dedicated individual seeking to utilize my skills and practical knowledge in a dynamic environment. I am committed to delivering high-quality results, adapting to new challenges, and contributing effectively to the success and continuous growth of the organization.</textarea>
+                    </div>
+                </div>
+            </div>
+            <!-- Education -->
+            <div>
+                <h3 class="font-bold text-gray-700 mb-2 border-b pb-1">3. Education</h3>
+                <div id="education-container" class="space-y-4">
+                    <!-- Dynamic Education Entries -->
+                </div>
+                <button onclick="addEducation()" class="mt-3 w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded border border-gray-300 transition">
+                    <i class="fa-solid fa-plus mr-1"></i> Add Education
+                </button>
+            </div>
+            <!-- Experience -->
+            <div>
+                <h3 class="font-bold text-gray-700 mb-2 border-b pb-1">4. Experience</h3>
+                <div id="experience-container" class="space-y-4">
+                    <!-- Dynamic Experience Entries -->
+                </div>
+                <button onclick="addExperience()" class="mt-3 w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded border border-gray-300 transition">
+                    <i class="fa-solid fa-plus mr-1"></i> Add Experience
+                </button>
+            </div>
+            <!-- Skills -->
+            <div>
+                <h3 class="font-bold text-gray-700 mb-2 border-b pb-1">5. Skills</h3>
+                <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Professional Skills</label>
+                <input type="text" id="input-skills" value="HTML, CSS, JavaScript, Problem Solving, Communication, Teamwork" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Comma separated skills..." oninput="updatePreview()">
+                <p class="text-[10px] text-gray-500 mt-1 font-medium">Separate skills with a comma (,)</p>
+            </div>
+            <!-- Beautiful About Section -->
+            <div class="mt-8 pt-6 border-t border-indigo-100/50">
+                <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-4 border border-indigo-100 shadow-sm text-center relative overflow-hidden">
+                    <div class="absolute -top-4 -right-4 w-12 h-12 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70"></div>
+                    <div class="absolute -bottom-4 -left-4 w-12 h-12 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-70"></div>
+                                         
+                    <div class="relative z-10">
+                        <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-sm text-indigo-600 mb-2 border border-indigo-50">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-indigo-900 mb-1">Shamo CV Maker</h4>
+                        <p class="text-[10px] text-gray-600 font-medium leading-relaxed mb-3">
+                            Developed with <i class="fa-solid fa-heart text-red-500 mx-0.5"></i> by <span class="font-bold text-indigo-700">Nusrat Shaheen Inc.</span><br>
+                            Founder: <span class="font-bold text-gray-800">M Nauman Faisal</span>
+                        </p>
+                        <a href="mailto:naumanfaisal101@gmail.com" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-indigo-600 hover:text-white text-indigo-600 text-[10px] font-bold rounded-full transition-colors border border-indigo-100 shadow-sm mb-3">
+                            <i class="fa-regular fa-envelope text-sm"></i> naumanfaisal101@gmail.com
+                        </a>
+                        <p class="text-[9px] text-gray-400 font-medium uppercase tracking-wider">
+                            &copy; 2026 All Rights Reserved
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Right Panel: Live Preview (Takes 40% height on Mobile, Flex on Desktop) -->
+    <div id="preview-panel" class="w-full h-[40vh] md:h-full md:flex-1 bg-gray-200 flex justify-center items-start overflow-y-auto overflow-x-hidden p-4 md:p-8">
+                 
+        <!-- The actual A4 CV Container -->
+        <div id="preview-container" class="template-1">
+                         
+            <!-- Structure mapping that adapts via CSS based on template class -->
+            <div class="cv-wrapper" id="cv-wrapper">
+                                 
+                <!-- HEADER (Used primarily in T2, T3, T4) -->
+                <div class="cv-header print-specific-header hidden" id="cv-top-header">
+                     <div class="header-text text-left w-full">
+                         <h1 class="name" id="prev-name-top">Ali Ahmad</h1>
+                         <h2 class="title" id="prev-title-top">Software Engineer</h2>
+                                                   
+                         <!-- Contact row for T2 -->
+                         <div class="contact-row" id="prev-contact-row">
+                             <span title="Father's Name"><strong class="opacity-70 uppercase text-[10px] tracking-wider">F.Name:</strong> <span id="prev-father-name-top" class="font-medium">Ahmad Raza</span></span>
+                             <span title="CNIC"><strong class="opacity-70 uppercase text-[10px] tracking-wider">CNIC:</strong> <span id="prev-cnic-top" class="font-medium">34301-1234567-1</span></span>
+                             <span title="Date of Birth"><strong class="opacity-70 uppercase text-[10px] tracking-wider">DOB:</strong> <span id="prev-dob-top" class="font-medium">15 May 1998</span></span>
+                             <span title="Marital Status"><strong class="opacity-70 uppercase text-[10px] tracking-wider">Status:</strong> <span id="prev-marital-top" class="font-medium">Single</span></span>
+                             <span><strong class="opacity-70 uppercase text-[10px] tracking-wider">Phone:</strong> <span id="prev-phone-top" class="font-medium">0300-1234567</span></span>
+                             <span><strong class="opacity-70 uppercase text-[10px] tracking-wider">Email:</strong> <span id="prev-email-top" class="font-medium">ali@example.com</span></span>
+                             <span title="Domicile"><strong class="opacity-70 uppercase text-[10px] tracking-wider">Dom:</strong> <span id="prev-domicile-top" class="font-medium">Punjab, Hafizabad</span></span>
+                             <span><strong class="opacity-70 uppercase text-[10px] tracking-wider">Add:</strong> <span id="prev-address-top" class="font-medium">Pindi Bhattian</span></span>
+                         </div>
+                     </div>
+                     <img src="logo.jpg" id="prev-photo-top" class="photo" alt="Profile" onerror="this.src='https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&h=400&fit=crop'">
+                </div>
+                <div class="cv-body flex-1 w-full">
+                    <!-- SIDEBAR -->
+                    <div class="cv-sidebar" id="cv-sidebar">
+                        <div class="text-center" id="photo-sidebar-container">
+                            <img src="logo.jpg" id="prev-photo-side" class="photo mb-4" alt="Profile" onerror="this.src='https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&h=400&fit=crop'">
+                        </div>
+                                                 
+                        <div id="name-sidebar-container">
+                            <h1 class="name" id="prev-name-side">Ali Ahmad</h1>
+                            <h2 class="title" id="prev-title-side">Software Engineer</h2>
+                        </div>
+                        <div class="cv-contact mb-6">
+                            <h3 class="sidebar-title">Personal Info</h3>
+                            <div class="flex flex-col gap-2.5 text-[12px]">
+                                <div class="flex items-start gap-2.5" title="Father's Name">
+                                    <i class="fa-solid fa-user-tie mt-1 w-4 text-center opacity-80"></i>
+                                     <div class="flex-1 leading-tight"><span class="font-bold opacity-70 uppercase text-[9px] tracking-wider block">Father Name</span> <span id="prev-father-name" class="font-semibold">Ahmad Raza</span></div>
+                                </div>
+                                <div class="flex items-start gap-2.5" title="CNIC">
+                                    <i class="fa-regular fa-id-card mt-1 w-4 text-center opacity-80"></i>
+                                     <div class="flex-1 leading-tight"><span class="font-bold opacity-70 uppercase text-[9px] tracking-wider block">CNIC No.</span> <span id="prev-cnic" class="font-semibold">34301-1234567-1</span></div>
+                                </div>
+                                <div class="flex items-start gap-2.5" title="Date of Birth">
+                                    <i class="fa-solid fa-calendar-days mt-1 w-4 text-center opacity-80"></i>
+                                     <div class="flex-1 leading-tight"><span class="font-bold opacity-70 uppercase text-[9px] tracking-wider block">Date of Birth</span> <span id="prev-dob" class="font-semibold">15 May 1998</span></div>
+                                </div>
+                                <div class="flex items-start gap-2.5" title="Marital Status">
+                                    <i class="fa-solid fa-ring mt-1 w-4 text-center opacity-80"></i>
+                                     <div class="flex-1 leading-tight"><span class="font-bold opacity-70 uppercase text-[9px] tracking-wider block">Marital Status</span> <span id="prev-marital" class="font-semibold">Single</span></div>
+                                </div>
+                                <div class="flex items-start gap-2.5" title="Domicile">
+                                    <i class="fa-solid fa-map-pin mt-1 w-4 text-center opacity-80"></i>
+                                     <div class="flex-1 leading-tight"><span class="font-bold opacity-70 uppercase text-[9px] tracking-wider block">Domicile</span> <span id="prev-domicile" class="font-semibold">Punjab, Hafizabad</span></div>
+                                </div>
+                                <div class="flex items-start gap-2.5" title="Phone">
+                                    <i class="fa-solid fa-phone mt-1 w-4 text-center opacity-80"></i>
+                                     <div class="flex-1 leading-tight"><span class="font-bold opacity-70 uppercase text-[9px] tracking-wider block">Phone</span> <span id="prev-phone" class="font-semibold">0300-1234567</span></div>
+                                </div>
+                                <div class="flex items-start gap-2.5" title="Email">
+                                    <i class="fa-solid fa-envelope mt-1 w-4 text-center opacity-80"></i>
+                                     <div class="flex-1 leading-tight"><span class="font-bold opacity-70 uppercase text-[9px] tracking-wider block">Email</span> <span id="prev-email" class="font-semibold break-all">ali@example.com</span></div>
+                                </div>
+                                <div class="flex items-start gap-2.5" title="Address">
+                                    <i class="fa-solid fa-location-dot mt-1 w-4 text-center opacity-80"></i>
+                                     <div class="flex-1 leading-tight"><span class="font-bold opacity-70 uppercase text-[9px] tracking-wider block">Address</span> <span id="prev-address" class="font-semibold">Pindi Bhattian, Punjab</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cv-skills">
+                            <h3 class="sidebar-title">Skills</h3>
+                            <div id="prev-skills" class="flex flex-wrap gap-1">
+                                <!-- Skills injected here -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- MAIN CONTENT -->
+                    <div class="cv-main" id="cv-main">
+                        <div class="cv-section mb-6">
+                            <h3 class="section-title">Profile Summary</h3>
+                            <p class="cv-item-desc" id="prev-summary">Motivated and detail-oriented graduate seeking to leverage technical skills...</p>
+                        </div>
+                        <div class="cv-section mb-6">
+                            <h3 class="section-title">Education</h3>
+                            <div id="prev-education" class="flex flex-col gap-3">
+                                <!-- Education injected here -->
+                            </div>
+                        </div>
+                        <div class="cv-section">
+                            <h3 class="section-title">Experience</h3>
+                            <div id="prev-experience" class="flex flex-col gap-3">
+                                <!-- Experience injected here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Image Cropper Modal (Upgraded with Controls) -->
+    <div id="crop-modal" class="fixed inset-0 bg-black bg-opacity-80 z-[100] hidden flex justify-center items-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-5 w-full max-w-lg flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-crop-simple mr-2 text-indigo-600"></i>Advanced Photo Cropper</h3>
+                <button onclick="closeCropper()" class="text-gray-500 hover:text-red-500 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+                         
+            <div class="w-full h-[350px] relative rounded overflow-hidden flex items-center justify-center mb-4 bg-gray-100 select-none">
+                <!-- Standard Cropper Wrapper -->
+                <div id="standard-crop-wrap" class="w-full h-full">
+                    <img id="crop-image" src="" alt="To Crop" class="max-w-full max-h-full block">
+                </div>
+                <!-- Custom 4-Point Perspective Wrapper -->
+                <div id="perspective-crop-wrap" class="hidden w-full h-full relative bg-gray-900 overflow-hidden select-none touch-none">
+                    <canvas id="p-canvas" class="absolute inset-0 m-auto max-w-full max-h-full object-contain pointer-events-none"></canvas>
+                    <svg id="p-svg" class="absolute top-0 left-0 w-full h-full pointer-events-none">
+                        <polygon id="p-poly" points="" fill="rgba(79, 70, 229, 0.3)" stroke="#4f46e5" stroke-width="2"/>
+                    </svg>
+                    <!-- Draggable Corners -->
+                    <div id="p-pt-0" data-idx="0" class="perspective-handle"></div>
+                    <div id="p-pt-1" data-idx="1" class="perspective-handle"></div>
+                    <div id="p-pt-2" data-idx="2" class="perspective-handle"></div>
+                    <div id="p-pt-3" data-idx="3" class="perspective-handle"></div>
+                </div>
+            </div>
+                         
+            <!-- Cropper Controls -->
+            <div class="flex flex-col gap-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                <!-- Top Row: Rotation & Straighten -->
+                <div class="flex items-center gap-3" id="rotation-controls">
+                    <div class="flex gap-1">
+                        <button onclick="rotateCropper(-90)" class="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 transition shadow-sm text-gray-700" title="Rotate Left 90">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                        <button onclick="rotateCropper(90)" class="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 transition shadow-sm text-gray-700" title="Rotate Right 90">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                    </div>
+                                         
+                    <div class="flex-1 flex items-center gap-2 px-2 border-l border-gray-300">
+                        <i class="fa-solid fa-level-down-alt text-gray-400 text-xs"></i>
+                        <input type="range" id="straighten-slider" min="-45" max="45" value="0" step="0.5" class="w-full h-1.5 bg-gray-300 rounded-lg appearance-none cursor-pointer" oninput="straightenCropper(this.value)" title="Fine Rotation / Straighten Scan">
+                        <i class="fa-solid fa-level-up-alt text-gray-400 text-xs"></i>
+                        <button onclick="resetCropper()" class="ml-1 text-[10px] bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded text-gray-700 font-bold transition">RESET</button>
+                    </div>
+                </div>
+                                 
+                <!-- Bottom Row: Aspect Ratio Toggle -->
+                <div class="flex items-center justify-between border-t border-gray-200 pt-2">
+                    <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Crop Mode:</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-indigo-700 transition" id="mode-passport-label">Passport (Auto)</span>
+                        <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" id="crop-mode-toggle" onchange="toggleCropMode()" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 transition-all duration-300 z-10 top-0 left-0"/>
+                            <label for="crop-mode-toggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-all duration-300"></label>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-500 transition" id="mode-free-label">Free / Perspective</span>
+                    </div>
+                </div>
+            </div>
+                         
+            <p class="text-[10px] text-gray-400 mt-2 text-center font-medium" id="crop-hint-text"><i class="fa-solid fa-circle-info mr-1"></i> Use mouse wheel to zoom. Use slider to straighten tilted mobile scans.</p>
+                         
+            <div class="flex justify-end gap-3 mt-3">
+                <button onclick="closeCropper()" class="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold transition text-sm">Cancel</button>
+                <button onclick="applyCrop()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow transition text-sm">
+                    <i class="fa-solid fa-check mr-1"></i> Crop & Apply
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Custom Modal for Errors -->
+    <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 z-[200] hidden flex justify-center items-center p-4">
+        <div class="bg-white rounded-lg p-5 max-w-sm w-full text-center shadow-xl">
+            <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500 mb-3"></i>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Notice</h3>
+            <p id="error-modal-msg" class="text-gray-600 text-sm mb-4">An error occurred.</p>
+            <button onclick="document.getElementById('error-modal').classList.add('hidden')" class="bg-indigo-600 text-white px-4 py-2 rounded font-semibold w-full">Close</button>
+        </div>
+    </div>
+    <script>
+        // --- Custom Lists for Dropdowns ---
+        const institutionsList = [
+            "Govt. Degree College Pindi Bhattian",
+            "Govt. High School Pindi Bhattian",
+            "Chenab College Pindi Bhattian",
+            "Punjab College Pindi Bhattian",
+            "KIPS College",
+            "University of the Punjab (PU) Lahore",
+            "University of Sargodha (UOS)",
+            "Govt. College University (GCU) Lahore",
+            "University of Agriculture Faisalabad (UAF)",
+            "UET Lahore",
+            "NUST Islamabad"
+        ];
+        const boardsList = [
+            "BISE Gujranwala",
+            "BISE Faisalabad",
+            "BISE Lahore",
+            "BISE Sargodha",
+            "Federal Board (FBISE)"
+        ];
+        // --- State Management ---
+        let educationData = [
+            { degree: "BS Computer Science", institute: "University of Sargodha (UOS)", board: "", year: "2020 - 2024", marks: "", total: "", cgpa: "3.8/4.0" },
+            { degree: "FSc Pre-Engineering", institute: "Govt. Degree College Pindi Bhattian", board: "BISE Gujranwala", year: "2018 - 2020", marks: "950", total: "1100", cgpa: "" },
+            { degree: "Matriculation", institute: "Govt. High School Pindi Bhattian", board: "BISE Gujranwala", year: "2016 - 2018", marks: "1020", total: "1100", cgpa: "" }
+        ];
+        let experienceData = [
+            { title: "Web Developer Intern", company: "Tech Solutions Lahore", year: "June 2023 - Aug 2023", desc: "Assisted in developing responsive web applications using HTML, CSS, and JS. Collaborated with senior developers to fix UI bugs." }
+        ];
+        let currentTemplate = 1;
+        let photoDataUrl = "logo.jpg";
+        let cropperInstance = null;
+        let baseRotation = 0;
+                 
+        // --- Perspective State Variables ---
+        let isFreeCrop = false;
+        let originalImgObj = new Image();
+        let pPoints = [{x: 0.1, y: 0.1}, {x: 0.9, y: 0.1}, {x: 0.9, y: 0.9}, {x: 0.1, y: 0.9}]; // TL, TR, BR, BL (Relative to image 0-1)
+        let activeHandleIdx = -1;
+        // --- Initialize ---
+        window.onload = () => {
+            renderEducationInputs();
+            renderExperienceInputs();
+            updatePreview();
+            scalePreview();
+            window.addEventListener('resize', scalePreview);
+            setupPerspectiveListeners();
+        };
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.combobox-container')) {
+                document.querySelectorAll('.cb-dropdown').forEach(d => d.classList.add('hidden'));
+            }
+        });
+        // --- Template Logic ---
+        function setTemplate(num) {
+            currentTemplate = num;
+            const container = document.getElementById('preview-container');
+            container.className = `template-${num}`;
+            updatePreview(); 
+        }
+        // --- Error Handling Utilities ---
+        function showError(msg) {
+            document.getElementById('error-modal-msg').innerText = msg;
+            document.getElementById('error-modal').classList.remove('hidden');
+        }
+        // --- THE MAGIC BULLET FOR TEXT OVERFLOW ---
+        function autoScaleToFitA4() {
+            const container = document.getElementById('preview-container');
+            const wrapper = document.getElementById('cv-wrapper');
+            wrapper.style.transform = 'none';
+            wrapper.style.height = 'auto';
+            wrapper.style.width = '100%';
+                         
+            requestAnimationFrame(() => {
+                const actualHeight = wrapper.scrollHeight;
+                const a4HeightPx = container.clientHeight; 
+                if (actualHeight > a4HeightPx) {
+                    const scaleRatio = a4HeightPx / actualHeight;
+                    wrapper.style.transform = `scale(${scaleRatio})`;
+                    wrapper.style.transformOrigin = 'top center';
+                    wrapper.style.width = `${100 / scaleRatio}%`; 
+                } else {
+                    wrapper.style.height = '100%';
+                }
+            });
+        }
+        // --- Data Binding & Rendering ---
+        function updatePreview() {
+            const name = document.getElementById('input-name').value;
+            const fatherName = document.getElementById('input-father-name').value;
+            const title = document.getElementById('input-title').value;
+            const cnic = document.getElementById('input-cnic').value;
+            const phone = document.getElementById('input-phone').value;
+            const email = document.getElementById('input-email').value;
+            const dobRaw = document.getElementById('input-dob').value;
+            const domicile = document.getElementById('input-domicile').value;
+            const marital = document.getElementById('input-marital').value;
+            const address = document.getElementById('input-address').value;
+            const summary = document.getElementById('input-summary').value;
+            const showPhoto = document.getElementById('show-photo').checked;
+            let dobFormatted = "Not Provided";
+            if (dobRaw) {
+                const dobDate = new Date(dobRaw);
+                if(!isNaN(dobDate)) {
+                    const options = { day: '2-digit', month: 'short', year: 'numeric' };
+                    let dateString = dobDate.toLocaleDateString('en-GB', options);
+                                         
+                    const today = new Date();
+                    let age = today.getFullYear() - dobDate.getFullYear();
+                    const m = today.getMonth() - dobDate.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) age--;
+                    dobFormatted = `${dateString} (${age} Years)`;
+                }
+            }
+            document.getElementById('prev-name-side').innerText = name;
+            document.getElementById('prev-title-side').innerText = title;
+            document.getElementById('prev-name-top').innerText = name;
+            document.getElementById('prev-title-top').innerText = title;
+            document.getElementById('prev-father-name').innerText = fatherName;
+            document.getElementById('prev-father-name-top').innerText = fatherName;
+            document.getElementById('prev-cnic').innerText = cnic;
+            document.getElementById('prev-cnic-top').innerText = cnic;
+            document.getElementById('prev-dob').innerText = dobFormatted;
+            document.getElementById('prev-dob-top').innerText = dobFormatted;
+            document.getElementById('prev-marital').innerText = marital;
+            document.getElementById('prev-marital-top').innerText = marital;
+            document.getElementById('prev-domicile').innerText = domicile;
+            document.getElementById('prev-domicile-top').innerText = domicile;
+            document.getElementById('prev-phone').innerText = phone;
+            document.getElementById('prev-email').innerText = email;
+            document.getElementById('prev-address').innerText = address;
+            document.getElementById('prev-phone-top').innerText = phone;
+            document.getElementById('prev-email-top').innerText = email;
+            document.getElementById('prev-address-top').innerText = address;
+            document.getElementById('prev-summary').innerText = summary;
+            const photoSide = document.getElementById('prev-photo-side');
+            const photoTop = document.getElementById('prev-photo-top');
+            photoSide.src = photoDataUrl;
+            photoTop.src = photoDataUrl;
+            if (showPhoto) {
+                photoSide.style.display = 'block';
+                photoTop.style.display = 'block';
+            } else {
+                photoSide.style.display = 'none';
+                photoTop.style.display = 'none';
+            }
+            const headerTop = document.getElementById('cv-top-header');
+            const nameSideContainer = document.getElementById('name-sidebar-container');
+            const contactRow = document.getElementById('prev-contact-row');
+            if (currentTemplate === 1 || currentTemplate === 5) {
+                headerTop.style.display = 'none';
+                nameSideContainer.style.display = 'block';
+                contactRow.style.display = 'none';
+            } else if (currentTemplate === 2) {
+                headerTop.style.display = 'flex';
+                nameSideContainer.style.display = 'none';
+                contactRow.style.display = 'flex';
+            } else {
+                headerTop.style.display = 'flex';
+                nameSideContainer.style.display = 'none';
+                contactRow.style.display = 'none';
+            }
+            const skills = document.getElementById('input-skills').value.split(',').map(s => s.trim()).filter(s => s);
+            let skillsHTML = skills.map(s => `<span class="skill-item">${s}</span>`).join('');
+                         
+            if(currentTemplate === 2) { 
+                 document.getElementById('prev-skills').innerHTML = '';
+                 let mainSkills = document.getElementById('t2-main-skills');
+                 if(!mainSkills) {
+                     mainSkills = document.createElement('div');
+                     mainSkills.id = 't2-main-skills';
+                     mainSkills.className = 'cv-section mt-6';
+                     document.getElementById('cv-main').appendChild(mainSkills);
+                 }
+                 mainSkills.innerHTML = `<h3 class="section-title">Skills</h3><div class="flex flex-wrap gap-2">${skillsHTML}</div>`;
+            } else { 
+                 document.getElementById('prev-skills').innerHTML = skillsHTML;
+                 const t2skills = document.getElementById('t2-main-skills');
+                 if(t2skills) t2skills.remove();
+            }
+            const eduHtml = educationData.map(edu => {
+                let details = [];
+                if (edu.board) details.push(edu.board);
+                if (edu.marks && edu.total) details.push(`Marks: ${edu.marks}/${edu.total}`);
+                if (edu.cgpa) details.push(`CGPA: ${edu.cgpa}`);
+                                 
+                return `
+                <div class="cv-item">
+                    <div class="flex justify-between items-start">
+                        <div class="cv-item-title">${edu.degree}</div>
+                        <div class="cv-item-date">${edu.year}</div>
+                    </div>
+                    <div class="cv-item-subtitle">${edu.institute}</div>
+                    ${details.length > 0 ? `<div class="cv-item-desc text-gray-500">${details.join(' | ')}</div>` : ''}
+                </div>`;
+            }).join('');
+            document.getElementById('prev-education').innerHTML = eduHtml;
+            const expHtml = experienceData.map(exp => `
+                <div class="cv-item">
+                    <div class="flex justify-between items-start">
+                        <div class="cv-item-title">${exp.title}</div>
+                        <div class="cv-item-date">${exp.year}</div>
+                    </div>
+                    <div class="cv-item-subtitle">${exp.company}</div>
+                    <div class="cv-item-desc">${exp.desc}</div>
+                </div>
+            `).join('');
+            document.getElementById('prev-experience').innerHTML = expHtml;
+            autoScaleToFitA4();
+        }
+        // --- Custom Combobox Engine ---
+        function createCombobox(index, field, value, listName, placeholder) {
+            const list = listName === 'institutions' ? institutionsList : boardsList;
+            const optionsHtml = list.map(opt => 
+                 `<div class="p-2.5 hover:bg-indigo-50 cursor-pointer text-sm border-b border-gray-50 last:border-0 text-gray-700 transition"
+                       onmousedown="selectComboboxOption(event, this, ${index}, '${field}')">${opt}</div>`
+            ).join('');
+            return `
+            <div class="relative w-full combobox-container">
+                <input type="text" placeholder="${placeholder}" value="${value}"
+                        class="w-full border border-gray-300 rounded p-2 pr-8 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white cb-input"
+                        oninput="filterCombobox(this); updateEdu(${index}, '${field}', this.value)"
+                       onfocus="filterCombobox(this)">
+                <button type="button" tabindex="-1" class="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-indigo-600 focus:outline-none transition" onclick="toggleDropdown(this)">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                </button>
+                <div class="cb-dropdown absolute z-[100] w-full bg-white border border-gray-200 shadow-xl rounded-md mt-1 max-h-48 overflow-y-auto hidden">
+                    ${optionsHtml}
+                </div>
+            </div>`;
+        }
+        function toggleDropdown(btnEl) {
+            document.querySelectorAll('.cb-dropdown').forEach(d => {
+                if(d !== btnEl.nextElementSibling) d.classList.add('hidden');
+            });
+            const inputEl = btnEl.previousElementSibling;
+            const dropdown = btnEl.nextElementSibling;
+            if (dropdown.classList.contains('hidden')) {
+                const items = dropdown.querySelectorAll('div');
+                items.forEach(item => item.style.display = 'block');
+                dropdown.classList.remove('hidden');
+                inputEl.focus(); 
+            } else {
+                dropdown.classList.add('hidden');
+            }
+        }
+        function filterCombobox(inputEl) {
+            const val = inputEl.value.toLowerCase();
+            const dropdown = inputEl.parentElement.querySelector('.cb-dropdown');
+            const items = dropdown.querySelectorAll('div');
+            let hasVisible = false;
+            items.forEach(item => {
+                if (item.innerText.toLowerCase().includes(val)) {
+                    item.style.display = 'block';
+                    hasVisible = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            if (hasVisible) dropdown.classList.remove('hidden');
+            else dropdown.classList.add('hidden');
+        }
+        function selectComboboxOption(event, optionEl, index, field) {
+            event.preventDefault(); 
+            const container = optionEl.closest('.combobox-container');
+            const input = container.querySelector('.cb-input');
+            const value = optionEl.innerText.trim();
+            input.value = value;
+            container.querySelector('.cb-dropdown').classList.add('hidden');
+            updateEdu(index, field, value);
+        }
+        // --- Input Rendering ---
+        function renderEducationInputs() {
+            const container = document.getElementById('education-container');
+            container.innerHTML = educationData.map((edu, index) => `
+                <div class="p-4 border border-indigo-100 rounded-md bg-indigo-50/40 relative group shadow-sm mb-3">
+                    <button onclick="removeEducation(${index})" class="absolute top-2 right-2 text-red-400 hover:text-red-600 opacity-70 hover:opacity-100 transition" title="Remove Entry"><i class="fa-solid fa-trash"></i></button>
+                    <div class="grid grid-cols-1 gap-3 mb-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Degree / Class</label>
+                            <input type="text" placeholder="e.g. FSc, BSCS" value="${edu.degree}" class="w-full border border-gray-300 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" oninput="updateEdu(${index}, 'degree', this.value)">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Institute / College / University</label>
+                            ${createCombobox(index, 'institute', edu.institute, 'institutions', 'e.g. Govt. Degree College')}
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Board (Optional)</label>
+                            ${createCombobox(index, 'board', edu.board, 'boards', 'e.g. BISE Gujranwala')}
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Year</label>
+                            <input type="text" placeholder="e.g. 2018 - 2020" value="${edu.year}" class="w-full border border-gray-300 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" oninput="updateEdu(${index}, 'year', this.value)">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">CGPA (If applicable)</label>
+                            <input type="text" placeholder="e.g. 3.8/4.0" value="${edu.cgpa}" class="w-full border border-gray-300 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" oninput="updateEdu(${index}, 'cgpa', this.value)">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Marks Obtained</label>
+                            <input type="text" placeholder="e.g. 950" value="${edu.marks}" class="w-full border border-gray-300 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" oninput="updateEdu(${index}, 'marks', this.value)">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Out of Total</label>
+                            <input type="text" placeholder="e.g. 1100" value="${edu.total}" class="w-full border border-gray-300 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" oninput="updateEdu(${index}, 'total', this.value)">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            updatePreview();
+        }
+        function renderExperienceInputs() {
+            const container = document.getElementById('experience-container');
+            container.innerHTML = experienceData.map((exp, index) => `
+                <div class="p-4 border border-indigo-100 rounded-md bg-indigo-50/40 relative group shadow-sm mb-3">
+                    <button onclick="removeExperience(${index})" class="absolute top-2 right-2 text-red-400 hover:text-red-600 opacity-70 hover:opacity-100 transition" title="Remove Entry"><i class="fa-solid fa-trash"></i></button>
+                    <div class="grid grid-cols-1 gap-3 mb-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Job Title</label>
+                            <input type="text" placeholder="e.g. Software Engineer" value="${exp.title}" class="w-full border border-gray-300 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" oninput="updateExp(${index}, 'title', this.value)">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Company / Organization</label>
+                            <input type="text" placeholder="e.g. Tech Solutions" value="${exp.company}" class="w-full border border-gray-300 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" oninput="updateExp(${index}, 'company', this.value)">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Duration</label>
+                            <input type="text" placeholder="e.g. 2021 - Present" value="${exp.year}" class="w-full border border-gray-300 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" oninput="updateExp(${index}, 'year', this.value)">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-indigo-800 mb-1 uppercase tracking-wide">Job Description</label>
+                        <textarea placeholder="Describe your responsibilities..." rows="2" class="w-full border border-gray-300 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" oninput="updateExp(${index}, 'desc', this.value)">${exp.desc}</textarea>
+                    </div>
+                </div>
+            `).join('');
+            updatePreview();
+        }
+        // --- Data Mutators ---
+        function updateEdu(index, field, value) { educationData[index][field] = value; updatePreview(); }
+        function updateExp(index, field, value) { experienceData[index][field] = value; updatePreview(); }
+        function addEducation() {
+            educationData.push({ degree: "", institute: "", board: "", year: "", marks: "", total: "", cgpa: "" });
+            renderEducationInputs();
+            scrollToBottom('editor-panel');
+        }
+        function removeEducation(index) {
+            educationData.splice(index, 1);
+            renderEducationInputs();
+        }
+        function addExperience() {
+            experienceData.push({ title: "", company: "", year: "", desc: "" });
+            renderExperienceInputs();
+            scrollToBottom('editor-panel');
+        }
+        function removeExperience(index) {
+            experienceData.splice(index, 1);
+            renderExperienceInputs();
+        }
+        // --- Photo Cropping Utilities ---
+        function openCropper(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const modal = document.getElementById('crop-modal');
+                    const image = document.getElementById('crop-image');
+                                         
+                    originalImgObj.src = e.target.result;
+                    image.src = e.target.result;
+                                         
+                    modal.classList.remove('hidden');
+                    if (cropperInstance) cropperInstance.destroy();
+                                         
+                    document.getElementById('crop-mode-toggle').checked = false;
+                    isFreeCrop = false;
+                    baseRotation = 0;
+                    document.getElementById('straighten-slider').value = 0;
+                                         
+                    updateUIMode();
+                    cropperInstance = new Cropper(image, {
+                        aspectRatio: 3 / 4,
+                        viewMode: 1,
+                        autoCropArea: 0.8,
+                        background: false
+                    });
+                }
+                reader.readAsDataURL(file);
+            }
+            event.target.value = '';
+        }
+        function rotateCropper(degree) {
+            if(cropperInstance && !isFreeCrop) {
+                baseRotation += degree;
+                const fineTune = parseFloat(document.getElementById('straighten-slider').value) || 0;
+                cropperInstance.rotateTo(baseRotation + fineTune);
+            }
+        }
+        function straightenCropper(degree) {
+            if(cropperInstance && !isFreeCrop) {
+                const fineTune = parseFloat(degree) || 0;
+                cropperInstance.rotateTo(baseRotation + fineTune);
+            }
+        }
+        function resetCropper() {
+            if(!isFreeCrop) {
+                if(cropperInstance) {
+                    cropperInstance.reset();
+                    baseRotation = 0;
+                    document.getElementById('straighten-slider').value = 0;
+                    cropperInstance.setAspectRatio(3/4);
+                }
+            } else {
+                // Reset Perspective points
+                pPoints = [{x: 0.1, y: 0.1}, {x: 0.9, y: 0.1}, {x: 0.9, y: 0.9}, {x: 0.1, y: 0.9}];
+                drawPerspectiveWorkspace();
+            }
+        }
+        function toggleCropMode() {
+            isFreeCrop = document.getElementById('crop-mode-toggle').checked;
+            updateUIMode();
+        }
+        function updateUIMode() {
+            const passLabel = document.getElementById('mode-passport-label');
+            const freeLabel = document.getElementById('mode-free-label');
+            const cropperWrap = document.getElementById('standard-crop-wrap');
+            const perspWrap = document.getElementById('perspective-crop-wrap');
+            const rotControls = document.getElementById('rotation-controls');
+            const hintText = document.getElementById('crop-hint-text');
+                         
+            if(isFreeCrop) {
+                passLabel.classList.replace('text-indigo-700', 'text-gray-500');
+                freeLabel.classList.replace('text-gray-500', 'text-indigo-700');
+                                 
+                cropperWrap.classList.add('hidden');
+                perspWrap.classList.remove('hidden');
+                rotControls.classList.add('opacity-30', 'pointer-events-none');
+                hintText.innerHTML = '<i class="fa-solid fa-expand mr-1"></i> Drag the 4 corner dots independently to select your exact photo bounds. It will automatically straighten to Passport size.';
+                                 
+                drawPerspectiveWorkspace();
+            } else {
+                passLabel.classList.replace('text-gray-500', 'text-indigo-700');
+                freeLabel.classList.replace('text-indigo-700', 'text-gray-500');
+                                 
+                perspWrap.classList.add('hidden');
+                cropperWrap.classList.remove('hidden');
+                rotControls.classList.remove('opacity-30', 'pointer-events-none');
+                hintText.innerHTML = '<i class="fa-solid fa-circle-info mr-1"></i> Use mouse wheel to zoom. Use slider to straighten tilted mobile scans.';
+            }
+        }
+        function closeCropper() {
+            document.getElementById('crop-modal').classList.add('hidden');
+            if (cropperInstance) {
+                cropperInstance.destroy();
+                cropperInstance = null;
+            }
+        }
+        // --- Custom 4-Point Perspective Implementation ---
+        function setupPerspectiveListeners() {
+            const wrap = document.getElementById('perspective-crop-wrap');
+            const handles = document.querySelectorAll('.perspective-handle');
+                         
+            handles.forEach(handle => {
+                handle.addEventListener('mousedown', startDrag);
+                handle.addEventListener('touchstart', startDrag, {passive: false});
+            });
+            window.addEventListener('mousemove', doDrag);
+            window.addEventListener('touchmove', doDrag, {passive: false});
+            window.addEventListener('mouseup', stopDrag);
+            window.addEventListener('touchend', stopDrag);
+        }
+        function drawPerspectiveWorkspace() {
+            const canvas = document.getElementById('p-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = originalImgObj.width;
+            canvas.height = originalImgObj.height;
+            ctx.drawImage(originalImgObj, 0, 0);
+            updatePerspectiveUI();
+        }
+        function updatePerspectiveUI() {
+            const canvas = document.getElementById('p-canvas');
+            const wrap = document.getElementById('perspective-crop-wrap');
+            const svgPoly = document.getElementById('p-poly');
+                         
+            // Calculate actual rendered size of canvas within wrapper (object-fit: contain)
+            const cRect = canvas.getBoundingClientRect();
+            const wRect = wrap.getBoundingClientRect();
+                         
+            // Canvas position relative to wrapper
+            const offsetX = cRect.left - wRect.left;
+            const offsetY = cRect.top - wRect.top;
+            const scaleX = cRect.width;
+            const scaleY = cRect.height;
+            let pointsStr = "";
+            pPoints.forEach((pt, i) => {
+                const px = offsetX + (pt.x * scaleX);
+                const py = offsetY + (pt.y * scaleY);
+                                 
+                const handle = document.getElementById(`p-pt-${i}`);
+                handle.style.left = `${px}px`;
+                handle.style.top = `${py}px`;
+                pointsStr += `${px},${py} `;
+            });
+                         
+            svgPoly.setAttribute('points', pointsStr.trim());
+        }
+        function startDrag(e) {
+            if(!isFreeCrop) return;
+            e.preventDefault();
+            activeHandleIdx = parseInt(e.target.getAttribute('data-idx'));
+        }
+        function doDrag(e) {
+            if(activeHandleIdx === -1 || !isFreeCrop) return;
+            e.preventDefault();
+                         
+            const canvas = document.getElementById('p-canvas');
+            const wrap = document.getElementById('perspective-crop-wrap');
+                         
+            const cRect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                         
+            // Calculate point normalized to image (0 to 1)
+            let nx = (clientX - cRect.left) / cRect.width;
+            let ny = (clientY - cRect.top) / cRect.height;
+                         
+            // Clamp to limits
+            nx = Math.max(0, Math.min(1, nx));
+            ny = Math.max(0, Math.min(1, ny));
+                         
+            pPoints[activeHandleIdx] = {x: nx, y: ny};
+            updatePerspectiveUI();
+        }
+        function stopDrag() {
+            activeHandleIdx = -1;
+        }
+        function applyCrop() {
+            if(!isFreeCrop) {
+                // Standard Cropper Apply
+                if (cropperInstance) {
+                    const canvas = cropperInstance.getCroppedCanvas({ width: 300, height: 400 });
+                    photoDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                    document.getElementById('show-photo').checked = true;
+                    updatePreview();
+                    closeCropper();
+                }
+            } else {
+                // Custom Perspective Apply (Bilinear Warp to 300x400)
+                const destW = 300;
+                const destH = 400;
+                const destCanvas = document.createElement('canvas');
+                destCanvas.width = destW;
+                destCanvas.height = destH;
+                const destCtx = destCanvas.getContext('2d');
+                const destImgData = destCtx.createImageData(destW, destH);
+                const destData = destImgData.data;
+                const srcCanvas = document.getElementById('p-canvas');
+                const srcCtx = srcCanvas.getContext('2d');
+                const srcW = srcCanvas.width;
+                const srcH = srcCanvas.height;
+                const srcImgData = srcCtx.getImageData(0, 0, srcW, srcH);
+                const srcData = srcImgData.data;
+                // pPoints: [TL, TR, BR, BL]
+                for (let y = 0; y < destH; y++) {
+                    const v = y / (destH - 1);
+                    for (let x = 0; x < destW; x++) {
+                        const u = x / (destW - 1);
+                        // Bilinear interpolation mapping
+                        const topX = pPoints[0].x + (pPoints[1].x - pPoints[0].x) * u;
+                        const topY = pPoints[0].y + (pPoints[1].y - pPoints[0].y) * u;
+                        const botX = pPoints[3].x + (pPoints[2].x - pPoints[3].x) * u;
+                        const botY = pPoints[3].y + (pPoints[2].y - pPoints[3].y) * u;
+                        const px = topX + (botX - topX) * v;
+                        const py = topY + (botY - topY) * v;
+                        const sx = Math.floor(px * (srcW - 1));
+                        const sy = Math.floor(py * (srcH - 1));
+                        if (sx >= 0 && sx < srcW && sy >= 0 && sy < srcH) {
+                            const srcIdx = (sy * srcW + sx) * 4;
+                            const destIdx = (y * destW + x) * 4;
+                            destData[destIdx] = srcData[srcIdx];
+                            destData[destIdx + 1] = srcData[srcIdx + 1];
+                            destData[destIdx + 2] = srcData[srcIdx + 2];
+                            destData[destIdx + 3] = srcData[srcIdx + 3];
+                        }
+                    }
+                }
+                destCtx.putImageData(destImgData, 0, 0);
+                photoDataUrl = destCanvas.toDataURL('image/jpeg', 0.9);
+                document.getElementById('show-photo').checked = true;
+                updatePreview();
+                closeCropper();
+            }
+        }
+        // --- Window resize handles perspective update ---
+        window.addEventListener('resize', () => {
+            if(isFreeCrop && !document.getElementById('crop-modal').classList.contains('hidden')) {
+                updatePerspectiveUI();
+            }
+        });
+        // --- Layout Utils ---
+        function scrollToBottom(id) {
+            const el = document.getElementById(id);
+            setTimeout(() => { el.scrollTop = el.scrollHeight; }, 100);
+        }
+        function scalePreview() {
+            const container = document.getElementById('preview-panel');
+            const preview = document.getElementById('preview-container');
+                         
+            preview.style.transform = `scale(1)`;
+                         
+            const padding = window.innerWidth < 768 ? 20 : 40; 
+            const availableWidth = container.clientWidth - padding;
+            const a4WidthPx = preview.offsetWidth;
+            if (availableWidth < a4WidthPx && availableWidth > 0) {
+                const scale = availableWidth / a4WidthPx;
+                preview.style.transform = `scale(${scale})`;
+                preview.style.marginBottom = `-${(1 - scale) * preview.offsetHeight}px`;
+                preview.style.transformOrigin = "top center";
+            } else {
+                preview.style.transform = `scale(1)`;
+                preview.style.marginBottom = `0px`;
+                preview.style.transformOrigin = "top center";
+            }
+        }
+        // --- Export Functions ---
+        function printCV() {
+            const wrapper = document.getElementById('cv-wrapper');
+            const preview = document.getElementById('preview-container');
+            const wrapperScale = wrapper.style.transform;
+            const wrapperWidth = wrapper.style.width;
+            const previewScale = preview.style.transform;
+            const previewMargin = preview.style.marginBottom;
+                         
+            wrapper.style.transform = 'none';
+            wrapper.style.width = '100%';
+            preview.style.transform = 'scale(1)';
+            preview.style.marginBottom = '0';
+                         
+            window.print();
+                         
+            wrapper.style.transform = wrapperScale;
+            wrapper.style.width = wrapperWidth;
+            preview.style.transform = previewScale;
+            preview.style.marginBottom = previewMargin;
+        }
+        function downloadPDF() {
+            const wrapper = document.getElementById('cv-wrapper');
+            const preview = document.getElementById('preview-container');
+            const wrapperScale = wrapper.style.transform;
+            const wrapperWidth = wrapper.style.width;
+            const previewScale = preview.style.transform;
+            const previewMargin = preview.style.marginBottom;
+                         
+            wrapper.style.transform = 'none';
+            wrapper.style.width = '100%';
+            preview.style.transform = 'scale(1)';
+            preview.style.marginBottom = '0';
+                         
+            const btn = document.querySelector('button[onclick="downloadPDF()"]');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PDF...';
+            btn.disabled = true;
+            const opt = {
+                margin:       0,
+                filename:     'Shamo_CV.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(preview).save().then(() => {
+                wrapper.style.transform = wrapperScale;
+                wrapper.style.width = wrapperWidth;
+                preview.style.transform = previewScale;
+                preview.style.marginBottom = previewMargin;
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }).catch(err => {
+                showError("Failed to generate PDF. Local files might be restricted by your browser. Try 'Print' and Save as PDF.");
+                wrapper.style.transform = wrapperScale;
+                wrapper.style.width = wrapperWidth;
+                preview.style.transform = previewScale;
+                preview.style.marginBottom = previewMargin;
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            });
+        }
+        function downloadJPG() {
+            const wrapper = document.getElementById('cv-wrapper');
+            const preview = document.getElementById('preview-container');
+            const wrapperScale = wrapper.style.transform;
+            const wrapperWidth = wrapper.style.width;
+            const previewScale = preview.style.transform;
+            const previewMargin = preview.style.marginBottom;
+            wrapper.style.transform = 'none';
+            wrapper.style.width = '100%';
+            preview.style.transform = 'scale(1)';
+            preview.style.marginBottom = '0';
+                         
+            const btn = document.querySelector('button[onclick="downloadJPG()"]');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            btn.disabled = true;
+            html2canvas(preview, { scale: 2, useCORS: true }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Shamo_CV.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.click();
+                                 
+                wrapper.style.transform = wrapperScale;
+                wrapper.style.width = wrapperWidth;
+                preview.style.transform = previewScale;
+                preview.style.marginBottom = previewMargin;
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }).catch(err => {
+                showError("Failed to generate image. Local files might be restricted by your browser. Try 'Print' and Save as PDF.");
+                wrapper.style.transform = wrapperScale;
+                wrapper.style.width = wrapperWidth;
+                preview.style.transform = previewScale;
+                preview.style.marginBottom = previewMargin;
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

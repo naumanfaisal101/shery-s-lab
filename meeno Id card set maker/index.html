@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شناختی کارڈ پرنٹنگ ایپ (Meeno ID Card 4x6 Arranger)</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- PDF.js for reading PDF uploads -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f4f6;
+            touch-action: manipulation;
+        }
+        /* 4x6 preview box setting */
+        .sheet-preview-container {
+            aspect-ratio: 1 / 1.5; /* 4x6 aspect ratio */
+            width: 100%;
+            max-width: 450px; /* Adapted for 4x6 proportion */
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            position: relative;
+            border: 1px solid #d1d5db;
+        }
+        .sheet-preview-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Perspective crop canvas style */
+        #cropCanvas {
+            max-width: 100%;
+            max-height: 60vh;
+            touch-action: none;
+            cursor: crosshair;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background-color: #111;
+        }
+        
+        /* Camera tracking overlay */
+        .camera-overlay-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Toggle Switch Styling */
+        .toggle-checkbox:checked { right: 0; border-color: #3b82f6; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #3b82f6; }
+        .toggle-checkbox:checked + .toggle-label:after { transform: translateX(100%); }
+    </style>
+</head>
+<body class="text-gray-800">
+
+<a href="../index.html" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; background: #1e3a8a; color: white; padding: 12px 20px; text-decoration: none; border-radius: 50px; font-family: sans-serif; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.3s;">
+    ← Back to Dashboard
+</a>    
+
+    <!-- Screen loading overlay -->
+    <div id="globalLoader" class="fixed inset-0 bg-black/80 z-[100] hidden flex-col items-center justify-center">
+        <div class="loader mb-4 block" style="width: 50px; height: 50px; border-width: 5px;"></div>
+        <p class="text-white font-bold text-xl mt-2" id="loaderText">پراسیسنگ ہو رہی ہے...</p>
+        <p class="text-gray-300 text-sm mt-1">انتظار کریں</p>
+    </div>
+
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <!-- App Header -->
+        <header class="mb-8 text-center bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center">
+            <img src="Logo Falak ID Card Set Maker.jpg" alt="Meeno ID Card Maker Logo" class="w-40 h-40 sm:w-48 sm:h-48 mb-4 rounded-full shadow-lg object-cover border-4 border-blue-50" onerror="this.style.display='none'">
+            <h1 class="text-3xl font-bold text-blue-600 flex items-center justify-center gap-3">
+                Meeno ID Card Set Maker
+            </h1>
+            <p class="text-gray-500 mt-2 font-medium">بالکل CamScanner کی طرح تصویر لیں، کراپ کریں اور 4x6 شیٹ پر سیٹ کریں</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Controls Section -->
+            <div class="lg:col-span-5 space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center border-b pb-2 mb-4">
+                        <h2 class="text-xl font-semibold flex items-center gap-2">
+                            <i data-lucide="scan"></i> اسکین یا اپلوڈ کریں
+                        </h2>
+                        <span id="aiStatus" class="text-xs font-bold bg-yellow-100 text-yellow-700 px-2 py-1 rounded border border-yellow-300 flex items-center gap-1">
+                            <div class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div> AI لوڈ ہو رہا ہے...
+                        </span>
+                    </div>
+                    
+                    <input type="file" id="nativeCameraFrontFallback" accept="image/*" capture="environment" class="hidden">
+                    <input type="file" id="nativeCameraBackFallback" accept="image/*" capture="environment" class="hidden">
+                    <input type="file" id="frontUpload" accept="image/jpeg, image/png, image/jpg, application/pdf" class="hidden">
+                    <input type="file" id="backUpload" accept="image/jpeg, image/png, image/jpg, application/pdf" class="hidden">
+
+                    <div class="mb-6 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                        <label class="block text-base font-bold text-blue-800 mb-3 flex items-center gap-2">
+                            <i data-lucide="credit-card"></i> فرنٹ سائیڈ (Front Side)
+                        </label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="startLiveCamera('front')" class="flex flex-col items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-4 px-2 rounded-lg font-medium transition-all shadow-sm active:scale-95 text-sm">
+                                <i data-lucide="camera" class="w-6 h-6"></i> کیمرہ سے اسکین کریں
+                            </button>
+                            <button onclick="document.getElementById('frontUpload').click()" class="flex flex-col items-center justify-center gap-2 bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 py-4 px-2 rounded-lg font-medium transition-all shadow-sm active:scale-95 text-sm">
+                                <i data-lucide="image" class="w-6 h-6"></i> تصویر یا PDF اپلوڈ کریں
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 bg-green-50/50 p-4 rounded-xl border border-green-100">
+                        <label class="block text-base font-bold text-green-800 mb-3 flex items-center gap-2">
+                            <i data-lucide="credit-card"></i> بیک سائیڈ (Back Side)
+                        </label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="startLiveCamera('back')" class="flex flex-col items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-4 px-2 rounded-lg font-medium transition-all shadow-sm active:scale-95 text-sm">
+                                <i data-lucide="camera" class="w-6 h-6"></i> کیمرہ سے اسکین کریں
+                            </button>
+                            <button onclick="document.getElementById('backUpload').click()" class="flex flex-col items-center justify-center gap-2 bg-white hover:bg-green-50 text-green-700 border border-green-200 py-4 px-2 rounded-lg font-medium transition-all shadow-sm active:scale-95 text-sm">
+                                <i data-lucide="image" class="w-6 h-6"></i> تصویر یا PDF اپلوڈ کریں
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Print Settings -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2 flex items-center gap-2">
+                        <i data-lucide="settings"></i> پرنٹ سیٹنگز (Settings)
+                    </h2>
+                    <div class="space-y-4">
+                        
+                        <!-- Size Selector added here -->
+                        <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="ruler" class="w-5 h-5 text-gray-500"></i>
+                                <span class="text-sm font-bold text-gray-700">کارڈ کا سائز</span>
+                            </div>
+                            <select id="globalCardSize" onchange="updateGlobalCardSize()" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-1.5 font-bold cursor-pointer outline-none">
+                                <option value="custom362">3.62" x 2.33"</option>
+                                <option value="cr80">Standard (CR80)</option>
+                            </select>
+                        </div>
+
+                        <!-- BW Toggle -->
+                        <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100" onclick="document.getElementById('bwToggle').click()">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="palette" class="w-5 h-5 text-gray-500"></i>
+                                <span class="text-sm font-bold text-gray-700">بلیک اینڈ وائٹ (B&W) رزلٹ</span>
+                            </div>
+                            <input type="checkbox" id="bwToggle" onchange="renderSheetLayout()" onclick="event.stopPropagation()" class="w-5 h-5 text-blue-600 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="space-y-3">
+                        <button onclick="downloadJPG()" class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors shadow-sm">
+                            <i data-lucide="image"></i> JPG فائل ڈاؤنلوڈ کریں
+                        </button>
+                        <button onclick="downloadPDF()" class="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-3 px-4 rounded-lg font-medium transition-colors shadow-sm">
+                            <i data-lucide="file-text"></i> PDF فائل ڈاؤنلوڈ کریں
+                        </button>
+                        <button onclick="printPreview()" class="w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 text-white py-3 px-4 rounded-lg font-medium transition-colors shadow-sm">
+                            <i data-lucide="printer"></i> ڈائریکٹ پرنٹ کریں
+                        </button>
+                    </div>
+                    <div id="messageBox" class="mt-4 text-center text-sm font-medium hidden"></div>
+                </div>
+            </div>
+
+            <!-- Preview View -->
+            <div class="lg:col-span-7">
+                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center sticky top-6">
+                    <h2 class="text-xl font-semibold mb-4 w-full text-center sm:text-right border-b pb-2">پریویو (4x6 Sheet)</h2>
+                    <div class="sheet-preview-container">
+                        <img id="previewImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect width='100%25' height='100%25' fill='%23f9fafb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='18' fill='%239ca3af'%3Eتصویر اپلوڈ یا اسکین کریں%3C/text%3E%3C/svg%3E" alt="4x6 Preview">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stylish About Section -->
+        <div class="mt-12 relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-blue-50 rounded-2xl border border-indigo-100 shadow-sm p-8 sm:p-10 text-center" dir="ltr">
+            <div class="absolute -top-12 -right-12 w-40 h-40 bg-blue-200 rounded-full mix-blend-multiply filter blur-2xl opacity-60 animate-pulse"></div>
+            <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-indigo-200 rounded-full mix-blend-multiply filter blur-2xl opacity-60 animate-pulse" style="animation-delay: 2s;"></div>
+            
+            <div class="relative z-10">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-2 font-sans tracking-tight">
+                    Meeno ID Card Set Maker
+                </h2>
+                <p class="text-sm sm:text-base font-bold text-gray-500 mb-6 tracking-[0.2em] uppercase font-sans">
+                    By Nusrat Shaheen Inc.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 mb-8">
+                    <div class="flex items-center gap-3 text-gray-700 bg-white/70 px-5 py-3 rounded-xl shadow-sm border border-white backdrop-blur-md transition-transform hover:-translate-y-1 duration-300 w-full sm:w-auto">
+                        <div class="bg-blue-100 p-2 rounded-full text-blue-600">
+                            <i data-lucide="user" class="w-5 h-5"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Founder</p>
+                            <p class="font-bold text-indigo-900 text-sm sm:text-base">M Nauman Faisal</p>
+                        </div>
+                    </div>
+                    
+                    <a href="mailto:naumanfaisal101@gmail.com" class="flex items-center gap-3 text-gray-700 bg-white/70 px-5 py-3 rounded-xl shadow-sm border border-white backdrop-blur-md transition-transform hover:-translate-y-1 hover:bg-blue-50 duration-300 w-full sm:w-auto cursor-pointer">
+                        <div class="bg-indigo-100 p-2 rounded-full text-indigo-600">
+                            <i data-lucide="mail" class="w-5 h-5"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Contact</p>
+                            <p class="font-bold text-blue-900 text-sm sm:text-base break-all">naumanfaisal101@gmail.com</p>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="inline-flex items-center justify-center gap-2 px-4 py-1.5 bg-gray-100/80 rounded-full border border-gray-200">
+                    <i data-lucide="copyright" class="w-3 h-3 text-gray-500"></i>
+                    <p class="text-xs font-bold text-gray-500 font-sans tracking-wide">
+                        2026 All Rights Reserved.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="renderCanvas" class="hidden"></canvas>
+
+    <!-- LIVE CAMERA SCANNER MODAL -->
+    <div id="liveCameraModal" class="fixed inset-0 bg-black z-[80] hidden flex-col">
+        <div class="bg-black/60 text-white p-4 flex justify-between items-center absolute top-0 w-full z-20">
+            <h3 class="text-lg font-bold flex items-center gap-2">
+                <i data-lucide="scan-line" class="w-5 h-5 text-blue-400"></i>
+                <span id="liveCameraTitle">کارڈ اسکین کریں</span>
+            </h3>
+            <button onclick="stopLiveCamera()" class="bg-gray-800 px-4 py-1.5 rounded-lg text-sm font-bold border border-gray-600">کینسل</button>
+        </div>
+        <div class="relative flex-1 overflow-hidden flex items-center justify-center bg-gray-900">
+            <video id="liveVideo" autoplay playsinline class="absolute w-full h-full object-cover"></video>
+            <canvas id="liveOverlay" class="camera-overlay-container"></canvas>
+            <div id="liveTrackerHint" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/70 bg-black/40 px-3 py-1 rounded text-sm font-bold pointer-events-none text-center">
+                کارڈ فریم میں لائیں...
+            </div>
+        </div>
+        <div class="bg-black p-6 flex justify-center items-center pb-10 z-20">
+            <button onclick="captureFromLiveVideo()" class="relative group outline-none">
+                <div class="w-20 h-20 bg-white/30 rounded-full flex items-center justify-center border-[3px] border-white active:scale-95 transition-transform">
+                    <div class="w-16 h-16 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)]"></div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- UPGRADED MANUAL CROP MODAL -->
+    <div id="cropModal" class="fixed inset-0 bg-black/95 z-[60] hidden flex-col items-center justify-center p-2 sm:p-4">
+        <div class="bg-white rounded-xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col h-[98vh] sm:h-[90vh] relative">
+            
+            <div class="p-3 sm:p-4 bg-gray-50 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center z-10 gap-3">
+                <div class="flex items-center gap-3 w-full justify-between sm:w-auto">
+                    <h3 class="text-base sm:text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i data-lucide="crop" class="text-blue-600"></i> مینوئل کراپ
+                    </h3>
+                    <div class="flex items-center bg-gray-200 rounded-lg p-1">
+                        <button id="btnModePerspective" onclick="setCropMode('perspective')" class="px-3 py-1 text-sm font-bold rounded-md bg-white text-blue-600 shadow-sm transition-all">پرسپیکٹو</button>
+                        <button id="btnModeFixed" onclick="setCropMode('fixed')" class="px-3 py-1 text-sm font-bold rounded-md text-gray-500 hover:text-gray-700 transition-all">فکسڈ باکس</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <button onclick="setFullImage()" class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1 hover:bg-blue-200">
+                        <i data-lucide="maximize" class="w-4 h-4"></i> مکمل تصویر
+                    </button>
+                    <button id="aiDetectBtn" onclick="runAiDetectionOnCanvas()" class="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1">
+                        <i data-lucide="cpu" class="w-4 h-4"></i> آٹو کنارے
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex-1 bg-gray-900 relative flex items-center justify-center overflow-hidden" id="canvasContainer">
+                <div id="fixedTools" class="absolute top-4 left-1/2 transform -translate-x-1/2 z-40 bg-white/90 backdrop-blur-sm rounded-full shadow-lg p-1.5 flex gap-1 hidden">
+                    <button onclick="adjustFixedScale(1.05)" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700" title="Zoom In"><i data-lucide="zoom-in" class="w-5 h-5"></i></button>
+                    <button onclick="adjustFixedScale(0.95)" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700" title="Zoom Out"><i data-lucide="zoom-out" class="w-5 h-5"></i></button>
+                    <div class="w-px bg-gray-300 mx-1"></div>
+                    <button onclick="adjustFixedRotation(-1)" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded font-bold text-xs text-gray-700" title="Left 1°">-1°</button>
+                    <button onclick="adjustFixedRotation(1)" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded font-bold text-xs text-gray-700" title="Right 1°">+1°</button>
+                    <div class="w-px bg-gray-300 mx-1"></div>
+                    <button onclick="adjustFixedRotation(-90)" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded font-bold text-xs text-gray-700" title="Left 90°">-90°</button>
+                    <button onclick="adjustFixedRotation(90)" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded font-bold text-xs text-gray-700" title="Right 90°">+90°</button>
+                </div>
+
+                <canvas id="cropCanvas"></canvas>
+
+                <div id="loupeMonitor" class="absolute top-4 right-4 z-50 border-[3px] border-blue-500 rounded-xl shadow-2xl bg-white overflow-hidden pointer-events-none hidden" style="width: 140px; height: 140px;">
+                    <canvas id="loupeCanvas" width="140" height="140"></canvas>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="w-4 h-4 border-[2px] border-red-500 rounded-full"></div>
+                        <div class="w-full h-[1px] bg-red-500/80 absolute"></div>
+                        <div class="h-full w-[1px] bg-red-500/80 absolute"></div>
+                    </div>
+                    <div class="absolute bottom-0 w-full bg-blue-500 text-white text-[11px] font-bold text-center py-0.5">زوم (2.0x)</div>
+                </div>
+            </div>
+            
+            <div class="p-3 sm:p-4 bg-white border-t flex flex-col gap-4 z-10">
+                <div class="bg-gray-50 p-3 rounded-lg border">
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                        <div class="sm:col-span-5 flex items-center gap-2">
+                            <i data-lucide="sun" class="w-4 h-4 text-gray-500"></i>
+                            <input type="range" id="exposureSlider" min="50" max="200" value="100" class="flex-1" oninput="drawCropUI()">
+                        </div>
+                        <div class="sm:col-span-5 flex items-center gap-2">
+                            <i data-lucide="contrast" class="w-4 h-4 text-gray-500"></i>
+                            <input type="range" id="contrastSlider" min="50" max="250" value="100" class="flex-1" oninput="drawCropUI()">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <button onclick="applyAutoEnhance()" class="w-full text-xs font-bold bg-blue-100 text-blue-700 py-1.5 rounded">آٹو فلٹر</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeCropModal()" class="bg-gray-200 px-6 py-2 rounded-lg font-bold hover:bg-gray-300">کینسل</button>
+                    <button onclick="confirmCropSelection()" class="bg-blue-600 text-white px-8 py-2 rounded-lg font-bold shadow-md hover:bg-blue-700">ڈن (Apply)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Module Loader Script -->
+    <script>
+        let cvReady = false;
+        function loadOpenCV() {
+            const script = document.createElement('script');
+            script.src = 'https://docs.opencv.org/4.8.0/opencv.js';
+            script.async = true;
+            script.onload = () => {
+                cvReady = true;
+                const status = document.getElementById('aiStatus');
+                status.className = 'text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded border border-green-300 flex items-center gap-1';
+                status.innerHTML = '<i data-lucide="check-circle" class="w-3 h-3"></i> AI فعال ہے';
+                lucide.createIcons();
+            };
+            script.onerror = () => { document.getElementById('aiStatus').innerHTML = 'AI Offline'; }
+            document.body.appendChild(script);
+        }
+        window.addEventListener('load', loadOpenCV);
+    </script>
+
+    <script>
+        lucide.createIcons();
+        
+        // --- UPDATED DIMENSIONS FOR 4x6 SHEET ---
+        // 4x6 inches at 300 DPI -> 1200x1800 pixels
+        const SHEET_WIDTH = 1200; 
+        const SHEET_HEIGHT = 1800;
+        
+        // Default dynamically to 3.62x2.33 inches as requested
+        let CARD_WIDTH = Math.round(3.62 * 300); // 1086
+        let CARD_HEIGHT = Math.round(2.33 * 300); // 699
+        let FIXED_ASPECT = 3.62 / 2.33; // ~1.5536
+        
+        function updateGlobalCardSize() {
+            const size = document.getElementById('globalCardSize').value;
+            if (size === 'custom362') {
+                CARD_WIDTH = Math.round(3.62 * 300); // 1086 pixels
+                CARD_HEIGHT = Math.round(2.33 * 300); // 699 pixels
+                FIXED_ASPECT = 3.62 / 2.33;
+            } else {
+                CARD_WIDTH = 1000;
+                CARD_HEIGHT = 630;
+                FIXED_ASPECT = 85.6 / 53.98; // CR80 Standard Size
+            }
+            renderSheetLayout();
+            // If crop modal is currently open in fixed mode, recalculate fixed box
+            if (!document.getElementById('cropModal').classList.contains('hidden') && cropMode === 'fixed') {
+                setCropMode('fixed'); 
+            }
+        }
+
+        const mainCanvas = document.getElementById('renderCanvas');
+        const mainCtx = mainCanvas.getContext('2d');
+        mainCanvas.width = SHEET_WIDTH; mainCanvas.height = SHEET_HEIGHT;
+        let frontImageObj = null; let backImageObj = null;
+        let currentProcessingType = 'front';
+        
+        // Manual Crop Variables (Shared)
+        const cropCanvas = document.getElementById('cropCanvas');
+        const cropCtx = cropCanvas.getContext('2d');
+        let rawImageObj = null; 
+        
+        // Mode State
+        let cropMode = 'perspective'; // 'perspective' or 'fixed'
+        
+        // Perspective State
+        let imgScale = 1;
+        let corners = []; 
+        let draggingCorner = -1;
+        const CORNER_RADIUS = 25;
+        const loupeMonitor = document.getElementById('loupeMonitor');
+        const loupeCanvas = document.getElementById('loupeCanvas');
+        const loupeCtx = loupeCanvas.getContext('2d');
+
+        // Fixed Box State
+        let fixedBoxW = 0, fixedBoxH = 0;
+        let fixedImgX = 0, fixedImgY = 0, fixedImgScale = 1, fixedImgRotation = 0;
+        let isDraggingFixed = false;
+        let dragStartX = 0, dragStartY = 0;
+        let initialPinchDist = null;
+        let initialPinchScale = null;
+
+        // Live Camera Variables
+        let videoStream = null; let liveTrackingAnimFrame = null;
+        let liveDetectedCorners = null; let trackingStableFrames = 0;
+        let isProcessingCV = false;
+        const liveVideo = document.getElementById('liveVideo');
+        const liveOverlay = document.getElementById('liveOverlay');
+        const overlayCtx = liveOverlay.getContext('2d');
+        const liveTrackerHint = document.getElementById('liveTrackerHint');
+
+        function clearCanvas() { mainCtx.fillStyle = '#ffffff'; mainCtx.fillRect(0, 0, SHEET_WIDTH, SHEET_HEIGHT); }
+        clearCanvas();
+
+        document.getElementById('frontUpload').addEventListener('change', (e) => handleGalleryInput(e, 'front'));
+        document.getElementById('backUpload').addEventListener('change', (e) => handleGalleryInput(e, 'back'));
+        document.getElementById('nativeCameraFrontFallback').addEventListener('change', (e) => handleGalleryInput(e, 'front'));
+        document.getElementById('nativeCameraBackFallback').addEventListener('change', (e) => handleGalleryInput(e, 'back'));
+
+        /* --- UNIFIED AI CORNER DETECTION --- */
+        function findDocumentCorners(canvasElement) {
+            try {
+                let src = cv.imread(canvasElement);
+                let gray = new cv.Mat();
+                cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
+                cv.GaussianBlur(gray, gray, new cv.Size(5, 5), 0, 0, cv.BORDER_DEFAULT);
+                let edges = new cv.Mat();
+                cv.Canny(gray, edges, 40, 120, 3, false);
+                let M = cv.Mat.ones(5, 5, cv.CV_8U);
+                cv.dilate(edges, edges, M, new cv.Point(-1, -1), 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+                
+                let contours = new cv.MatVector(); let hierarchy = new cv.Mat();
+                cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+                let maxArea = 0; let bestPts = null;
+                const frameArea = canvasElement.width * canvasElement.height;
+
+                for (let i = 0; i < contours.size(); ++i) {
+                    let cnt = contours.get(i);
+                    let area = cv.contourArea(cnt);
+                    if (area > (frameArea * 0.08) && area < (frameArea * 0.90)) { 
+                        let peri = cv.arcLength(cnt, true);
+                        let approx = new cv.Mat();
+                        cv.approxPolyDP(cnt, approx, 0.04 * peri, true); 
+                        if (approx.rows === 4 && cv.isContourConvex(approx)) {
+                            if (area > maxArea) {
+                                maxArea = area;
+                                bestPts = [];
+                                for(let j=0; j<4; j++) {
+                                    bestPts.push({ 
+                                        x: Math.max(0, Math.min(1, approx.data32S[j*2] / canvasElement.width)), 
+                                        y: Math.max(0, Math.min(1, approx.data32S[j*2+1] / canvasElement.height)) 
+                                    });
+                                }
+                            }
+                        }
+                        approx.delete();
+                    }
+                }
+                src.delete(); gray.delete(); edges.delete(); M.delete(); contours.delete(); hierarchy.delete();
+                return bestPts ? sortCornersNorm(bestPts) : null;
+            } catch (e) { return null; }
+        }
+
+        /* --- LIVE AI TRACKING --- */
+        async function startLiveCamera(type) {
+            currentProcessingType = type;
+            liveDetectedCorners = null; trackingStableFrames = 0;
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+                });
+                liveVideo.srcObject = videoStream;
+                document.getElementById('liveCameraModal').classList.remove('hidden');
+                document.getElementById('liveCameraModal').classList.add('flex');
+                liveVideo.onloadedmetadata = () => {
+                    liveOverlay.width = liveVideo.clientWidth; liveOverlay.height = liveVideo.clientHeight;
+                    startLiveTracking();
+                };
+            } catch (err) {
+                showToast("Live Camera support nahi kar raha.", "yellow");
+                if(type === 'front') document.getElementById('nativeCameraFrontFallback').click();
+                else document.getElementById('nativeCameraBackFallback').click();
+            }
+        }
+
+        function stopLiveCamera() {
+            document.getElementById('liveCameraModal').classList.add('hidden');
+            if (videoStream) { videoStream.getTracks().forEach(track => track.stop()); videoStream = null; }
+            if (liveTrackingAnimFrame) cancelAnimationFrame(liveTrackingAnimFrame);
+            liveVideo.srcObject = null; isProcessingCV = false;
+        }
+
+        function startLiveTracking() {
+            const procW = 250; 
+            const procH = Math.floor(250 * (liveVideo.videoHeight / liveVideo.videoWidth));
+            const procCanvas = document.createElement('canvas');
+            procCanvas.width = procW; procCanvas.height = procH;
+            const pCtx = procCanvas.getContext('2d', { willReadFrequently: true });
+
+            function trackFrame() {
+                if (!videoStream) return;
+                liveOverlay.width = liveVideo.clientWidth;
+                liveOverlay.height = liveVideo.clientHeight;
+                overlayCtx.clearRect(0, 0, liveOverlay.width, liveOverlay.height);
+                if (liveDetectedCorners) drawLiveOverlay(liveDetectedCorners, trackingStableFrames);
+
+                if (cvReady && !isProcessingCV && liveVideo.readyState === liveVideo.HAVE_ENOUGH_DATA) {
+                    isProcessingCV = true;
+                    pCtx.drawImage(liveVideo, 0, 0, procW, procH);
+                    setTimeout(() => {
+                        let newPts = findDocumentCorners(procCanvas);
+                        if (newPts) {
+                            trackingStableFrames++;
+                            if (!liveDetectedCorners) liveDetectedCorners = newPts;
+                            else {
+                                const lerp = 0.45; 
+                                for(let i=0; i<4; i++) {
+                                    liveDetectedCorners[i].x += (newPts[i].x - liveDetectedCorners[i].x) * lerp;
+                                    liveDetectedCorners[i].y += (newPts[i].y - liveDetectedCorners[i].y) * lerp;
+                                }
+                            }
+                        } else {
+                            trackingStableFrames = 0;
+                            if (trackingStableFrames < -10) liveDetectedCorners = null;
+                        }
+                        isProcessingCV = false;
+                    }, 0);
+                }
+                liveTrackingAnimFrame = requestAnimationFrame(trackFrame);
+            }
+            liveTrackingAnimFrame = requestAnimationFrame(trackFrame);
+        }
+
+        function drawLiveOverlay(normCorners, stableCount) {
+            const cW = liveOverlay.width; const cH = liveOverlay.height;
+            const vW = liveVideo.videoWidth; const vH = liveVideo.videoHeight;
+            const vRatio = vW / vH; const cRatio = cW / cH;
+            
+            let drawW, drawH, offsetX = 0, offsetY = 0;
+            if (cRatio > vRatio) { drawW = cW; drawH = cW / vRatio; offsetY = (cH - drawH) / 2; } 
+            else { drawH = cH; drawW = cH * vRatio; offsetX = (cW - drawW) / 2; }
+            
+            const mapX = (x) => (x * drawW) + offsetX; const mapY = (y) => (y * drawH) + offsetY;
+
+            overlayCtx.beginPath();
+            overlayCtx.moveTo(mapX(normCorners[0].x), mapY(normCorners[0].y));
+            overlayCtx.lineTo(mapX(normCorners[1].x), mapY(normCorners[1].y));
+            overlayCtx.lineTo(mapX(normCorners[2].x), mapY(normCorners[2].y));
+            overlayCtx.lineTo(mapX(normCorners[3].x), mapY(normCorners[3].y));
+            overlayCtx.closePath();
+            
+            const isLocked = stableCount > 8; 
+            overlayCtx.lineWidth = isLocked ? 7 : 4;
+            const strokeColor = isLocked ? 'rgba(34, 197, 94, 0.9)' : 'rgba(255, 153, 0, 0.9)';
+            overlayCtx.strokeStyle = strokeColor; 
+            overlayCtx.fillStyle = isLocked ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 153, 0, 0.15)';
+            overlayCtx.stroke(); overlayCtx.fill();
+            
+            liveTrackerHint.textContent = isLocked ? "Best! Ab capture karein" : "Card frame main laain...";
+            overlayCtx.fillStyle = strokeColor;
+            for(let i=0; i<4; i++) overlayCtx.fillRect(mapX(normCorners[i].x) - 6, mapY(normCorners[i].y) - 6, 12, 12);
+        }
+
+        function captureFromLiveVideo() {
+            const vW = liveVideo.videoWidth; const vH = liveVideo.videoHeight;
+            const capCanvas = document.createElement('canvas');
+            capCanvas.width = vW; capCanvas.height = vH;
+            capCanvas.getContext('2d').drawImage(liveVideo, 0, 0, vW, vH);
+            
+            stopLiveCamera();
+            document.getElementById('loaderText').textContent = "تصویر لوڈ ہو رہی ہے...";
+            document.getElementById('globalLoader').classList.remove('hidden');
+            document.getElementById('globalLoader').classList.add('flex');
+            
+            rawImageObj = new Image();
+            rawImageObj.onload = () => {
+                document.getElementById('globalLoader').classList.add('hidden');
+                setCropMode('perspective'); 
+                openCropModal();
+            };
+            rawImageObj.src = capCanvas.toDataURL('image/jpeg', 0.9);
+        }
+
+        function sortCornersNorm(pts) {
+            pts.sort((a, b) => a.y - b.y);
+            let top = pts.slice(0, 2).sort((a, b) => a.x - b.x);
+            let bottom = pts.slice(2, 4).sort((a, b) => b.x - a.x); 
+            return [top[0], top[1], bottom[0], bottom[1]];
+        }
+
+        /* --- GALLERY & MANUAL CROP MODES LOGIC --- */
+        async function handleGalleryInput(event, type) {
+            const file = event.target.files[0]; if (!file) return;
+            currentProcessingType = type;
+            
+            // شو لوڈر
+            document.getElementById('loaderText').textContent = "فائل لوڈ ہو رہی ہے...";
+            document.getElementById('globalLoader').classList.remove('hidden');
+            document.getElementById('globalLoader').classList.add('flex');
+
+            if (file.type === 'application/pdf') {
+                try {
+                    const fileReader = new FileReader();
+                    fileReader.onload = async function() {
+                        const typedarray = new Uint8Array(this.result);
+                        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                        const page = await pdf.getPage(1); // پہلا صفحہ حاصل کریں
+                        const viewport = page.getViewport({ scale: 2.5 }); 
+
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+
+                        await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+                        rawImageObj = new Image();
+                        rawImageObj.onload = () => { 
+                            document.getElementById('globalLoader').classList.add('hidden');
+                            document.getElementById('globalLoader').classList.remove('flex');
+                            setCropMode('perspective'); 
+                            openCropModal(); 
+                        };
+                        rawImageObj.src = canvas.toDataURL('image/jpeg', 0.9);
+                    };
+                    fileReader.readAsArrayBuffer(file);
+                } catch (error) {
+                    console.error("PDF load error:", error);
+                    showToast("PDF لوڈ کرنے میں مسئلہ آیا!", "red");
+                    document.getElementById('globalLoader').classList.add('hidden');
+                    document.getElementById('globalLoader').classList.remove('flex');
+                }
+            } else {
+                // نارمل امیج کے لیے (JPG/PNG)
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    rawImageObj = new Image();
+                    rawImageObj.onload = () => { 
+                        document.getElementById('globalLoader').classList.add('hidden');
+                        document.getElementById('globalLoader').classList.remove('flex');
+                        setCropMode('perspective'); 
+                        openCropModal(); 
+                    };
+                    rawImageObj.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+            event.target.value = '';
+        }
+
+        function setCropMode(mode) {
+            cropMode = mode;
+            document.getElementById('btnModePerspective').className = mode === 'perspective' ? "px-3 py-1 text-sm font-bold rounded-md bg-white text-blue-600 shadow-sm transition-all" : "px-3 py-1 text-sm font-bold rounded-md text-gray-500 hover:text-gray-700 transition-all";
+            document.getElementById('btnModeFixed').className = mode === 'fixed' ? "px-3 py-1 text-sm font-bold rounded-md bg-white text-blue-600 shadow-sm transition-all" : "px-3 py-1 text-sm font-bold rounded-md text-gray-500 hover:text-gray-700 transition-all";
+            
+            document.getElementById('aiDetectBtn').style.display = mode === 'perspective' ? 'flex' : 'none';
+            document.getElementById('fixedTools').style.display = mode === 'fixed' ? 'flex' : 'none';
+            loupeMonitor.style.display = 'none';
+
+            if(rawImageObj) {
+                if (mode === 'fixed') {
+                    // Initialize Fixed Box logic
+                    const cW = cropCanvas.width; const cH = cropCanvas.height;
+                    if (cW / cH > FIXED_ASPECT) {
+                        fixedBoxH = cH * 0.8; fixedBoxW = fixedBoxH * FIXED_ASPECT;
+                    } else {
+                        fixedBoxW = cW * 0.8; fixedBoxH = fixedBoxW / FIXED_ASPECT;
+                    }
+                    fixedImgX = 0; fixedImgY = 0; fixedImgRotation = 0;
+                    
+                    fixedImgScale = Math.max(fixedBoxW / (rawImageObj.width * imgScale), fixedBoxH / (rawImageObj.height * imgScale));
+                    fixedImgScale *= 1.05; // Add a 5% margin
+                }
+                drawCropUI();
+            }
+        }
+
+        function setFullImage() {
+            if (cropMode === 'perspective') {
+                const w = cropCanvas.width, h = cropCanvas.height;
+                corners = [{x: 0, y: 0}, {x: w, y: 0}, {x: w, y: h}, {x: 0, y: h}];
+            } else if (cropMode === 'fixed') {
+                fixedImgX = 0; fixedImgY = 0; fixedImgRotation = 0;
+                fixedImgScale = Math.max(fixedBoxW / (rawImageObj.width * imgScale), fixedBoxH / (rawImageObj.height * imgScale));
+                fixedImgScale *= 1.05;
+            }
+            drawCropUI();
+        }
+
+        function adjustFixedScale(factor) { fixedImgScale *= factor; drawCropUI(); }
+        function adjustFixedRotation(deg) { fixedImgRotation += deg; drawCropUI(); }
+
+        function openCropModal() {
+            const modal = document.getElementById('cropModal');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            document.getElementById('exposureSlider').value = 100;
+            document.getElementById('contrastSlider').value = 100;
+            
+            setTimeout(() => {
+                const container = document.getElementById('canvasContainer');
+                imgScale = Math.min(container.clientWidth / rawImageObj.width, container.clientHeight / rawImageObj.height);
+                if (imgScale > 2) imgScale = 2; // Prevent pixelation
+                
+                cropCanvas.width = rawImageObj.width * imgScale;
+                cropCanvas.height = rawImageObj.height * imgScale;
+                
+                if (cropMode === 'perspective') {
+                    const w = cropCanvas.width, h = cropCanvas.height;
+                    corners = [{x: w*0.1, y: h*0.1}, {x: w*0.9, y: h*0.1}, {x: w*0.9, y: h*0.9}, {x: w*0.1, y: h*0.9}];
+                    runAiDetectionOnCanvas(true); 
+                } else if (cropMode === 'fixed') {
+                    setCropMode('fixed');
+                }
+                drawCropUI();
+            }, 50);
+        }
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y); ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y); ctx.closePath();
+        }
+
+        function drawCropUI() {
+            if(!rawImageObj) return;
+            const exposure = document.getElementById('exposureSlider').value/100;
+            const contrast = document.getElementById('contrastSlider').value/100;
+            
+            cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+            cropCtx.filter = `brightness(${exposure}) contrast(${contrast})`;
+
+            if (cropMode === 'perspective') {
+                cropCtx.drawImage(rawImageObj, 0, 0, cropCanvas.width, cropCanvas.height);
+                cropCtx.filter = 'none'; 
+                
+                if (corners && corners.length === 4) {
+                    cropCtx.strokeStyle = '#22c55e'; 
+                    cropCtx.lineWidth = 4;
+                    cropCtx.beginPath();
+                    cropCtx.moveTo(corners[0].x, corners[0].y); 
+                    cropCtx.lineTo(corners[1].x, corners[1].y);
+                    cropCtx.lineTo(corners[2].x, corners[2].y); 
+                    cropCtx.lineTo(corners[3].x, corners[3].y);
+                    cropCtx.closePath(); 
+                    cropCtx.stroke();
+                    
+                    corners.forEach((c, i) => {
+                        cropCtx.beginPath(); cropCtx.arc(c.x, c.y, CORNER_RADIUS, 0, Math.PI*2);
+                        cropCtx.fillStyle = 'white'; cropCtx.fill();
+                        cropCtx.strokeStyle = draggingCorner === i ? '#ef4444' : '#3b82f6'; 
+                        cropCtx.lineWidth = 3;
+                        cropCtx.stroke();
+                    });
+                }
+            } else {
+                cropCtx.save();
+                cropCtx.translate(cropCanvas.width / 2 + fixedImgX, cropCanvas.height / 2 + fixedImgY);
+                cropCtx.rotate(fixedImgRotation * Math.PI / 180);
+                cropCtx.scale(fixedImgScale * imgScale, fixedImgScale * imgScale);
+                cropCtx.drawImage(rawImageObj, -rawImageObj.width / 2, -rawImageObj.height / 2);
+                cropCtx.restore();
+
+                cropCtx.filter = 'none';
+                
+                const boxX = (cropCanvas.width - fixedBoxW) / 2;
+                const boxY = (cropCanvas.height - fixedBoxH) / 2;
+
+                cropCtx.strokeStyle = '#3b82f6';
+                cropCtx.lineWidth = 5;
+                roundRect(cropCtx, boxX, boxY, fixedBoxW, fixedBoxH, 20);
+                cropCtx.stroke();
+            }
+        }
+
+        function getPointerPos(e) {
+            const rect = cropCanvas.getBoundingClientRect();
+            let cx = e.clientX || (e.touches && e.touches[0].clientX);
+            let cy = e.clientY || (e.touches && e.touches[0].clientY);
+            const sX = cropCanvas.width / rect.width;
+            const sY = cropCanvas.height / rect.height;
+            return { x: (cx - rect.left) * sX, y: (cy - rect.top) * sY };
+        }
+
+        cropCanvas.addEventListener('mousedown', (e) => {
+            const pos = getPointerPos(e); 
+            if (cropMode === 'perspective') {
+                draggingCorner = -1;
+                if (corners && corners.length === 4) {
+                    corners.forEach((c, i) => { if(Math.hypot(pos.x-c.x, pos.y-c.y) < CORNER_RADIUS*3) draggingCorner = i; });
+                }
+                if(draggingCorner !== -1) { e.preventDefault(); loupeMonitor.style.display = 'block'; }
+            } else {
+                isDraggingFixed = true;
+                dragStartX = pos.x - fixedImgX;
+                dragStartY = pos.y - fixedImgY;
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            const pos = getPointerPos(e);
+            if (cropMode === 'perspective' && draggingCorner !== -1) {
+                corners[draggingCorner] = { x: Math.max(0, Math.min(cropCanvas.width, pos.x)), y: Math.max(0, Math.min(cropCanvas.height, pos.y)) };
+                drawCropUI(); updateLoupe(pos);
+            } else if (cropMode === 'fixed' && isDraggingFixed) {
+                fixedImgX = pos.x - dragStartX;
+                fixedImgY = pos.y - dragStartY;
+                drawCropUI();
+            }
+        });
+
+        window.addEventListener('mouseup', () => { 
+            draggingCorner = -1; isDraggingFixed = false; loupeMonitor.style.display = 'none'; 
+        });
+
+        cropCanvas.addEventListener('touchstart', (e) => {
+            if (cropMode === 'perspective') {
+                const pos = getPointerPos(e); draggingCorner = -1;
+                if (corners && corners.length === 4) {
+                    corners.forEach((c, i) => { if(Math.hypot(pos.x-c.x, pos.y-c.y) < CORNER_RADIUS*3) draggingCorner = i; });
+                }
+                if(draggingCorner !== -1) { e.preventDefault(); loupeMonitor.style.display = 'block'; }
+            } else {
+                if (e.touches.length === 2) {
+                    initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                    initialPinchScale = fixedImgScale;
+                    isDraggingFixed = false;
+                } else if (e.touches.length === 1) {
+                    isDraggingFixed = true;
+                    const pos = getPointerPos(e);
+                    dragStartX = pos.x - fixedImgX;
+                    dragStartY = pos.y - fixedImgY;
+                }
+            }
+        }, {passive: false});
+
+        cropCanvas.addEventListener('touchmove', (e) => {
+            if (cropMode === 'perspective') {
+                if (draggingCorner === -1) return;
+                e.preventDefault();
+                const pos = getPointerPos(e);
+                corners[draggingCorner] = { x: Math.max(0, Math.min(cropCanvas.width, pos.x)), y: Math.max(0, Math.min(cropCanvas.height, pos.y)) };
+                drawCropUI(); updateLoupe(pos);
+            } else {
+                e.preventDefault();
+                if (e.touches.length === 2 && initialPinchDist) {
+                    const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                    fixedImgScale = initialPinchScale * (dist / initialPinchDist);
+                    drawCropUI();
+                } else if (e.touches.length === 1 && isDraggingFixed) {
+                    const pos = getPointerPos(e);
+                    fixedImgX = pos.x - dragStartX;
+                    fixedImgY = pos.y - dragStartY;
+                    drawCropUI();
+                }
+            }
+        }, {passive: false});
+
+        window.addEventListener('touchend', () => { 
+            draggingCorner = -1; isDraggingFixed = false; loupeMonitor.style.display = 'none'; 
+            initialPinchDist = null;
+        });
+
+        cropCanvas.addEventListener('wheel', (e) => {
+            if (cropMode === 'fixed') {
+                e.preventDefault();
+                const zoomFactor = e.deltaY < 0 ? 1.05 : 0.95;
+                fixedImgScale *= zoomFactor;
+                drawCropUI();
+            }
+        });
+
+        function updateLoupe(pos) {
+            if (cropMode !== 'perspective') return;
+            const lSize = 140; const zoom = 2.0;
+            loupeCtx.clearRect(0, 0, lSize, lSize);
+            loupeCtx.drawImage(rawImageObj, (pos.x/imgScale)-(lSize/(2*zoom)), (pos.y/imgScale)-(lSize/(2*zoom)), lSize/zoom, lSize/zoom, 0, 0, lSize, lSize);
+        }
+
+        function runAiDetectionOnCanvas(isInitial = false) {
+            if (!cvReady || cropMode !== 'perspective') return;
+            const btn = document.getElementById('aiDetectBtn');
+            const originalText = btn.innerHTML;
+            if (!isInitial) btn.innerHTML = 'پراسیسنگ...';
+
+            setTimeout(() => {
+                const procW = 400; 
+                const procH = Math.floor(400 * (rawImageObj.height / rawImageObj.width));
+                const pCanvas = document.createElement('canvas');
+                pCanvas.width = procW; pCanvas.height = procH;
+                pCanvas.getContext('2d').drawImage(rawImageObj, 0, 0, procW, procH);
+
+                let normPts = findDocumentCorners(pCanvas);
+                
+                if (normPts) {
+                    corners = normPts.map(p => ({ x: p.x * cropCanvas.width, y: p.y * cropCanvas.height }));
+                    if (!isInitial) showToast("AI کنارے تلاش کر لیے گئے!", "green");
+                } else {
+                    const w = cropCanvas.width, h = cropCanvas.height;
+                    corners = [{x: w*0.1, y: h*0.1}, {x: w*0.9, y: h*0.1}, {x: w*0.9, y: h*0.9}, {x: w*0.1, y: h*0.9}];
+                    if (!isInitial) showToast("کنارے نہیں ملے، مینول سیٹ کریں۔", "yellow");
+                }
+                
+                drawCropUI();
+                if (!isInitial) btn.innerHTML = originalText;
+            }, 50);
+        }
+
+        function confirmCropSelection() {
+            document.getElementById('loaderText').textContent = "کراپنگ ہو رہی ہے...";
+            document.getElementById('globalLoader').classList.remove('hidden');
+            document.getElementById('globalLoader').classList.add('flex');
+            
+            setTimeout(() => {
+                const finalCanvas = document.createElement('canvas');
+                finalCanvas.width = CARD_WIDTH; finalCanvas.height = CARD_HEIGHT;
+                const fCtx = finalCanvas.getContext('2d');
+                
+                if (cropMode === 'perspective') {
+                    // Perspective Warp
+                    const origCorners = corners.map(c => ({ x: c.x / imgScale, y: c.y / imgScale }));
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = rawImageObj.width; tempCanvas.height = rawImageObj.height;
+                    tempCanvas.getContext('2d').drawImage(rawImageObj, 0, 0);
+                    
+                    const srcData = tempCanvas.getContext('2d').getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+                    const dstData = fCtx.createImageData(CARD_WIDTH, CARD_HEIGHT);
+                    
+                    for (let y = 0; y < CARD_HEIGHT; y++) {
+                        let v = y / CARD_HEIGHT;
+                        for (let x = 0; x < CARD_WIDTH; x++) {
+                            let u = x / CARD_WIDTH;
+                            let sx = Math.floor((1-u)*(1-v)*origCorners[0].x + u*(1-v)*origCorners[1].x + u*v*origCorners[2].x + (1-u)*v*origCorners[3].x);
+                            let sy = Math.floor((1-u)*(1-v)*origCorners[0].y + u*(1-v)*origCorners[1].y + u*v*origCorners[2].y + (1-u)*v*origCorners[3].y);
+                            if (sx >= 0 && sx < tempCanvas.width && sy >= 0 && sy < tempCanvas.height) {
+                                const sIdx = (sy * tempCanvas.width + sx) * 4;
+                                const dIdx = (y * CARD_WIDTH + x) * 4;
+                                for(let k=0; k<4; k++) dstData.data[dIdx+k] = srcData.data[sIdx+k];
+                            }
+                        }
+                    }
+                    fCtx.putImageData(dstData, 0, 0);
+                } else {
+                    // Fixed Box Extraction
+                    fCtx.fillStyle = '#fff';
+                    fCtx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+                    const scaleRatio = CARD_WIDTH / fixedBoxW;
+                    
+                    fCtx.save();
+                    fCtx.translate(CARD_WIDTH / 2 + fixedImgX * scaleRatio, CARD_HEIGHT / 2 + fixedImgY * scaleRatio);
+                    fCtx.rotate(fixedImgRotation * Math.PI / 180);
+                    fCtx.scale(fixedImgScale * imgScale * scaleRatio, fixedImgScale * imgScale * scaleRatio);
+                    fCtx.drawImage(rawImageObj, -rawImageObj.width / 2, -rawImageObj.height / 2);
+                    fCtx.restore();
+                }
+                
+                // Final Rounded Output
+                const outputCanvas = document.createElement('canvas');
+                outputCanvas.width = CARD_WIDTH; outputCanvas.height = CARD_HEIGHT;
+                const outCtx = outputCanvas.getContext('2d');
+                
+                outCtx.fillStyle = '#ffffff';
+                outCtx.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+
+                outCtx.save();
+                roundRect(outCtx, 0, 0, CARD_WIDTH, CARD_HEIGHT, 40); 
+                outCtx.clip();
+                
+                outCtx.filter = `brightness(${document.getElementById('exposureSlider').value/100}) contrast(${document.getElementById('contrastSlider').value/100}) saturate(1.1)`;
+                outCtx.drawImage(finalCanvas, 0, 0);
+                outCtx.restore();
+                
+                const finalImg = new Image();
+                finalImg.onload = () => {
+                    if (currentProcessingType === 'front') frontImageObj = finalImg; else backImageObj = finalImg;
+                    renderSheetLayout(); 
+                    document.getElementById('globalLoader').classList.add('hidden');
+                    closeCropModal();
+                };
+                finalImg.src = outputCanvas.toDataURL('image/jpeg', 0.9);
+            }, 50);
+        }
+
+        // --- UPDATED RENDER FOR 4x6 SHEET ---
+        function renderSheetLayout() {
+            clearCanvas();
+            const isBW = document.getElementById('bwToggle').checked;
+            
+            // ڈائنیمک الائنمنٹ (درمیان میں رکھنے کے لیے)
+            const xPos = (SHEET_WIDTH - CARD_WIDTH) / 2;
+            const frontY = (SHEET_HEIGHT / 2 - CARD_HEIGHT) / 2;
+            const backY = (SHEET_HEIGHT / 2) + frontY;
+
+            if (frontImageObj) {
+                mainCtx.save(); 
+                if (isBW) mainCtx.filter = 'grayscale(100%) contrast(1.2)';
+                mainCtx.drawImage(frontImageObj, xPos, frontY, CARD_WIDTH, CARD_HEIGHT);
+                mainCtx.restore();
+            }
+            
+            if (backImageObj) {
+                mainCtx.save(); 
+                if (isBW) mainCtx.filter = 'grayscale(100%) contrast(1.2)';
+                mainCtx.drawImage(backImageObj, xPos, backY, CARD_WIDTH, CARD_HEIGHT);
+                mainCtx.restore();
+            }
+            
+            document.getElementById('previewImage').src = mainCanvas.toDataURL('image/jpeg', 0.8);
+        }
+
+        function showToast(msg, color) {
+            const t = document.createElement('div'); t.textContent = msg;
+            t.className = `fixed top-10 left-1/2 -translate-x-1/2 bg-${color}-600 text-white px-4 py-2 rounded z-[100] font-bold text-sm`;
+            document.body.appendChild(t); setTimeout(() => t.remove(), 2500);
+        }
+
+        function closeCropModal() { document.getElementById('cropModal').classList.add('hidden'); }
+        
+        // ---- FIXED DOWNLOAD FUNCTIONS ----
+        function downloadJPG() { 
+            if(!frontImageObj && !backImageObj) {
+                showToast("پہلے کوئی کارڈ اپلوڈ کریں!", "yellow");
+                return;
+            }
+            
+            document.getElementById('loaderText').textContent = "JPG فائل بن رہی ہے...";
+            document.getElementById('globalLoader').classList.remove('hidden');
+            document.getElementById('globalLoader').classList.add('flex');
+
+            setTimeout(() => {
+                try {
+                    const a = document.createElement('a');
+                    a.download = 'ID_Card_4x6_Sheet.jpg';
+                    a.href = mainCanvas.toDataURL('image/jpeg', 0.9);
+                    document.body.appendChild(a); 
+                    a.click();
+                    document.body.removeChild(a);
+                } catch(e) {
+                    console.error("Error downloading JPG:", e);
+                    showToast("ڈاؤنلوڈ میں مسئلہ آیا!", "red");
+                } finally {
+                    document.getElementById('globalLoader').classList.add('hidden');
+                    document.getElementById('globalLoader').classList.remove('flex');
+                }
+            }, 150); 
+        }
+
+        function downloadPDF() { 
+            if(!frontImageObj && !backImageObj) {
+                showToast("پہلے کوئی کارڈ اپلوڈ کریں!", "yellow");
+                return;
+            }
+            
+            document.getElementById('loaderText').textContent = "PDF فائل بن رہی ہے...";
+            document.getElementById('globalLoader').classList.remove('hidden');
+            document.getElementById('globalLoader').classList.add('flex');
+
+            setTimeout(() => {
+                try {
+                    const { jsPDF } = window.jspdf; 
+                    // Create 4x6 inch PDF
+                    const pdf = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'in',
+                        format: [4, 6]
+                    });
+                    pdf.addImage(mainCanvas.toDataURL('image/jpeg', 0.8), 'JPEG', 0, 0, 4, 6);
+                    pdf.save('ID_Card_4x6_Sheet.pdf');
+                } catch(e) {
+                    console.error("Error downloading PDF:", e);
+                    showToast("ڈاؤنلوڈ میں مسئلہ آیا!", "red");
+                } finally {
+                    document.getElementById('globalLoader').classList.add('hidden');
+                    document.getElementById('globalLoader').classList.remove('flex');
+                }
+            }, 150);
+        }
+
+        function printPreview() { 
+            if(!frontImageObj && !backImageObj) {
+                showToast("پہلے کوئی کارڈ اپلوڈ کریں!", "yellow");
+                return;
+            }
+            const w = window.open(); 
+            w.document.write(`<img src="${mainCanvas.toDataURL('image/jpeg', 0.9)}" style="width:100%" onload="window.print();window.close()">`);
+        }
+        
+        function applyAutoEnhance() { 
+            document.getElementById('exposureSlider').value = 115; 
+            document.getElementById('contrastSlider').value = 145; 
+            drawCropUI(); 
+        }
+    </script>
+</body>
+</html>

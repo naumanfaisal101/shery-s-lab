@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNF apps suit</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+        /* Smooth transitions */
+        .app-card, .img-wrapper, .badge-wrap, .icon-wrap, header, footer { transition: all 0.3s ease; }
+        .app-card:hover { transform: translateY(-5px); }
+        /* Theme Switcher Buttons */
+        .theme-btn { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .theme-btn:hover { transform: scale(1.1); }
+        .theme-btn.active { border-color: #ffd700; transform: scale(1.15); box-shadow: 0 0 10px rgba(255,215,0,0.5); }
+        
+        /* =========================================
+           1. Adobe Photoshop (Dark) - DEFAULT
+           ========================================= */
+        body.theme-photoshop { background-color: #1a1a1a; color: #cccccc; }
+        body.theme-photoshop header { background: #262626; border-bottom: 2px solid #333333; }
+        body.theme-photoshop header h1 { color: #ffffff; }
+        body.theme-photoshop header p { color: #aaaaaa; }
+        body.theme-photoshop header .icon-wrap-main { background-color: #333333; border-color: #00e6e6; color: #00e6e6; }
+        body.theme-photoshop .app-card { background-color: #262626; border-color: #444444; }
+        body.theme-photoshop .app-card h2 { color: #ffffff; }
+        body.theme-photoshop .app-card p { color: #aaaaaa; }
+        body.theme-photoshop .app-card:hover { box-shadow: 0 8px 25px rgba(0,230,230,0.15); border-color: #00e6e6; }
+        body.theme-photoshop .img-wrapper { background-color: #1e1e1e; }
+        body.theme-photoshop footer { background-color: #262626; border-top: 1px solid #444444; }
+        body.theme-photoshop footer h2 { color: #ffffff; }
+        body.theme-photoshop footer .subtitle { color: #888888; }
+        body.theme-photoshop .badge-wrap { background-color: #333333; border-color: #444444; }
+        body.theme-photoshop .badge-wrap:hover { background-color: #3a3a3a; border-color: #00e6e6; }
+        body.theme-photoshop .badge-wrap p.title { color: #888888; }
+        body.theme-photoshop .badge-wrap p.value { color: #00e6e6; }
+        body.theme-photoshop .icon-wrap { background-color: #262626; color: #00e6e6; }
+        body.theme-photoshop .copy-text { color: #666666; }
+        
+        /* =========================================
+           2. NS Blue (Light)
+           ========================================= */
+        body.theme-default { background-color: #f3f4f6; color: #1f2937; }
+        body.theme-default header { background: linear-gradient(to right, #1e3a8a, #3730a3, #1e3a8a); }
+        body.theme-default header h1 { color: #ffffff; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        body.theme-default header p { color: #bfdbfe; }
+        body.theme-default header .icon-wrap-main { background-color: #ffffff; border-color: #60a5fa; color: #1d4ed8; }
+        body.theme-default .app-card { background-color: #ffffff; border-color: #e5e7eb; }
+        body.theme-default .app-card h2 { color: #1f2937; }
+        body.theme-default .app-card p { color: #6b7280; }
+        body.theme-default .app-card:hover { box-shadow: 0 10px 25px rgba(29,78,216,0.15); border-color: #93c5fd; }
+        body.theme-default .img-wrapper { background-color: #f8fafc; }
+        body.theme-default footer { background-color: #ffffff; border-top: 1px solid #e5e7eb; }
+        body.theme-default footer h2 { color: #1e3a8a; }
+        body.theme-default footer .subtitle { color: #6b7280; }
+        body.theme-default .badge-wrap { background-color: #f8fafc; border-color: #e2e8f0; }
+        body.theme-default .badge-wrap:hover { background-color: #eff6ff; border-color: #bfdbfe; }
+        body.theme-default .badge-wrap p.title { color: #94a3b8; }
+        body.theme-default .badge-wrap p.value { color: #1d4ed8; }
+        body.theme-default .icon-wrap { background-color: #dbeafe; color: #1d4ed8; }
+        body.theme-default .copy-text { color: #9ca3af; }
+        
+        /* =========================================
+           3. Forest Green
+           ========================================= */
+        body.theme-green { background-color: #f0fdf4; color: #166534; }
+        body.theme-green header { background: linear-gradient(to right, #166534, #15803d, #166534); }
+        body.theme-green header h1 { color: #ffffff; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        body.theme-green header p { color: #bbf7d0; }
+        body.theme-green header .icon-wrap-main { background-color: #ffffff; border-color: #86efac; color: #16a34a; }
+        body.theme-green .app-card { background-color: #ffffff; border-color: #d1fae5; }
+        body.theme-green .app-card h2 { color: #166534; }
+        body.theme-green .app-card p { color: #15803d; }
+        body.theme-green .app-card:hover { box-shadow: 0 10px 25px rgba(22,163,74,0.15); border-color: #86efac; }
+        body.theme-green .img-wrapper { background-color: #f0fdf4; }
+        body.theme-green footer { background-color: #ffffff; border-top: 1px solid #d1fae5; }
+        body.theme-green footer h2 { color: #166534; }
+        body.theme-green footer .subtitle { color: #15803d; }
+        body.theme-green .badge-wrap { background-color: #f0fdf4; border-color: #bbf7d0; }
+        body.theme-green .badge-wrap:hover { background-color: #dcfce7; border-color: #86efac; }
+        body.theme-green .badge-wrap p.title { color: #4ade80; }
+        body.theme-green .badge-wrap p.value { color: #16a34a; }
+        body.theme-green .icon-wrap { background-color: #dcfce7; color: #16a34a; }
+        body.theme-green .copy-text { color: #86efac; }
+        
+        /* =========================================
+           4. Modern Gray (Silver)
+           ========================================= */
+        body.theme-gray { background-color: #f3f4f6; color: #111827; }
+        body.theme-gray header { background: linear-gradient(to right, #4b5563, #374151, #4b5563); }
+        body.theme-gray header h1 { color: #ffffff; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        body.theme-gray header p { color: #d1d5db; }
+        body.theme-gray header .icon-wrap-main { background-color: #ffffff; border-color: #9ca3af; color: #4b5563; }
+        body.theme-gray .app-card { background-color: #ffffff; border-color: #d1d5db; }
+        body.theme-gray .app-card h2 { color: #111827; }
+        body.theme-gray .app-card p { color: #4b5563; }
+        body.theme-gray .app-card:hover { box-shadow: 0 10px 25px rgba(75,85,99,0.15); border-color: #9ca3af; }
+        body.theme-gray .img-wrapper { background-color: #f9fafb; }
+        body.theme-gray footer { background-color: #ffffff; border-top: 1px solid #d1d5db; }
+        body.theme-gray footer h2 { color: #111827; }
+        body.theme-gray footer .subtitle { color: #4b5563; }
+        body.theme-gray .badge-wrap { background-color: #f9fafb; border-color: #e5e7eb; }
+        body.theme-gray .badge-wrap:hover { background-color: #f3f4f6; border-color: #d1d5db; }
+        body.theme-gray .badge-wrap p.title { color: #9ca3af; }
+        body.theme-gray .badge-wrap p.value { color: #374151; }
+        body.theme-gray .icon-wrap { background-color: #e5e7eb; color: #4b5563; }
+        body.theme-gray .copy-text { color: #9ca3af; }
+        
+        /* =========================================
+           5. Warm Sunset
+           ========================================= */
+        body.theme-sunset { background-color: #fffbeb; color: #854d0e; }
+        body.theme-sunset header { background: linear-gradient(to right, #c2410c, #b91c1c, #c2410c); }
+        body.theme-sunset header h1 { color: #ffffff; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        body.theme-sunset header p { color: #fecaca; }
+        body.theme-sunset header .icon-wrap-main { background-color: #ffffff; border-color: #fca5a5; color: #dc2626; }
+        body.theme-sunset .app-card { background-color: #ffffff; border-color: #fecaca; }
+        body.theme-sunset .app-card h2 { color: #854d0e; }
+        body.theme-sunset .app-card p { color: #b45309; }
+        body.theme-sunset .app-card:hover { box-shadow: 0 10px 25px rgba(234,88,12,0.15); border-color: #fca5a5; }
+        body.theme-sunset .img-wrapper { background-color: #fffbeb; }
+        body.theme-sunset footer { background-color: #ffffff; border-top: 1px solid #fecaca; }
+        body.theme-sunset footer h2 { color: #c2410c; }
+        body.theme-sunset footer .subtitle { color: #b45309; }
+        body.theme-sunset .badge-wrap { background-color: #fffbeb; border-color: #fef08a; }
+        body.theme-sunset .badge-wrap:hover { background-color: #fef3c7; border-color: #fca5a5; }
+        body.theme-sunset .badge-wrap p.title { color: #fca5a5; }
+        body.theme-sunset .badge-wrap p.value { color: #c2410c; }
+        body.theme-sunset .icon-wrap { background-color: #fee2e2; color: #ea580c; }
+        body.theme-sunset .copy-text { color: #fca5a5; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col theme-photoshop">
+    
+    <!-- Header -->
+    <header class="shadow-xl relative">
+        <!-- Theme Switcher Controls -->
+        <div class="absolute top-4 right-4 flex items-center gap-2 bg-black/30 p-2 rounded-full backdrop-blur-sm z-50">
+            <span class="text-xs text-white/90 font-bold ml-1">Theme:</span>
+            <button class="theme-btn theme-photoshop-bg active" onclick="setTheme('photoshop')" title="Adobe Photoshop (Dark)" style="background-color: #1a1a1a; border-color: #00e6e6;"></button>
+            <button class="theme-btn theme-default-bg" onclick="setTheme('default')" title="NS Blue (Default)" style="background-image: linear-gradient(to right, #1e3a8a, #3730a3);"></button>
+            <button class="theme-btn theme-green-bg" onclick="setTheme('green')" title="Forest Green" style="background-color: #166534;"></button>
+            <button class="theme-btn theme-gray-bg" onclick="setTheme('gray')" title="Modern Gray" style="background-color: #4b5563;"></button>
+            <button class="theme-btn theme-sunset-bg" onclick="setTheme('sunset')" title="Warm Sunset" style="background-color: #c2410c;"></button>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 flex flex-col items-center text-center">
+            
+            <!-- Beautiful Big Logo Wrapper -->
+            <div class="mb-6 relative group">
+                <!-- Glowing background effect -->
+                <div class="absolute inset-0 bg-cyan-400 blur-2xl opacity-20 rounded-full group-hover:opacity-40 transition-opacity duration-500"></div>
+                
+                <!-- Main Logo Image (Large & Responsive) -->
+                <img src="logo mnf.jpg" alt="MNF Apps Suit Logo" 
+                     class="relative w-40 h-40 sm:w-48 sm:h-48 object-contain rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.3)] border-4 border-white/10 transition-transform duration-300 group-hover:scale-105 bg-white">
+            </div>
+
+            <h1 class="text-4xl font-extrabold tracking-tight mb-2">MNF apps suit</h1>
+            <p class="text-lg font-medium tracking-wide">All-in-One Professional Web Applications Suite</p>
+            
+            <!-- App Development Badge -->
+            <div class="mt-5 flex items-center gap-3 px-5 py-2 rounded-full border badge-wrap">
+                <div class="flex gap-2 text-xl value">
+                    <i class="fa-brands fa-apple"></i>
+                    <i class="fa-brands fa-android"></i>
+                </div>
+                <span class="text-sm font-bold tracking-wide uppercase value">Apps Under Development</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App Grid -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        <!-- Changed to lg:grid-cols-3 for a balanced 3x2 grid for apps -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- App 1: Shamo CV Maker -->
+            <a href="shamo cv maker/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
+                <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
+                    <img src="shamo cv maker/wisam.jpg" alt="Shamo CV Maker" class="w-full h-full object-contain drop-shadow-md rounded">
+                </div>
+                <div class="p-5 border-t text-center border-inherit">
+                    <h2 class="text-xl font-bold mb-2">Shamo CV Maker</h2>
+                    <p class="text-sm">Professional CV and resume generation tool with customizable A4 templates.</p>
+                </div>
+            </a>
+
+            <!-- App 2: Zohan Pro -->
+            <a href="zohan pro/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
+                <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
+                    <img src="zohan pro/Gemini_Generated_Image_jstdc1jstdc1jstd.jpg" alt="Zohan Pro" class="w-full h-full object-contain drop-shadow-md rounded">
+                </div>
+                <div class="p-5 border-t text-center border-inherit">
+                    <h2 class="text-xl font-bold mb-2">Zohan Pro</h2>
+                    <p class="text-sm">Ultra Fast ID Studio for generating bulk institutional ID cards.</p>
+                </div>
+            </a>
+
+            <!-- App 3: Daiba Passport Photo Maker -->
+            <a href="Daiba passport size photo set maker/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
+                <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
+                    <img src="Daiba passport size photo set maker/Gemini_Generated_Image_57wlmt57wlmt57wl.jpg" alt="Daiba Passport Maker" class="w-full h-full object-contain drop-shadow-md rounded">
+                </div>
+                <div class="p-5 border-t text-center border-inherit">
+                    <h2 class="text-xl font-bold mb-2">Daiba Passport Set</h2>
+                    <p class="text-sm">Crop, arrange, and print 4x6 passport-sized photo sheets instantly.</p>
+                </div>
+            </a>
+
+            <!-- App 4: Falak ID Card Set Maker -->
+            <a href="falak Id card set maker/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
+                <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
+                    <img src="falak Id card set maker/Logo Falak ID Card Set Maker.jpg" alt="Falak ID Card Set Maker" class="w-full h-full object-contain drop-shadow-md rounded">
+                </div>
+                <div class="p-5 border-t text-center border-inherit">
+                    <h2 class="text-xl font-bold mb-2">Falak ID Scanner</h2>
+                    <p class="text-sm">AI-powered card scanning and perfectly aligned front/back A4 printing.</p>
+                </div>
+            </a>
+
+            <!-- App 5: Meeno ID Card Set Maker -->
+            <a href="meeno Id card set maker/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
+                <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
+                    <img src="meeno Id card set maker/Logo Falak ID Card Set Maker.jpg" alt="Meeno ID Card Set Maker" class="w-full h-full object-contain drop-shadow-md rounded">
+                </div>
+                <div class="p-5 border-t text-center border-inherit">
+                    <h2 class="text-xl font-bold mb-2">Meeno ID Card Set</h2>
+                    <p class="text-sm">Professional ID card set generation and 4x6 sheet formatting tool.</p>
+                </div>
+            </a>
+
+            <!-- App 6: Bhla JPG to PDF Converter -->
+            <a href="bhla jpg to PDF converter/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
+                <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
+                    <img src="bhla jpg to PDF converter/logobhla.jpg" alt="Bhla JPG to PDF Converter Logo" class="w-full h-full object-contain drop-shadow-md rounded" onerror="this.src='https://via.placeholder.com/300x220?text=Bhla+Converter'">
+                </div>
+                <div class="p-5 border-t text-center border-inherit">
+                    <h2 class="text-xl font-bold mb-2">Bhla JPG to PDF</h2>
+                    <p class="text-sm">Convert JPG images to PDF format instantly with custom layouts.</p>
+                </div>
+            </a>
+
+            <!-- NEW App 7: Atta Letter Pad Generator -->
+            <a href="atta leter pad generator/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
+                <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
+                    <img src="atta leter pad generator/logoatta.jpg" alt="Atta Letter Pad Generator Logo" class="w-full h-full object-contain drop-shadow-md rounded" onerror="this.src='https://via.placeholder.com/300x220?text=Atta+Letter+Pad'">
+                </div>
+                <div class="p-5 border-t text-center border-inherit">
+                    <h2 class="text-xl font-bold mb-2">Atta Letter Pad</h2>
+                    <p class="text-sm">Professional letter pad generator with customizable details and layout.</p>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <!-- About Section -->
+    <footer class="mt-auto pt-10 pb-6">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl font-extrabold mb-2 font-sans tracking-tight">MNF apps suit</h2>
+            <p class="text-sm font-bold mb-8 tracking-[0.2em] uppercase font-sans subtitle">By Nusrat Shaheen Inc.</p>
+            
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-6 mb-8">
+                <!-- Founder Badge -->
+                <div class="flex items-center gap-4 px-6 py-4 rounded-2xl border w-full sm:w-auto badge-wrap">
+                    <div class="p-3 rounded-full icon-wrap">
+                        <i class="fa-solid fa-user-tie text-xl"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-[10px] font-bold uppercase tracking-wider title">Co-Founder</p>
+                        <p class="font-bold text-lg value">M Nauman Faisal</p>
+                    </div>
+                </div>
+
+                <!-- Contact Badge -->
+                <a href="mailto:mnf101.101@gmail.com" class="flex items-center gap-4 px-6 py-4 rounded-2xl border w-full sm:w-auto cursor-pointer group badge-wrap">
+                    <div class="p-3 rounded-full group-hover:scale-110 transition-transform icon-wrap">
+                        <i class="fa-solid fa-envelope text-xl"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-[10px] font-bold uppercase tracking-wider title">Contact</p>
+                        <p class="font-bold text-base value">mnf101.101@gmail.com</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="inline-flex items-center justify-center gap-2 mt-4 copy-text">
+                <i class="fa-regular fa-copyright"></i>
+                <p class="text-sm font-medium tracking-wide">2026 All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Highly safe and robust Theme switcher logic
+        function setTheme(themeName) {
+            // Safely remove ONLY theme classes to protect other layout classes
+            document.body.classList.forEach(className => {
+                if (className.startsWith('theme-')) {
+                    document.body.classList.remove(className);
+                }
+            });
+
+            // Add selected theme
+            document.body.classList.add('theme-' + themeName);
+
+            // Update button active state
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.theme-${themeName}-bg`).classList.add('active');
+
+            // Save preference
+            localStorage.setItem('mnf_apps_suit_theme', themeName);
+        }
+
+        // Load saved theme on startup (Default is photoshop)
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('mnf_apps_suit_theme') || 'photoshop';
+            setTheme(savedTheme);
+        });
+    </script>
+</body>
+</html>
