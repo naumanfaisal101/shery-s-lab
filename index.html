@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MNF apps suit</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
@@ -136,9 +134,7 @@
 </head>
 <body class="min-h-screen flex flex-col theme-photoshop">
     
-    <!-- Header -->
     <header class="shadow-xl relative">
-        <!-- Theme Switcher Controls -->
         <div class="absolute top-4 right-4 flex items-center gap-2 bg-black/30 p-2 rounded-full backdrop-blur-sm z-50">
             <span class="text-xs text-white/90 font-bold ml-1">Theme:</span>
             <button class="theme-btn theme-photoshop-bg active" onclick="setTheme('photoshop')" title="Adobe Photoshop (Dark)" style="background-color: #1a1a1a; border-color: #00e6e6;"></button>
@@ -150,12 +146,9 @@
         
         <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 flex flex-col items-center text-center">
             
-            <!-- Beautiful Big Logo Wrapper -->
             <div class="mb-6 relative group">
-                <!-- Glowing background effect -->
                 <div class="absolute inset-0 bg-cyan-400 blur-2xl opacity-20 rounded-full group-hover:opacity-40 transition-opacity duration-500"></div>
                 
-                <!-- Main Logo Image (Large & Responsive) -->
                 <img src="logo mnf.jpg" alt="MNF Apps Suit Logo" 
                      class="relative w-40 h-40 sm:w-48 sm:h-48 object-contain rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.3)] border-4 border-white/10 transition-transform duration-300 group-hover:scale-105 bg-white">
             </div>
@@ -163,7 +156,6 @@
             <h1 class="text-4xl font-extrabold tracking-tight mb-2">MNF apps suit</h1>
             <p class="text-lg font-medium tracking-wide">All-in-One Professional Web Applications Suite</p>
             
-            <!-- App Development Badge -->
             <div class="mt-5 flex items-center gap-3 px-5 py-2 rounded-full border badge-wrap">
                 <div class="flex gap-2 text-xl value">
                     <i class="fa-brands fa-apple"></i>
@@ -174,11 +166,8 @@
         </div>
     </header>
 
-    <!-- Main App Grid -->
     <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <!-- Changed to lg:grid-cols-3 for a balanced 3x2 grid for apps -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- App 1: Shamo CV Maker -->
             <a href="shamo cv maker/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
                 <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
                     <img src="shamo cv maker/wisam.jpg" alt="Shamo CV Maker" class="w-full h-full object-contain drop-shadow-md rounded">
@@ -189,7 +178,6 @@
                 </div>
             </a>
 
-            <!-- App 2: Zohan Pro -->
             <a href="zohan pro/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
                 <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
                     <img src="zohan pro/Gemini_Generated_Image_jstdc1jstdc1jstd.jpg" alt="Zohan Pro" class="w-full h-full object-contain drop-shadow-md rounded">
@@ -200,7 +188,6 @@
                 </div>
             </a>
 
-            <!-- App 3: Daiba Passport Photo Maker -->
             <a href="Daiba passport size photo set maker/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
                 <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
                     <img src="Daiba passport size photo set maker/Gemini_Generated_Image_57wlmt57wlmt57wl.jpg" alt="Daiba Passport Maker" class="w-full h-full object-contain drop-shadow-md rounded">
@@ -211,7 +198,6 @@
                 </div>
             </a>
 
-            <!-- App 4: Falak ID Card Set Maker -->
             <a href="falak Id card set maker/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
                 <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
                     <img src="falak Id card set maker/Logo Falak ID Card Set Maker.jpg" alt="Falak ID Card Set Maker" class="w-full h-full object-contain drop-shadow-md rounded">
@@ -222,7 +208,6 @@
                 </div>
             </a>
 
-            <!-- App 5: Meeno ID Card Set Maker -->
             <a href="meeno Id card set maker/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
                 <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
                     <img src="meeno Id card set maker/Logo Falak ID Card Set Maker.jpg" alt="Meeno ID Card Set Maker" class="w-full h-full object-contain drop-shadow-md rounded">
@@ -233,7 +218,6 @@
                 </div>
             </a>
 
-            <!-- App 6: Bhla JPG to PDF Converter -->
             <a href="bhla jpg to PDF converter/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
                 <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
                     <img src="bhla jpg to PDF converter/logobhla.jpg" alt="Bhla JPG to PDF Converter Logo" class="w-full h-full object-contain drop-shadow-md rounded" onerror="this.src='https://via.placeholder.com/300x220?text=Bhla+Converter'">
@@ -244,7 +228,6 @@
                 </div>
             </a>
 
-            <!-- NEW App 7: Atta Letter Pad Generator -->
             <a href="atta leter pad generator/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
                 <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
                     <img src="atta leter pad generator/logoatta.jpg" alt="Atta Letter Pad Generator Logo" class="w-full h-full object-contain drop-shadow-md rounded" onerror="this.src='https://via.placeholder.com/300x220?text=Atta+Letter+Pad'">
@@ -254,17 +237,45 @@
                     <p class="text-sm">Professional letter pad generator with customizable details and layout.</p>
                 </div>
             </a>
+
+            <a href="shaikhu calculator/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
+                <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
+                    <img src="shaikhu calculator/shaikhulogo.webp" alt="Shaikhu Calculator Logo" class="w-full h-full object-contain drop-shadow-md rounded" onerror="this.src='https://via.placeholder.com/300x220?text=Shaikhu+Calculator'">
+                </div>
+                <div class="p-5 border-t text-center border-inherit">
+                    <h2 class="text-xl font-bold mb-2">Shaikhu Calculator</h2>
+                    <p class="text-sm">Advanced calculation tool for quick and accurate mathematical results.</p>
+                </div>
+            </a>
+
+            <a href="Durr e Zara age calculator/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
+                <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
+                    <img src="Durr e Zara age calculator/durrezaralogo.webp" alt="Durr e Zara Age Calculator Logo" class="w-full h-full object-contain drop-shadow-md rounded" onerror="this.src='https://via.placeholder.com/300x220?text=Age+Calculator'">
+                </div>
+                <div class="p-5 border-t text-center border-inherit">
+                    <h2 class="text-xl font-bold mb-2">Durr e Zara Age Calc</h2>
+                    <p class="text-sm">Precise and easy-to-use age calculation tool for professional and personal use.</p>
+                </div>
+            </a>
+
+            <a href="MH jpg to webp converter/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden">
+                <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
+                    <img src="MH jpg to webp converter/mhussainlogo.webp" alt="MH JPG to WEBP Converter Logo" class="w-full h-full object-contain drop-shadow-md rounded" onerror="this.src='https://via.placeholder.com/300x220?text=MH+Converter'">
+                </div>
+                <div class="p-5 border-t text-center border-inherit">
+                    <h2 class="text-xl font-bold mb-2">MH JPG to WEBP</h2>
+                    <p class="text-sm">Efficient image conversion tool for optimizing standard images to next-gen WEBP format.</p>
+                </div>
+            </a>
         </div>
     </main>
 
-    <!-- About Section -->
     <footer class="mt-auto pt-10 pb-6">
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-extrabold mb-2 font-sans tracking-tight">MNF apps suit</h2>
             <p class="text-sm font-bold mb-8 tracking-[0.2em] uppercase font-sans subtitle">By Nusrat Shaheen Inc.</p>
             
             <div class="flex flex-col sm:flex-row justify-center items-center gap-6 mb-8">
-                <!-- Founder Badge -->
                 <div class="flex items-center gap-4 px-6 py-4 rounded-2xl border w-full sm:w-auto badge-wrap">
                     <div class="p-3 rounded-full icon-wrap">
                         <i class="fa-solid fa-user-tie text-xl"></i>
@@ -275,7 +286,6 @@
                     </div>
                 </div>
 
-                <!-- Contact Badge -->
                 <a href="mailto:mnf101.101@gmail.com" class="flex items-center gap-4 px-6 py-4 rounded-2xl border w-full sm:w-auto cursor-pointer group badge-wrap">
                     <div class="p-3 rounded-full group-hover:scale-110 transition-transform icon-wrap">
                         <i class="fa-solid fa-envelope text-xl"></i>
