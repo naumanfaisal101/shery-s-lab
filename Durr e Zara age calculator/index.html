@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Durr-e-zara Age Calculator</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for a polished look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+        .dark ::-webkit-scrollbar-thumb { background-color: #475569; }
+        
+        /* Smooth transitions */
+        body { transition: background-color 0.3s ease, color 0.3s ease; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
+
+    <!-- Navbar / Header -->
+    <header class="w-full bg-white dark:bg-gray-800 shadow-sm transition-colors duration-300">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center flex-wrap gap-y-4">
+            <div class="flex items-center gap-3 md:gap-4">
+                <!-- Logo with 1:1 (4:4) ratio (Now Clickable) -->
+                <a href="index.html" class="w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-xl overflow-hidden shadow-md bg-brand-100 dark:bg-gray-700 flex items-center justify-center hover:opacity-80 transition-opacity" aria-label="Go to Home">
+                    <img src="durrezaralogo.webp" alt="Durr-e-zara Logo" 
+                         class="w-full h-full object-cover"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%2316a34a\'><text x=\'50%\' y=\'50%\' font-size=\'40\' text-anchor=\'middle\' dominant-baseline=\'central\' font-family=\'sans-serif\' font-weight=\'bold\' fill=\'%23fff\'>DZ</text></svg>'; this.parentElement.classList.add('bg-brand-500')">
+                </a>
+                <div>
+                    <h1 class="text-lg md:text-2xl font-bold text-gray-900 dark:text-white leading-tight">Durr-e-zara</h1>
+                    <p class="text-sm md:text-base text-brand-600 dark:text-brand-500 font-medium tracking-wide">Age Calculator</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 md:gap-4">
+                <!-- Home Button -->
+                <a href="index.html" class="bg-brand-500 hover:bg-brand-600 text-white px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-bold rounded-full shadow-md hover:shadow-lg transition-all duration-300 whitespace-nowrap flex items-center gap-1.5">
+                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <span class="hidden sm:inline">Home</span>
+                </a>
+
+                <!-- Back to Dashboard Button -->
+                <a href="../index.html" class="bg-[#1e3a8a] hover:bg-blue-800 text-white px-3 py-2 md:px-4 md:py-2 text-xs md:text-sm font-bold rounded-full shadow-md hover:shadow-lg transition-all duration-300 whitespace-nowrap">
+                    &larr; <span class="hidden sm:inline">Back to Dashboard</span><span class="sm:hidden">Dashboard</span>
+                </a>
+
+                <!-- Theme Toggle Button -->
+                <button id="themeToggle" class="p-2 md:p-3 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" aria-label="Toggle Theme">
+                    <!-- Sun Icon -->
+                    <svg id="sunIcon" class="w-6 h-6 text-amber-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <!-- Moon Icon -->
+                    <svg id="moonIcon" class="w-6 h-6 text-gray-500 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6 w-full max-w-2xl mx-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full overflow-hidden transition-colors duration-300 border border-gray-100 dark:border-gray-700">
+            
+            <!-- Header bar inside card matching screenshot style but modernized -->
+            <div class="bg-brand-600 dark:bg-brand-700 text-white px-6 py-3 flex justify-between items-center">
+                <h2 class="text-xl font-semibold">Calculate Age</h2>
+                <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+
+            <div class="p-6 md:p-8">
+                <!-- Error Message Container -->
+                <div id="errorMessage" class="hidden mb-4 p-3 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-lg text-sm font-medium text-center"></div>
+
+                <!-- Input Form -->
+                <form id="ageForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Date of Birth -->
+                        <div class="space-y-2">
+                            <label for="dob" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date of Birth</label>
+                            <input type="date" id="dob" required
+                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-shadow cursor-pointer shadow-sm">
+                        </div>
+                        
+                        <!-- Target Date -->
+                        <div class="space-y-2">
+                            <label for="targetDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Age at the Date of</label>
+                            <input type="date" id="targetDate" required
+                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-shadow cursor-pointer shadow-sm">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                        Calculate Age
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </form>
+
+                <!-- Results Section (Hidden by default) -->
+                <div id="resultSection" class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700 hidden animate-fade-in">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Result:</h3>
+                    
+                    <!-- Main Age display -->
+                    <div class="bg-brand-50 dark:bg-gray-700/50 rounded-xl p-5 mb-4 border border-brand-100 dark:border-gray-600 text-center">
+                        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Exact Age</p>
+                        <p id="mainAge" class="text-2xl md:text-3xl font-extrabold text-brand-700 dark:text-brand-400"></p>
+                    </div>
+
+                    <!-- Detailed breakdown -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg border border-gray-100 dark:border-gray-600">
+                            <p id="totalDays" class="text-xl font-bold text-gray-800 dark:text-gray-100">0</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Total Days</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg border border-gray-100 dark:border-gray-600">
+                            <p id="totalHours" class="text-xl font-bold text-gray-800 dark:text-gray-100">0</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Total Hours</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg border border-gray-100 dark:border-gray-600">
+                            <p id="totalMins" class="text-xl font-bold text-gray-800 dark:text-gray-100">0</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Total Mins</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg border border-gray-100 dark:border-gray-600">
+                            <p id="totalSecs" class="text-xl font-bold text-gray-800 dark:text-gray-100">0</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Total Secs</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-6 mt-auto transition-colors duration-300">
+        <div class="max-w-4xl mx-auto px-4 text-center space-y-2">
+            <p class="text-gray-600 dark:text-gray-400 font-medium">Made by <span class="text-brand-600 dark:text-brand-500 font-bold">Nusrat shaheen inc.</span></p>
+            <a href="mailto:mnf101.101@gmail.com" class="inline-flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                mnf101.101@gmail.com
+            </a>
+        </div>
+    </footer>
+
+    <!-- CSS Animation for showing results cleanly -->
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
+
+    <!-- App Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Theme Management ---
+            const html = document.documentElement;
+            const themeToggleBtn = document.getElementById('themeToggle');
+            const sunIcon = document.getElementById('sunIcon');
+            const moonIcon = document.getElementById('moonIcon');
+
+            // Check saved theme or system preference
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+                updateThemeIcons('dark');
+            } else {
+                html.classList.remove('dark');
+                updateThemeIcons('light');
+            }
+
+            // Theme toggle listener
+            themeToggleBtn.addEventListener('click', () => {
+                if (html.classList.contains('dark')) {
+                    html.classList.remove('dark');
+                    localStorage.theme = 'light';
+                    updateThemeIcons('light');
+                } else {
+                    html.classList.add('dark');
+                    localStorage.theme = 'dark';
+                    updateThemeIcons('dark');
+                }
+            });
+
+            function updateThemeIcons(theme) {
+                if (theme === 'dark') {
+                    sunIcon.classList.remove('hidden');
+                    moonIcon.classList.add('hidden');
+                } else {
+                    sunIcon.classList.add('hidden');
+                    moonIcon.classList.remove('hidden');
+                }
+            }
+
+            // --- Calculator Logic ---
+            const form = document.getElementById('ageForm');
+            const dobInput = document.getElementById('dob');
+            const targetInput = document.getElementById('targetDate');
+            const resultSection = document.getElementById('resultSection');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Set default target date to today
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            targetInput.value = `${yyyy}-${mm}-${dd}`;
+
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            function showError(msg) {
+                errorMessage.textContent = msg;
+                errorMessage.classList.remove('hidden');
+                resultSection.classList.add('hidden');
+            }
+
+            function hideError() {
+                errorMessage.classList.add('hidden');
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                hideError();
+
+                const dobDate = new Date(dobInput.value);
+                const targetDate = new Date(targetInput.value);
+
+                // Validate Inputs
+                if (isNaN(dobDate.getTime()) || isNaN(targetDate.getTime())) {
+                    showError("Please enter valid dates.");
+                    return;
+                }
+
+                if (dobDate > targetDate) {
+                    showError("Date of Birth cannot be greater than the Target Date.");
+                    return;
+                }
+
+                // 1. Calculate Exact Years, Months, Days
+                let years = targetDate.getFullYear() - dobDate.getFullYear();
+                let months = targetDate.getMonth() - dobDate.getMonth();
+                let days = targetDate.getDate() - dobDate.getDate();
+
+                if (days < 0) {
+                    months--;
+                    // Get total days in the previous month of the target date
+                    const prevMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0);
+                    days += prevMonth.getDate();
+                }
+
+                if (months < 0) {
+                    years--;
+                    months += 12;
+                }
+
+                // Format the main string dynamically
+                let ageStringParts = [];
+                if (years > 0) ageStringParts.push(`${years} ${years === 1 ? 'year' : 'years'}`);
+                if (months > 0) ageStringParts.push(`${months} ${months === 1 ? 'month' : 'months'}`);
+                if (days > 0 || ageStringParts.length === 0) ageStringParts.push(`${days} ${days === 1 ? 'day' : 'days'}`);
+
+                document.getElementById('mainAge').textContent = ageStringParts.join(', ');
+
+                // 2. Calculate Totals (Days, Hours, Mins, Secs)
+                // We use UTC to avoid daylight saving time jumps affecting total calculation
+                const utcDob = Date.UTC(dobDate.getFullYear(), dobDate.getMonth(), dobDate.getDate());
+                const utcTarget = Date.UTC(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+                
+                const timeDiff = Math.abs(utcTarget - utcDob);
+                
+                const totalDays = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                const totalHours = totalDays * 24;
+                const totalMins = totalHours * 60;
+                const totalSecs = totalMins * 60;
+
+                // Update DOM elements
+                document.getElementById('totalDays').textContent = formatNumber(totalDays);
+                document.getElementById('totalHours').textContent = formatNumber(totalHours);
+                document.getElementById('totalMins').textContent = formatNumber(totalMins);
+                document.getElementById('totalSecs').textContent = formatNumber(totalSecs);
+
+                // Show Results safely
+                resultSection.classList.remove('hidden');
+                
+                // Quick animation reset
+                resultSection.classList.remove('animate-fade-in');
+                void resultSection.offsetWidth; // trigger reflow
+                resultSection.classList.add('animate-fade-in');
+            });
+        });
+    </script>
+</body>
+</html>
