@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MH jpg to webp converter</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for beautiful SVG icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Custom Tailwind Config for Theme Colors -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    },
+                    aspectRatio: {
+                        '4/4': '1 / 1',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Smooth transitions for theme switching */
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+        }
+        /* Hide scrollbar for cleaner look but keep functionality */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        
+        /* Drag and Drop states */
+        .drag-over {
+            border-color: #6366f1 !important;
+            background-color: rgba(99, 102, 241, 0.05) !important;
+        }
+        .dark .drag-over {
+            background-color: rgba(99, 102, 241, 0.1) !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 font-sans selection:bg-primary-500 selection:text-white">
+
+    <!-- Header Area -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <!-- Logo with 4:4 (1:1) aspect ratio -->
+                <div class="w-10 h-10 sm:w-12 sm:h-12 aspect-4/4 rounded-xl overflow-hidden shadow-md border-2 border-white dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center shrink-0">
+                    <img 
+                        src="mhussainlogo.webp" 
+                        alt="MH Logo" 
+                        class="w-full h-full object-cover"
+                        onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%236366f1\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M2 12h4l3-9 5 18 3-9h5\'/></svg>'; this.classList.add('p-2');"
+                    >
+                </div>
+                <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 dark:from-primary-400 dark:to-purple-400 bg-clip-text text-transparent truncate">
+                    MH jpg to webp converter
+                </h1>
+            </div>
+            
+            <!-- Right Side Controls -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <!-- App Home Button -->
+                <button id="homeBtn" class="text-sm font-medium text-slate-600 hover:text-primary-600 dark:text-slate-300 dark:hover:text-primary-400 transition-colors flex items-center gap-1.5" title="App Home">
+                    <i data-lucide="home" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Home</span>
+                </button>
+                
+                <!-- Back to Dashboard Button -->
+                <a href="../index.html" class="text-sm font-semibold bg-[#1e3a8a] hover:bg-blue-800 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all shadow-md hover:shadow-lg flex items-center gap-1.5 border border-blue-700">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Dashboard</span>
+                </a>
+
+                <!-- Theme Toggle Button -->
+                <button id="themeToggle" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 ml-1" aria-label="Toggle Dark Mode">
+                    <i data-lucide="sun" class="w-5 h-5 hidden dark:block text-amber-400"></i>
+                    <i data-lucide="moon" class="w-5 h-5 block dark:hidden text-slate-600"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App Container -->
+    <main class="flex-grow w-full max-w-3xl mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
+        
+        <!-- Welcome / Instructions -->
+        <div class="text-center space-y-2">
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Lightning Fast Conversion</h2>
+            <p class="text-slate-500 dark:text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
+                Convert your heavy JPG images to modern, lightweight WebP format instantly without uploading them to any server. Your files stay on your device!
+            </p>
+        </div>
+
+        <!-- Conversion Card -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 p-1 sm:p-2 overflow-hidden transition-all duration-300">
+            <div class="p-4 sm:p-8 space-y-6">
+                
+                <!-- Upload Zone -->
+                <div id="dropZone" class="relative group cursor-pointer flex flex-col items-center justify-center w-full h-48 sm:h-64 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200">
+                    <input type="file" id="fileInput" accept=".jpg, .jpeg" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" title="Click to select a JPG image">
+                    
+                    <div class="flex flex-col items-center space-y-4 pointer-events-none text-center px-4">
+                        <div class="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center text-primary-600 dark:text-primary-400 group-hover:scale-110 transition-transform duration-300">
+                            <i data-lucide="image-plus" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <p class="text-base sm:text-lg font-semibold text-slate-700 dark:text-slate-300">
+                                Click to upload or drag and drop
+                            </p>
+                            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                SVG, PNG, JPG or GIF (MAX. 800x400px)
+                            </p>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
+                            Only .jpg / .jpeg files
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Settings (Quality Slider) -->
+                <div id="settingsArea" class="hidden space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div class="flex justify-between items-center">
+                        <label for="qualitySlider" class="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                            <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> WebP Quality
+                        </label>
+                        <span id="qualityValue" class="text-sm font-bold text-primary-600 dark:text-primary-400">80%</span>
+                    </div>
+                    <input type="range" id="qualitySlider" min="0" max="1" step="0.05" value="0.8" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-primary-600">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Higher quality means larger file size. 80% is recommended for web.</p>
+                </div>
+
+                <!-- Preview Area -->
+                <div id="previewArea" class="hidden flex-col sm:flex-row gap-4 pt-4">
+                    <!-- Original -->
+                    <div class="flex-1 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-slate-200 dark:border-slate-700 relative overflow-hidden group">
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 flex justify-between">
+                            <span>ORIGINAL (JPG)</span>
+                            <span id="originalSize" class="text-slate-700 dark:text-slate-300">-- KB</span>
+                        </p>
+                        <div class="w-full h-32 sm:h-40 rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-900 flex items-center justify-center">
+                            <img id="originalPreview" src="" alt="Original Preview" class="max-w-full max-h-full object-contain">
+                        </div>
+                    </div>
+                    
+                    <!-- Arrow Icon (Desktop) -->
+                    <div class="hidden sm:flex items-center justify-center text-slate-300 dark:text-slate-600">
+                        <i data-lucide="arrow-right" class="w-6 h-6"></i>
+                    </div>
+
+                    <!-- Converted -->
+                    <div class="flex-1 bg-primary-50 dark:bg-primary-900/10 rounded-xl p-3 border border-primary-100 dark:border-primary-900/30 relative overflow-hidden">
+                        <p class="text-xs font-semibold text-primary-600 dark:text-primary-400 mb-2 flex justify-between">
+                            <span>CONVERTED (WEBP)</span>
+                            <span id="convertedSize" class="text-primary-700 dark:text-primary-300">-- KB</span>
+                        </p>
+                        <div class="w-full h-32 sm:h-40 rounded-lg overflow-hidden bg-white dark:bg-slate-900 flex items-center justify-center relative">
+                            <img id="convertedPreview" src="" alt="Converted Preview" class="max-w-full max-h-full object-contain">
+                            <!-- Loader -->
+                            <div id="convertingLoader" class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 flex flex-col items-center justify-center hidden">
+                                <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-primary-500"></i>
+                                <span class="text-xs mt-2 font-medium">Converting...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div id="actionArea" class="hidden pt-4 flex flex-col sm:flex-row gap-3">
+                    <button id="resetBtn" class="px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-700 font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto flex items-center justify-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset
+                    </button>
+                    <button id="downloadBtn" class="flex-1 px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-medium shadow-lg shadow-primary-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                        <i data-lucide="download" class="w-5 h-5"></i> Download WebP
+                    </button>
+                </div>
+                
+                <!-- Status Message -->
+                <div id="statusMessage" class="hidden rounded-lg p-3 text-sm text-center font-medium"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 py-6">
+        <div class="max-w-4xl mx-auto px-4 flex flex-col items-center justify-center space-y-2">
+            <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-medium text-sm sm:text-base">
+                develop with <i data-lucide="heart" class="w-4 h-4 text-red-500 fill-red-500 animate-pulse"></i> by 
+                <span class="text-slate-900 dark:text-slate-100 font-bold">Nusrat shaheen inc.</span>
+            </div>
+            <a href="mailto:mnf101.101@gmail.com" class="text-xs sm:text-sm text-slate-500 dark:text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex items-center gap-1">
+                <i data-lucide="mail" class="w-3 h-3"></i> contact(mnf101.101@gmail.com)
+            </a>
+        </div>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // --- Theme Management ---
+        const htmlElement = document.documentElement;
+        const themeToggleBtn = document.getElementById('themeToggle');
+
+        // Check local storage or system preference
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+        } else {
+            htmlElement.classList.remove('dark');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark');
+            if (htmlElement.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // --- Core Application Logic ---
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const settingsArea = document.getElementById('settingsArea');
+        const previewArea = document.getElementById('previewArea');
+        const actionArea = document.getElementById('actionArea');
+        
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityValue = document.getElementById('qualityValue');
+        
+        const originalPreview = document.getElementById('originalPreview');
+        const convertedPreview = document.getElementById('convertedPreview');
+        const originalSizeElem = document.getElementById('originalSize');
+        const convertedSizeElem = document.getElementById('convertedSize');
+        
+        const resetBtn = document.getElementById('resetBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const convertingLoader = document.getElementById('convertingLoader');
+
+        let currentFile = null;
+        let originalImageObj = new Image();
+        let currentWebpUrl = null;
+        let originalFileName = "";
+
+        // Drag and Drop Events
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            let dt = e.dataTransfer;
+            let files = dt.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            const file = files[0];
+
+            // Validate if it's a JPG
+            if (!file.type.match(/image\/jpe?g/i)) {
+                showStatus('Please select a valid JPG or JPEG image.', 'error');
+                return;
+            }
+
+            currentFile = file;
+            originalFileName = file.name.replace(/\.[^/.]+$/, ""); // remove extension
+            
+            // Format Original Size
+            originalSizeElem.textContent = formatBytes(file.size);
+            
+            // Show UI Elements
+            settingsArea.classList.remove('hidden');
+            previewArea.classList.remove('hidden');
+            previewArea.classList.add('flex');
+            actionArea.classList.remove('hidden');
+            actionArea.classList.add('flex');
+            dropZone.classList.add('hidden');
+            hideStatus();
+
+            // Load image for preview and conversion
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                originalPreview.src = e.target.result;
+                originalImageObj.src = e.target.result;
+                
+                originalImageObj.onload = function() {
+                    processConversion();
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // Handle Quality Slider Change
+        qualitySlider.addEventListener('input', function() {
+            qualityValue.textContent = Math.round(this.value * 100) + '%';
+        });
+
+        // Debounce conversion on slider change so it doesn't lag
+        let timeoutId;
+        qualitySlider.addEventListener('change', function() {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                if(currentFile) processConversion();
+            }, 300);
+        });
+
+        function processConversion() {
+            convertingLoader.classList.remove('hidden');
+            
+            // Short timeout to allow UI to show loader before blocking main thread with canvas
+            setTimeout(() => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    canvas.width = originalImageObj.width;
+                    canvas.height = originalImageObj.height;
+                    
+                    ctx.drawImage(originalImageObj, 0, 0);
+                    
+                    const quality = parseFloat(qualitySlider.value);
+                    currentWebpUrl = canvas.toDataURL('image/webp', quality);
+                    
+                    convertedPreview.src = currentWebpUrl;
+                    
+                    // Estimate converted size from Base64 string
+                    // Base64 is roughly 33% larger than binary. 
+                    // Formula: string length * 0.75 - padding length
+                    let padding = 0;
+                    if (currentWebpUrl.endsWith('==')) padding = 2;
+                    else if (currentWebpUrl.endsWith('=')) padding = 1;
+                    
+                    const base64Length = currentWebpUrl.split(',')[1].length;
+                    const sizeInBytes = (base64Length * 0.75) - padding;
+                    
+                    convertedSizeElem.textContent = formatBytes(sizeInBytes);
+                    
+                    // Show success status if size is reduced well
+                    if(sizeInBytes < currentFile.size) {
+                        const saved = ((currentFile.size - sizeInBytes) / currentFile.size * 100).toFixed(1);
+                        showStatus(`Awesome! You saved ${saved}% space.`, 'success');
+                    } else {
+                        showStatus(`File size increased. Try lowering the quality.`, 'warning');
+                    }
+                    
+                } catch (err) {
+                    console.error("Conversion error:", err);
+                    showStatus('Error during conversion.', 'error');
+                } finally {
+                    convertingLoader.classList.add('hidden');
+                }
+            }, 50);
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            if(!currentWebpUrl) return;
+            
+            const link = document.createElement('a');
+            link.download = `${originalFileName}-MH.webp`;
+            link.href = currentWebpUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        resetBtn.addEventListener('click', resetApp);
+        homeBtn.addEventListener('click', resetApp);
+
+        function resetApp() {
+            currentFile = null;
+            currentWebpUrl = null;
+            fileInput.value = '';
+            
+            dropZone.classList.remove('hidden');
+            settingsArea.classList.add('hidden');
+            
+            previewArea.classList.add('hidden');
+            previewArea.classList.remove('flex');
+            
+            actionArea.classList.add('hidden');
+            actionArea.classList.remove('flex');
+            
+            originalPreview.src = '';
+            convertedPreview.src = '';
+            
+            hideStatus();
+            
+            // Reset quality
+            qualitySlider.value = 0.8;
+            qualityValue.textContent = '80%';
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (!+bytes) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        }
+
+        function showStatus(message, type = 'info') {
+            statusMessage.textContent = message;
+            statusMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-amber-100', 'text-amber-700', 'dark:bg-red-900/30', 'dark:text-red-400', 'dark:bg-green-900/30', 'dark:text-green-400', 'dark:bg-amber-900/30', 'dark:text-amber-400');
+            
+            if (type === 'error') {
+                statusMessage.classList.add('bg-red-100', 'text-red-700', 'dark:bg-red-900/30', 'dark:text-red-400');
+            } else if (type === 'success') {
+                statusMessage.classList.add('bg-green-100', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400');
+            } else if (type === 'warning') {
+                statusMessage.classList.add('bg-amber-100', 'text-amber-700', 'dark:bg-amber-900/30', 'dark:text-amber-400');
+            }
+        }
+
+        function hideStatus() {
+            statusMessage.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
