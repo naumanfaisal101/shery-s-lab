@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shayree Balloon Pop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #87CEEB; /* Sky blue */
+            touch-action: none; /* Prevent scrolling on mobile touch */
+            font-family: 'Inter', sans-serif;
+            /* Disable text selection */
+            user-select: none; 
+            -webkit-user-select: none;
+        }
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+        /* Cloud background animation */
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.8;
+            animation: drift linear infinite;
+            pointer-events: none;
+        }
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+        .cloud::before {
+            width: 50px; height: 50px;
+            top: -20px; left: 10px;
+        }
+        .cloud::after {
+            width: 70px; height: 70px;
+            top: -30px; right: 15px;
+        }
+        @keyframes drift {
+            from { transform: translateX(-150px); }
+            to { transform: translateX(100vw); }
+        }
+        /* Custom UI Styles */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.3);
+        }
+        .bouncing-text {
+            animation: bounce 2s infinite ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background clouds -->
+    <div class="cloud" style="width: 120px; height: 40px; top: 10%; animation-duration: 40s;"></div>
+    <div class="cloud" style="width: 150px; height: 50px; top: 30%; animation-duration: 55s; animation-delay: -20s;"></div>
+    <div class="cloud" style="width: 100px; height: 35px; top: 60%; animation-duration: 35s; animation-delay: -10s;"></div>
+    <div class="cloud" style="width: 180px; height: 60px; top: 80%; animation-duration: 60s; animation-delay: -5s; opacity: 0.6;"></div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- UI Overlay Layer -->
+    <div id="uiLayer" class="absolute inset-0 pointer-events-none flex flex-col justify-between p-2 sm:p-4 z-10 w-full h-full overflow-hidden">
+        <!-- Top Bar: Score & Stage -->
+        <div class="flex justify-between items-start w-full hidden" id="gameHud">
+            <div class="glass-panel px-4 py-2 sm:px-6 sm:py-3 rounded-2xl text-white font-bold text-lg sm:text-2xl tracking-wide shadow-lg">
+                <span class="text-yellow-300">Level:</span> <span id="stageDisplay">1</span>/50
+            </div>
+            <div class="glass-panel px-4 py-2 sm:px-6 sm:py-3 rounded-2xl text-white font-bold text-lg sm:text-2xl tracking-wide shadow-lg">
+                <span class="text-green-300">Popped:</span> <span id="scoreDisplay">0</span>/<span id="targetDisplay">5</span>
+            </div>
+        </div>
+
+        <!-- Center Messages (Stage Clear etc) -->
+        <div id="centerMessage" class="absolute inset-0 flex items-center justify-center hidden px-4">
+            <h2 id="messageText" class="text-4xl sm:text-6xl md:text-7xl font-extrabold text-white drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)] bouncing-text text-center w-full">
+                Stage Clear!
+            </h2>
+        </div>
+    </div>
+
+    <!-- Main Menu / Start Screen -->
+    <div id="startMenu" class="absolute inset-0 flex items-center justify-center z-20 bg-black/40 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="glass-panel p-6 sm:p-10 md:p-12 rounded-3xl text-center w-full max-w-md shadow-2xl transform transition-transform hover:scale-105 duration-300 pointer-events-auto my-auto">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 mb-4 drop-shadow-lg bouncing-text leading-tight">
+                Shayree Balloon Pop
+            </h1>
+            <p class="text-white text-base sm:text-lg md:text-xl mb-6 font-medium drop-shadow-md">
+                Tap the balloons with your finger to pop them and learn ABCs!<br>
+                <span class="text-xs sm:text-sm opacity-80 text-yellow-200 mt-2 block">(Turn on your sound / آواز کھول لیں)</span>
+            </p>
+            
+            <button id="startBtn" class="w-full sm:w-auto bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold py-3 sm:py-4 px-8 sm:px-10 rounded-full text-xl sm:text-2xl shadow-[0_0_20px_rgba(74,222,128,0.5)] hover:shadow-[0_0_30px_rgba(74,222,128,0.8)] transition-all active:scale-95 mb-6">
+                START TAPPING! 👆
+            </button>
+
+            <!-- Credits -->
+            <div class="border-t border-white/30 pt-4 mt-2">
+                <p class="text-sm text-white font-semibold drop-shadow-sm">
+                    Developed with ❤️ by <span class="text-yellow-300">Nusrat SHAHEEN inc.</span>
+                </p>
+                <p class="text-xs text-white/80 mt-1 drop-shadow-sm">
+                    Contact: <a href="mailto:mnf101.101@gmail.com" class="underline hover:text-white break-all">mnf101.101@gmail.com</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startMenu = document.getElementById('startMenu');
+        const startBtn = document.getElementById('startBtn');
+        const gameHud = document.getElementById('gameHud');
+        const stageDisplay = document.getElementById('stageDisplay');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const targetDisplay = document.getElementById('targetDisplay');
+        const centerMessage = document.getElementById('centerMessage');
+        const messageText = document.getElementById('messageText');
+
+        // Audio Context
+        let audioCtx;
+
+        // Game State
+        let width, height;
+        let isPlaying = false;
+        let currentStage = 1;
+        let balloonsPoppedInStage = 0;
+        let targetBalloons = 5;
+        let animationFrameId;
+        let tapRadiusUpgrade = 15; // Upgrades make tapping easier
+
+        // Entities
+        let balloons = [];
+        let particles = [];
+        let floatingTexts = [];
+        let fallingEmojis = [];
+        let tapEffects = [];
+
+        // Alphabet and Silly Words with Urdu meaning and Emojis
+        const sillyAlphabet = [
+            { letter: 'A', word: 'Awesome Apple', urdu: 'Shandaar Saib', urduScript: 'شاندار سیب', emoji: '🍎' },
+            { letter: 'B', word: 'Bouncing Banana', urdu: 'Uchalta Kela', urduScript: 'اچھلتا کیلا', emoji: '🍌' },
+            { letter: 'C', word: 'Crazy Cat', urdu: 'Pagal Bili', urduScript: 'پاگل بلی', emoji: '🐱' },
+            { letter: 'D', word: 'Dancing Dog', urdu: 'Nachta Kuta', urduScript: 'ناچتا کتا', emoji: '🐶' },
+            { letter: 'E', word: 'Epic Elephant', urdu: 'Shaandar Haathi', urduScript: 'شاندار ہاتھی', emoji: '🐘' },
+            { letter: 'F', word: 'Fluffy Frog', urdu: 'Naram Maindak', urduScript: 'نرم مینڈک', emoji: '🐸' },
+            { letter: 'G', word: 'Giggly Goat', urdu: 'Hansti Bakri', urduScript: 'ہنستی بکری', emoji: '🐐' },
+            { letter: 'H', word: 'Happy Horse', urdu: 'Khush Ghora', urduScript: 'خوش گھوڑا', emoji: '🐴' },
+            { letter: 'I', word: 'Itchy Iguana', urdu: 'Khujli Wali Chipkali', urduScript: 'کھجلی والی چھپکلی', emoji: '🦎' },
+            { letter: 'J', word: 'Jumping Jackal', urdu: 'Uchalta Gidar', urduScript: 'اچھلتا گیدڑ', emoji: '🐺' },
+            { letter: 'K', word: 'Kooky Kangaroo', urdu: 'Ajeeb Kangaroo', urduScript: 'عجیب کینگرو', emoji: '🦘' },
+            { letter: 'L', word: 'Laughing Lion', urdu: 'Hansta Sher', urduScript: 'ہنستا شیر', emoji: '🦁' },
+            { letter: 'M', word: 'Magical Monkey', urdu: 'Jadui Bandar', urduScript: 'جادوئی بندر', emoji: '🐵' },
+            { letter: 'N', word: 'Naughty Nightowl', urdu: 'Shararti Ullu', urduScript: 'شرارتی الو', emoji: '🦉' },
+            { letter: 'O', word: 'Outstanding Octopus', urdu: 'Behtareen Octopus', urduScript: 'بہترین آکٹوپس', emoji: '🐙' },
+            { letter: 'P', word: 'Playful Parrot', urdu: 'Chulbula Tota', urduScript: 'چلبلا طوطا', emoji: '🦜' },
+            { letter: 'Q', word: 'Quirky Queen', urdu: 'Ajeeb Malika', urduScript: 'عجیب ملکہ', emoji: '👸' },
+            { letter: 'R', word: 'Running Rabbit', urdu: 'Bhagta Khargosh', urduScript: 'بھاگتا خرگوش', emoji: '🐰' },
+            { letter: 'S', word: 'Silly Snake', urdu: 'Mazaqiya Saanp', urduScript: 'مزاحیہ سانپ', emoji: '🐍' },
+            { letter: 'T', word: 'Ticklish Turtle', urdu: 'Gudgudi Wala Kachwa', urduScript: 'گدگدی والا کچھوا', emoji: '🐢' },
+            { letter: 'U', word: 'Unique Umbrella', urdu: 'Munfarid Chatri', urduScript: 'منفرد چھتری', emoji: '☂️' },
+            { letter: 'V', word: 'Vibrant Volcano', urdu: 'Chamakdar Aatish Fishan', urduScript: 'چمکدار آتش فشاں', emoji: '🌋' },
+            { letter: 'W', word: 'Wiggly Worm', urdu: 'Hilta Keera', urduScript: 'ہلتا کیڑا', emoji: '🐛' },
+            { letter: 'X', word: 'Xylophone', urdu: 'Jal Tarang', urduScript: 'جل ترنگ', emoji: '🎹' },
+            { letter: 'Y', word: 'Yawning Yak', urdu: 'Ubaasi Leta Yak', urduScript: 'اباسی لیتا یاک', emoji: '🐂' },
+            { letter: 'Z', word: 'Zippy Zebra', urdu: 'Phurtila Zebra', urduScript: 'پھرتیلا زیبرا', emoji: '🦓' }
+        ];
+
+        // Background Music System
+        let bgmIntervalId = null;
+        let nextNoteTime = 0;
+        let currentNote = 0;
+        const bgmNotes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63]; // Cheerful arpeggio
+
+        function startBGM() {
+            if (!audioCtx) return;
+            if (bgmIntervalId) return; 
+            
+            nextNoteTime = audioCtx.currentTime + 0.1;
+            bgmIntervalId = setInterval(() => {
+                if (!isPlaying) return; 
+                
+                while (nextNoteTime < audioCtx.currentTime + 0.1) {
+                    playBGMNote(bgmNotes[currentNote], nextNoteTime);
+                    nextNoteTime += 0.35; 
+                    currentNote = (currentNote + 1) % bgmNotes.length;
+                }
+            }, 50);
+        }
+
+        function playBGMNote(freq, time) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine'; 
+            osc.frequency.value = freq / 2; 
+            
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(0.04, time + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
+            
+            osc.start(time);
+            osc.stop(time + 0.35);
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playPopSound() {
+            if (!audioCtx) return;
+            
+            // Pop has two components: a quick noise burst and a low thud
+            const bufferSize = audioCtx.sampleRate * 0.1; 
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            const noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'highpass';
+            noiseFilter.frequency.value = 1000;
+            const noiseGain = audioCtx.createGain();
+            
+            noiseGain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+            noiseGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+            
+            noise.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+            noise.start();
+
+            const osc = audioCtx.createOscillator();
+            const oscGain = audioCtx.createGain();
+            osc.connect(oscGain);
+            oscGain.connect(audioCtx.destination);
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
+            
+            oscGain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            oscGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function playWinSound() {
+            if (!audioCtx) return;
+            const notes = [440, 554.37, 659.25, 880]; // A Major arpeggio
+            notes.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                
+                const startTime = audioCtx.currentTime + (i * 0.15);
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+                
+                osc.start(startTime);
+                osc.stop(startTime + 0.5);
+            });
+        }
+
+        function playTapMissSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        let lastSpeechTime = 0;
+
+        function speakWord(content) {
+            if ('speechSynthesis' in window) {
+                const now = Date.now();
+                if (now - lastSpeechTime < 3500) return; 
+                lastSpeechTime = now;
+
+                window.speechSynthesis.cancel();
+                
+                setTimeout(() => {
+                    const voices = window.speechSynthesis.getVoices();
+                    const combinedText = `Yay! ${content.letter} ... for ... ${content.word}! ... matlab ... ${content.urdu}!`;
+                    
+                    const utterance = new SpeechSynthesisUtterance(combinedText);
+                    
+                    const subcontinentVoice = voices.find(v => 
+                        v.lang === 'ur-PK' || v.lang === 'ur-IN' || 
+                        v.lang === 'en-IN' || v.lang === 'hi-IN' || 
+                        v.name.includes('India') || v.name.includes('Pakistan')
+                    );
+                    
+                    if (subcontinentVoice) {
+                        utterance.voice = subcontinentVoice;
+                    } else {
+                        const fallbackVoice = voices.find(v => v.lang.startsWith('en'));
+                        if (fallbackVoice) utterance.voice = fallbackVoice;
+                    }
+
+                    utterance.rate = 0.85; 
+                    utterance.pitch = 1.4; 
+                    window.speechSynthesis.speak(utterance);
+                }, 50);
+            }
+        }
+
+        class Balloon {
+            constructor() {
+                // Responsive Radius based on screen width/height to look good on Mobile & Desktop
+                let dynamicBase = Math.min(width, height) * 0.08; 
+                if (dynamicBase < 35) dynamicBase = 35; // Minimum size for small phones
+                if (dynamicBase > 60) dynamicBase = 60; // Max size for big desktops
+
+                this.radius = Math.random() * 15 + dynamicBase; 
+                this.x = Math.random() * (width - this.radius * 2) + this.radius;
+                this.y = height + this.radius * 2;
+                
+                // Move slightly faster based on the much higher level cap
+                this.vy = -(Math.random() * 2 + 1.5) * (1 + currentStage * 0.05); 
+                this.color = `hsl(${Math.random() * 360}, 80%, 60%)`;
+                
+                this.content = sillyAlphabet[Math.floor(Math.random() * sillyAlphabet.length)];
+                
+                this.markedForDeletion = false;
+                this.wobbleOffset = Math.random() * Math.PI * 2;
+                this.wobbleSpeed = Math.random() * 0.05 + 0.02;
+            }
+
+            update() {
+                this.y += this.vy;
+                this.x += Math.sin(Date.now() * 0.005 * this.wobbleSpeed + this.wobbleOffset) * 2;
+
+                // Adjust bounds dynamically in case of screen rotation
+                if (this.x < this.radius) this.x = this.radius;
+                if (this.x > width - this.radius) this.x = width - this.radius;
+
+                if (this.y < -this.radius * 2) {
+                    this.markedForDeletion = true; 
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                
+                // String
+                ctx.beginPath();
+                ctx.moveTo(0, this.radius);
+                ctx.quadraticCurveTo(-10, this.radius + 15, 0, this.radius + 30);
+                ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Balloon Body
+                ctx.beginPath();
+                ctx.moveTo(0, this.radius);
+                ctx.bezierCurveTo(-this.radius*1.1, this.radius, -this.radius*1.1, -this.radius, 0, -this.radius);
+                ctx.bezierCurveTo(this.radius*1.1, -this.radius, this.radius*1.1, this.radius, 0, this.radius);
+                
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                
+                // Shine
+                ctx.beginPath();
+                ctx.ellipse(-this.radius/3, -this.radius/2, this.radius/4, this.radius/8, Math.PI/4, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.fill();
+
+                // Tie
+                ctx.beginPath();
+                ctx.moveTo(-5, this.radius);
+                ctx.lineTo(5, this.radius);
+                ctx.lineTo(0, this.radius + 6);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+
+                // Letter inside - dynamically scaled
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${this.radius * 1.3}px Inter`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                ctx.fillText(this.content.letter, 0, 0);
+
+                ctx.restore();
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 6 + 3;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.size = Math.random() * 6 + 4;
+                this.color = color;
+                this.life = 1.0; 
+                this.decay = Math.random() * 0.02 + 0.02;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.vy += 0.2; // Gravity
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.life * 10);
+                ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        class FloatingText {
+            constructor(x, y, content, color) {
+                this.x = x;
+                this.y = y;
+                this.content = content;
+                this.color = color;
+                this.life = 1.0;
+                this.vy = -1.5; 
+                this.scale = 0.5;
+            }
+
+            update() {
+                this.y += this.vy;
+                this.life -= 0.015;
+                if (this.scale < 1.3) this.scale += 0.08; 
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.translate(this.x, this.y);
+                ctx.scale(this.scale, this.scale);
+                
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // Scale text down nicely on small screens
+                let fontSize = Math.min(width, height) > 500 ? '32px' : '24px';
+                ctx.font = `900 ${fontSize} Inter`;
+                ctx.lineWidth = 6;
+                ctx.strokeStyle = 'white';
+                ctx.strokeText(this.content.word, 0, 0);
+                
+                ctx.fillStyle = this.color;
+                ctx.fillText(this.content.word, 0, 0);
+                
+                ctx.restore();
+            }
+        }
+
+        class FallingEmoji {
+            constructor(x, y, emoji) {
+                this.x = x;
+                this.y = y;
+                this.emoji = emoji;
+                this.vy = -6; 
+                this.vx = (Math.random() - 0.5) * 6; 
+                this.gravity = 0.4;
+                this.rotation = 0;
+                this.rotSpeed = (Math.random() - 0.5) * 0.2;
+                
+                // Responsive Emoji size
+                this.size = Math.min(width, height) > 500 ? 70 : 50; 
+                this.markedForDeletion = false;
+            }
+
+            update() {
+                this.vy += this.gravity;
+                this.y += this.vy;
+                this.x += this.vx;
+                this.rotation += this.rotSpeed;
+                
+                if (this.y > height + 100) {
+                    this.markedForDeletion = true;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.font = `${this.size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.emoji, 0, 0);
+                ctx.restore();
+            }
+        }
+
+        // Visual feedback for tapping
+        class TapEffect {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = 10;
+                this.alpha = 1;
+            }
+            update() {
+                this.radius += 3;
+                this.alpha -= 0.05;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            
+            // Adjust any existing balloons so they don't get stuck off-screen on rotate
+            balloons.forEach(b => {
+                if (b.x > width - b.radius) b.x = width - b.radius;
+            });
+        }
+
+        function createConfetti(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function spawnBalloon() {
+            if (!isPlaying) return;
+            // Spawn chance is slightly higher in finger tap game
+            const spawnChance = 0.03 + (currentStage * 0.005);
+            if (Math.random() < spawnChance && balloons.length < 5 + Math.floor(currentStage / 2)) {
+                balloons.push(new Balloon());
+            }
+        }
+
+        function handleTap(e) {
+            if (!isPlaying) return;
+            e.preventDefault(); // Prevent double trigger on touch
+            initAudio(); // Ensure audio context is awake
+
+            let tapX, tapY;
+            if (e.touches && e.touches.length > 0) {
+                tapX = e.touches[0].clientX;
+                tapY = e.touches[0].clientY;
+            } else {
+                tapX = e.clientX;
+                tapY = e.clientY;
+            }
+
+            // Create visual tap ripple
+            tapEffects.push(new TapEffect(tapX, tapY));
+
+            let hit = false;
+            // Iterate backwards to click the balloon that is rendered "on top"
+            for (let i = balloons.length - 1; i >= 0; i--) {
+                const bln = balloons[i];
+                const dx = tapX - bln.x;
+                const dy = tapY - bln.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                // Use the upgraded tapRadius instead of hardcoded 15px
+                if (distance < bln.radius + tapRadiusUpgrade) {
+                    popBalloon(bln, i);
+                    hit = true;
+                    break; // Only pop one balloon per tap
+                }
+            }
+
+            if (!hit) {
+                playTapMissSound();
+            }
+        }
+
+        function popBalloon(bln, index) {
+            bln.markedForDeletion = true;
+            playPopSound();
+            createConfetti(bln.x, bln.y, bln.color);
+            floatingTexts.push(new FloatingText(bln.x, bln.y, bln.content, bln.color));
+            fallingEmojis.push(new FallingEmoji(bln.x, bln.y, bln.content.emoji));
+            
+            speakWord(bln.content); 
+            
+            balloonsPoppedInStage++;
+            scoreDisplay.innerText = balloonsPoppedInStage;
+
+            if (balloonsPoppedInStage >= targetBalloons) {
+                handleStageComplete();
+            }
+        }
+
+        function handleStageComplete() {
+            isPlaying = false; 
+            playWinSound();
+            
+            if (currentStage >= 50) {
+                showMessage("YOU DID IT!", "All 50 Levels Cleared! 🎉", () => {
+                    resetGame(true);
+                });
+            } else {
+                let upgradeMessage = "Great Job! 🌟";
+                
+                // Add Upgrades logic every 10 levels
+                if (currentStage + 1 === 10) {
+                    upgradeMessage = "UPGRADE: Mega Tap Unlocked! 💥";
+                    tapRadiusUpgrade = 25;
+                } else if (currentStage + 1 === 20) {
+                    upgradeMessage = "UPGRADE: Super Tap Unlocked! ⚡";
+                    tapRadiusUpgrade = 35;
+                } else if (currentStage + 1 === 30) {
+                    upgradeMessage = "UPGRADE: Ultra Tap Unlocked! 🔥";
+                    tapRadiusUpgrade = 50;
+                } else if (currentStage + 1 === 40) {
+                    upgradeMessage = "UPGRADE: Godlike Tap Unlocked! 🌟";
+                    tapRadiusUpgrade = 70;
+                }
+
+                showMessage(`Level ${currentStage} Clear!`, upgradeMessage, () => {
+                    currentStage++;
+                    balloonsPoppedInStage = 0;
+                    targetBalloons = 5 + Math.floor(currentStage * 1.5); // Adjusted scale for 50 levels
+                    
+                    stageDisplay.innerText = currentStage;
+                    scoreDisplay.innerText = balloonsPoppedInStage;
+                    targetDisplay.innerText = targetBalloons;
+                    
+                    balloons = []; 
+                    isPlaying = true;
+                });
+            }
+        }
+
+        function showMessage(mainText, subText, callback) {
+            // Adaptive font sizes inside the inner HTML
+            let innerHtmlClasses = "text-xl sm:text-2xl md:text-3xl text-yellow-300 drop-shadow-md mt-2 block";
+            messageText.innerHTML = `${mainText}<br><span class="${innerHtmlClasses}">${subText}</span>`;
+            centerMessage.classList.remove('hidden');
+            
+            setTimeout(() => {
+                centerMessage.classList.add('hidden');
+                if (callback) callback();
+            }, 3000);
+        }
+
+        function resetGame(fullReset = false) {
+            if (fullReset) {
+                currentStage = 1;
+                tapRadiusUpgrade = 15; // Reset tap upgrade
+                startMenu.classList.remove('hidden');
+                gameHud.classList.add('hidden');
+            }
+            balloonsPoppedInStage = 0;
+            targetBalloons = 5 + Math.floor(currentStage * 1.5);
+            
+            stageDisplay.innerText = currentStage;
+            scoreDisplay.innerText = balloonsPoppedInStage;
+            targetDisplay.innerText = targetBalloons;
+            
+            balloons = [];
+            particles = [];
+            floatingTexts = [];
+            fallingEmojis = []; 
+            tapEffects = [];
+            isPlaying = false;
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, width, height);
+
+            if (isPlaying) {
+                spawnBalloon();
+            }
+
+            // Update & Draw Entities
+            balloons.forEach(b => { b.update(); b.draw(); });
+            particles.forEach(p => { p.update(); p.draw(); });
+            floatingTexts.forEach(t => { t.update(); t.draw(); });
+            fallingEmojis.forEach(e => { e.update(); e.draw(); });
+            tapEffects.forEach(t => { t.update(); t.draw(); }); 
+
+            // Cleanup arrays
+            balloons = balloons.filter(b => !b.markedForDeletion);
+            fallingEmojis = fallingEmojis.filter(e => !e.markedForDeletion);
+            particles = particles.filter(p => p.life > 0);
+            floatingTexts = floatingTexts.filter(t => t.life > 0);
+            tapEffects = tapEffects.filter(t => t.alpha > 0);
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // Event Listeners for Resize & Screen Rotation
+        window.addEventListener('resize', resize);
+        window.addEventListener('orientationchange', () => {
+            // Wait slightly for browser UI to adjust before recalculating sizing
+            setTimeout(resize, 100);
+        });
+        
+        // Touch and Mouse events for popping
+        canvas.addEventListener('mousedown', handleTap);
+        canvas.addEventListener('touchstart', handleTap, { passive: false });
+
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startBGM(); 
+            
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.resume();
+                window.speechSynthesis.cancel();
+            }
+
+            startMenu.classList.add('hidden');
+            gameHud.classList.remove('hidden');
+            resetGame();
+            isPlaying = true;
+            
+            if ('speechSynthesis' in window) {
+                setTimeout(() => {
+                    let msg = new SpeechSynthesisUtterance("Tap the balloons to pop them!");
+                    msg.rate = 0.9;
+                    msg.pitch = 1.2;
+                    msg.lang = 'en-US';
+                    window.speechSynthesis.speak(msg);
+                }, 100);
+            }
+        });
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+
+        // Initialize
+        resize();
+        resetGame(true);
+        gameLoop(); 
+
+    </script>
+</body>
+</html>
