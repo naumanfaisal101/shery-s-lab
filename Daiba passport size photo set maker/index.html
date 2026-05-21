@@ -10,6 +10,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Imgly AI Background Removal (Naya Feature) -->
+    <script src="https://unpkg.com/@imgly/background-removal@1.4.3/dist/browser/bundle.js"></script>
     
     <style>
         body {
@@ -20,6 +22,7 @@
             width: 100%;
             max-height: 500px;
             background-color: #e5e7eb;
+            transition: background-color 0.3s ease;
         }
         #resultPreview {
             width: 100%;
@@ -49,17 +52,15 @@
             min-height: 300px;
             overflow: hidden;
             background: #e5e7eb;
+            transition: background-color 0.3s ease;
         }
-        /* CSS Fix: Zabardasti chupane ke liye important tag add kiya gaya hai */
         #perspectiveWrapper.hidden {
             display: none !important;
         }
-        /* Drag and Drop styles */
         #dropZone.dragover {
             border-color: #3b82f6 !important;
             background-color: #eff6ff !important;
         }
-        /* Camera Modal Styles */
         #cameraModal {
             backdrop-filter: blur(5px);
         }
@@ -67,22 +68,18 @@
 </head>
 <body class="min-h-screen p-2 sm:p-4 md:p-8 overflow-x-hidden">
 
-    <!-- Mobile Floating Home Button (Sirf mobile par nazar aayega) -->
     <a id="floatingMobileBtn" href="../index.html" class="sm:hidden fixed bottom-6 right-6 z-[9999] bg-blue-900 hover:bg-blue-800 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-2xl transition-transform active:scale-95 border-2 border-white">
         <i class="fa-solid fa-house text-xl"></i>
     </a>
 
-    <!-- Desktop Floating Back Button (Mobile par hide ho jayega) -->
     <a id="floatingDesktopBtn" href="../index.html" class="hidden sm:flex items-center gap-2 fixed bottom-8 right-8 z-[9999] bg-blue-900 hover:bg-blue-800 text-white py-3 px-6 rounded-full font-bold text-sm shadow-xl transition-all hover:scale-105 border-2 border-white">
         <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
     </a>
 
-    <!-- FIX: Camera Modal completely overhauled for mobile responsiveness -->
+    <!-- FIX: Camera Modal overhauled for mobile AND Desktop perfect view -->
     <div id="cameraModal" class="hidden fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 sm:p-4">
-        <!-- On mobile: Takes full height (h-full). On Desktop: Takes max-h-[95vh] with rounded corners -->
-        <div class="bg-white sm:rounded-xl shadow-2xl w-full max-w-2xl h-full sm:h-auto sm:max-h-[95vh] flex flex-col overflow-hidden">
+        <div class="bg-white sm:rounded-xl shadow-2xl w-full max-w-3xl h-full sm:h-auto sm:max-h-[95vh] flex flex-col overflow-hidden">
             
-            <!-- Top Header -->
             <div class="p-3 sm:p-4 bg-gray-900 text-white flex justify-between items-center shrink-0">
                 <h3 class="font-bold text-base sm:text-lg"><i class="fa-solid fa-camera mr-2"></i> Camera Live View</h3>
                 <div class="flex items-center gap-3 sm:gap-4">
@@ -95,24 +92,23 @@
                 </div>
             </div>
             
-            <!-- Video Area: Flex-grow takes all remaining space. min-h-0 prevents overflow -->
-            <div class="relative bg-black flex-grow w-full overflow-hidden min-h-0">
+            <!-- FIX: Added min-h-[400px] specifically for desktop to ensure the video isn't hidden -->
+            <div class="relative bg-black flex-grow w-full overflow-hidden min-h-[400px] sm:min-h-[500px]">
                 <video id="videoElement" autoplay playsinline class="absolute inset-0 w-full h-full object-contain"></video>
-                <!-- Loading Spinner for Camera -->
-                <div id="camLoading" class="absolute inset-0 flex items-center justify-center text-white hidden z-10 bg-black/50">
-                    <i class="fa-solid fa-spinner fa-spin text-4xl"></i>
+                <div id="camLoading" class="absolute inset-0 flex items-center justify-center text-white hidden z-10 bg-black/70 flex-col">
+                    <i class="fa-solid fa-spinner fa-spin text-4xl mb-3"></i>
+                    <p id="camLoadingText" class="font-bold text-lg">Camera Shuru Ho Raha Hai...</p>
                 </div>
             </div>
 
-            <!-- Bottom Controls -->
-            <div class="p-4 sm:p-6 bg-gray-50 shrink-0 border-t border-gray-200">
-                <h4 class="text-xs sm:text-sm font-bold text-gray-700 mb-3 sm:mb-4 border-b pb-1">Live Camera Controls (Exposure / ISO)</h4>
+            <!-- UPGRADE: Extended Camera Controls (Beautify & Background) -->
+            <div class="p-4 sm:p-5 bg-gray-50 shrink-0 border-t border-gray-200">
+                <h4 class="text-xs sm:text-sm font-bold text-gray-700 mb-2 border-b pb-1">Camera Settings & Filters</h4>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
-                    <!-- Adjusted label layout so text doesn't overlap on small screens -->
+                <div class="grid grid-cols-2 gap-x-4 gap-y-3 mb-3">
                     <div>
                         <label class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
-                            <span>Exposure (Brightness)</span>
+                            <span>Exposure</span>
                             <span class="text-blue-600 font-bold"><span id="camExpVal">100</span>%</span>
                         </label>
                         <input type="range" id="camExposureSlider" min="50" max="200" value="100" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
@@ -124,10 +120,27 @@
                         </label>
                         <input type="range" id="camContrastSlider" min="50" max="200" value="100" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
                     </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
+                            <span>Beautify (Skin Smooth)</span>
+                            <span class="text-pink-500 font-bold"><span id="camBeautyVal">0</span>%</span>
+                        </label>
+                        <input type="range" id="camBeautifySlider" min="0" max="100" value="0" class="w-full h-2 bg-pink-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
+                            <span>Auto Background</span>
+                        </label>
+                        <select id="camBgColor" class="w-full h-[26px] text-xs border border-gray-300 rounded focus:ring-blue-500 bg-white">
+                            <option value="none">Original (No Change)</option>
+                            <option value="blue">Blue Background</option>
+                            <option value="white">White Background</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div class="flex justify-center mt-2 sm:mt-4">
-                    <button id="capturePhotoBtn" class="bg-blue-600 text-white rounded-full w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg hover:bg-blue-700 transition transform hover:scale-105 border-4 border-white ring-2 ring-blue-600">
+                <div class="flex justify-center">
+                    <button id="capturePhotoBtn" class="bg-blue-600 text-white rounded-full w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg hover:bg-blue-700 transition transform hover:scale-105 border-4 border-white ring-2 ring-blue-600" title="Tasweer Khainchain">
                         <i class="fa-solid fa-camera text-xl sm:text-2xl"></i>
                     </button>
                 </div>
@@ -138,12 +151,10 @@
     <div class="max-w-5xl mx-auto w-full">
         <header class="mb-8 sm:mb-10 flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 sm:gap-6 bg-white p-5 sm:p-8 sm:pr-40 rounded-2xl shadow-sm border border-gray-100 relative">
             
-            <!-- Header Home Button (Desktop ke liye) -->
             <a href="index.html" class="hidden sm:flex absolute top-6 right-6 bg-gray-50 hover:bg-gray-100 text-gray-600 px-4 py-2 rounded-full font-medium text-sm transition items-center gap-2 border border-gray-200">
                 <i class="fa-solid fa-house"></i> Home Page
             </a>
 
-            <!-- Logo (Ab Clickable Hai) -->
             <div class="relative shrink-0 group">
                 <a href="index.html" title="Go to Home Page">
                     <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 via-red-400 to-yellow-400 blur-md opacity-60 scale-110 group-hover:scale-125 transition-all duration-300"></div>
@@ -155,7 +166,6 @@
             </div>
             
             <div class="text-center sm:text-left mt-2 sm:mt-0 max-w-full">
-                <!-- Title (Ab Clickable Hai) -->
                 <a href="index.html" class="inline-block hover:opacity-80 transition-opacity" title="Go to Home Page">
                     <h1 class="text-2xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-purple-600 mb-2 sm:mb-3 tracking-tight break-words">
                         Daiba Passport Photo Set Maker
@@ -167,7 +177,7 @@
                     </span>
                 </div>
                 <p class="text-gray-600 text-xs sm:text-base max-w-md mx-auto sm:mx-0 leading-relaxed px-2 sm:px-0">
-                    Crop to 35x45mm, rotate, aur alag alag photos ko ek hi 4x6 sheet par lagayein taake koi jagah zaya na ho. Exposure aur Contrast bhi set karein!
+                    Crop to 35x45mm, Face Beautify karein, Blue/White background lagayein, aur ek hi 4x6 sheet par lagayein.
                 </p>
             </div>
         </header>
@@ -180,28 +190,24 @@
                 
                 <div id="dropZone" class="mb-6 bg-gray-50 p-4 rounded-lg border-2 border-dashed border-gray-200 transition-all relative overflow-hidden">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10 items-end">
-                        <!-- File Upload -->
                         <div class="w-full">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">File Upload Karein</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">File Upload</label>
                             <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/jpg" 
                                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors border border-gray-300 rounded-md p-1.5 bg-white h-[44px]">
                         </div>
-                        <!-- Camera Button -->
                         <div class="w-full">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Ya Camera Istemal</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Camera Istemal</label>
                             <button id="openCameraBtn" class="w-full bg-blue-600 text-white px-4 rounded-md hover:bg-blue-700 transition flex justify-center items-center gap-2 font-medium h-[44px] whitespace-nowrap">
                                 <i class="fa-solid fa-camera"></i> Camera
                             </button>
                         </div>
-                        <!-- Paste Button -->
                         <div class="w-full">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Ya Copy Paste Karein</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Copy Paste</label>
                             <button id="pasteBtn" class="w-full bg-purple-600 text-white px-4 rounded-md hover:bg-purple-700 transition flex justify-center items-center gap-2 font-medium h-[44px] whitespace-nowrap" title="Ctrl+V bhi kaam karega">
                                 <i class="fa-solid fa-clipboard"></i> Paste Image
                             </button>
                         </div>
                     </div>
-                    <!-- Drag Overlay -->
                     <div id="dragOverlay" class="absolute inset-0 bg-blue-50/95 flex items-center justify-center hidden z-20 pointer-events-none transition-opacity">
                         <div class="text-center">
                             <i class="fa-solid fa-cloud-arrow-up text-blue-600 text-4xl mb-2"></i>
@@ -210,7 +216,6 @@
                     </div>
                 </div>
 
-                <!-- Crop Mode Toggle -->
                 <div id="cropModeToggle" class="mb-4 hidden flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-100">
                     <span class="text-sm font-medium text-gray-700">Crop Mode:</span>
                     <label class="inline-flex items-center cursor-pointer">
@@ -220,15 +225,13 @@
                     </label>
                 </div>
 
-                <!-- Standard Crop Tool Container -->
                 <div class="cropper-container rounded-lg overflow-hidden border border-gray-200 mb-4 hidden" id="cropperWrapper">
-                    <img id="imageToCrop" src="" alt="Picture to crop" style="filter: brightness(100%) contrast(100%); transition: filter 0.1s;">
+                    <img id="imageToCrop" src="" alt="Picture to crop" style="transition: filter 0.1s;">
                 </div>
 
-                <!-- Perspective Crop Tool Container -->
                 <div class="relative rounded-lg overflow-hidden border border-gray-200 mb-4 hidden" id="perspectiveWrapper">
                     <div class="relative inline-block" id="perspectiveImgContainer" style="line-height: 0;">
-                        <img id="perspectiveImg" src="" class="max-w-full max-h-[500px] pointer-events-none" style="display:block; filter: brightness(100%) contrast(100%); transition: filter 0.1s;">
+                        <img id="perspectiveImg" src="" class="max-w-full max-h-[500px] pointer-events-none" style="display:block; transition: filter 0.1s;">
                         <svg id="perspectiveSvg" class="absolute top-0 left-0 w-full h-full pointer-events-auto" style="z-index: 10;">
                             <polygon id="perspectivePoly" points="0,0 0,0 0,0 0,0" fill="rgba(59, 130, 246, 0.2)" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4"/>
                             <circle cx="0" cy="0" r="10" class="handle" data-index="0" />
@@ -239,12 +242,11 @@
                     </div>
                 </div>
 
-                <!-- UPGRADE 2: Image Adjustments (Exposure, Contrast, Rotate) -->
+                <!-- UPGRADE 3: Advanced Adjustments (Beautify & AI Background) -->
                 <div id="imageAdjustmentsPanel" class="mb-4 hidden bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                    <h3 class="text-sm font-bold text-gray-700 mb-3 border-b pb-1">Photo Adjustments (Settings)</h3>
+                    <h3 class="text-sm font-bold text-gray-700 mb-3 border-b pb-1">Photo Adjustments & AI Options</h3>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <!-- Exposure / Brightness -->
                         <div>
                             <div class="flex justify-between items-center mb-1">
                                 <label class="text-xs font-medium text-gray-600"><i class="fa-solid fa-sun mr-1"></i> Exposure</label>
@@ -252,7 +254,6 @@
                             </div>
                             <input type="range" id="imgExposureSlider" min="50" max="200" value="100" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
                         </div>
-                        <!-- Contrast -->
                         <div>
                             <div class="flex justify-between items-center mb-1">
                                 <label class="text-xs font-medium text-gray-600"><i class="fa-solid fa-circle-half-stroke mr-1"></i> Contrast</label>
@@ -260,9 +261,32 @@
                             </div>
                             <input type="range" id="imgContrastSlider" min="50" max="200" value="100" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
                         </div>
+                        
+                        <!-- Beautify Feature -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-medium text-pink-600"><i class="fa-solid fa-wand-magic mr-1"></i> Beautify (Glow)</label>
+                                <span id="imgBeautyVal" class="text-xs text-pink-600 font-bold">0%</span>
+                            </div>
+                            <input type="range" id="imgBeautifySlider" min="0" max="100" value="0" class="w-full h-2 bg-pink-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+
+                        <!-- AI Background Feature -->
+                        <div class="flex flex-col justify-end">
+                            <label class="text-xs font-medium text-indigo-600 mb-1"><i class="fa-solid fa-fill-drip mr-1"></i> Background Color</label>
+                            <div class="flex gap-2">
+                                <select id="imgBgColor" class="flex-grow text-xs border border-gray-300 rounded h-8">
+                                    <option value="none">Original (Transparent)</option>
+                                    <option value="blue">Blue (#005bb5)</option>
+                                    <option value="white">White (#ffffff)</option>
+                                </select>
+                                <button id="removeBgBtn" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-1 rounded text-xs hover:opacity-90 transition whitespace-nowrap shadow-sm font-bold" title="AI se Background Hatayein">
+                                    <i class="fa-solid fa-scissors"></i> AI Remove
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Rotation Controls for Flat Mode -->
                     <div id="rotationControls">
                         <label class="block text-xs font-medium text-gray-600 mb-2"><i class="fa-solid fa-rotate mr-1"></i> Rotate Photo (Seedha Karein)</label>
                         <div class="flex items-center gap-3">
@@ -280,14 +304,12 @@
                     </div>
                 </div>
 
-                <!-- Final Add To Sheet Settings -->
                 <div id="cropSettings" class="hidden">
                     <div class="flex justify-between items-center mb-2">
                         <label class="block text-sm font-medium text-gray-700">Kitni copies chahiye? (Is photo ki)</label>
                         <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded">Khali Jagah: <span id="availableSlotsText">8</span>/8</span>
                     </div>
                     <select id="photoCount" class="block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 mb-4">
-                        <!-- Options generated dynamically -->
                     </select>
 
                     <div class="grid grid-cols-2 gap-4 mb-4">
@@ -325,7 +347,6 @@
                         </button>
                     </div>
 
-                    <!-- Image preview of the 4x6 canvas -->
                     <img id="resultPreview" alt="4x6 Print Sheet Preview">
                     
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full mt-6">
@@ -364,7 +385,6 @@
         let printSheetSlots = [];
         const MAX_SLOTS = 8;
 
-        // Base Elements
         const imageUpload = document.getElementById('imageUpload');
         const imageToCrop = document.getElementById('imageToCrop');
         const cropperWrapper = document.getElementById('cropperWrapper');
@@ -378,25 +398,28 @@
         const perspectiveToggle = document.getElementById('perspectiveToggle');
         const modeLabelText = document.getElementById('modeLabelText');
         
-        // Adjustments UI
         const imageAdjustmentsPanel = document.getElementById('imageAdjustmentsPanel');
         const rotationControls = document.getElementById('rotationControls');
         const rotationSlider = document.getElementById('rotationSlider');
         const rotateLeftBtn = document.getElementById('rotateLeftBtn');
         const rotateRightBtn = document.getElementById('rotateRightBtn');
         const resetAdjustmentsBtn = document.getElementById('resetAdjustmentsBtn');
+        
         const imgExposureSlider = document.getElementById('imgExposureSlider');
         const imgContrastSlider = document.getElementById('imgContrastSlider');
+        const imgBeautifySlider = document.getElementById('imgBeautifySlider');
+        const imgBgColor = document.getElementById('imgBgColor');
+        const removeBgBtn = document.getElementById('removeBgBtn');
+
         const imgExpVal = document.getElementById('imgExpVal');
         const imgContVal = document.getElementById('imgContVal');
+        const imgBeautyVal = document.getElementById('imgBeautyVal');
 
-        // Perspective Elements
         const perspectiveWrapper = document.getElementById('perspectiveWrapper');
         const perspectiveImg = document.getElementById('perspectiveImg');
         const perspectiveSvg = document.getElementById('perspectiveSvg');
         const perspectivePoly = document.getElementById('perspectivePoly');
         
-        // Preview & Action Elements
         const resultContainer = document.getElementById('resultContainer');
         const resultPlaceholder = document.getElementById('resultPlaceholder');
         const resultPreview = document.getElementById('resultPreview');
@@ -404,32 +427,36 @@
         const previewSlotsText = document.getElementById('previewSlotsText');
         const clearSheetBtn = document.getElementById('clearSheetBtn');
         
-        // Camera Elements
         const openCameraBtn = document.getElementById('openCameraBtn');
         const cameraModal = document.getElementById('cameraModal');
         const closeCameraBtn = document.getElementById('closeCameraBtn');
         const videoElement = document.getElementById('videoElement');
         const capturePhotoBtn = document.getElementById('capturePhotoBtn');
+        
         const camExposureSlider = document.getElementById('camExposureSlider');
         const camContrastSlider = document.getElementById('camContrastSlider');
+        const camBeautifySlider = document.getElementById('camBeautifySlider');
+        const camBgColor = document.getElementById('camBgColor');
+        
         const camExpVal = document.getElementById('camExpVal');
         const camContVal = document.getElementById('camContVal');
+        const camBeautyVal = document.getElementById('camBeautyVal');
+        
         const camLoading = document.getElementById('camLoading');
+        const camLoadingText = document.getElementById('camLoadingText');
         const flipCameraBtn = document.getElementById('flipCameraBtn');
         const floatingMobileBtn = document.getElementById('floatingMobileBtn');
         const floatingDesktopBtn = document.getElementById('floatingDesktopBtn');
+        
         let cameraStream = null;
-        let currentFacingMode = "environment"; // By default back camera
+        let currentFacingMode = "environment"; 
 
         captureDateInput.value = new Date().toISOString().split('T')[0];
 
         function getNextPhotoNumber() {
             let lastNum = localStorage.getItem('daiba_last_photo_number');
-            if (!lastNum) {
-                lastNum = 10000;
-            } else {
-                lastNum = parseInt(lastNum, 10);
-            }
+            if (!lastNum) lastNum = 10000;
+            else lastNum = parseInt(lastNum, 10);
             lastNum++;
             localStorage.setItem('daiba_last_photo_number', lastNum.toString());
             return 'DB-' + lastNum;
@@ -438,25 +465,20 @@
         function updatePhotoCountDropdown() {
             const remaining = MAX_SLOTS - printSheetSlots.length;
             photoCountSelect.innerHTML = '';
-
             if (remaining === 0) {
                 const opt = document.createElement('option');
-                opt.value = 0;
-                opt.text = "Sheet Full (Jagah Nahi Hai)";
+                opt.value = 0; opt.text = "Sheet Full";
                 photoCountSelect.appendChild(opt);
                 addToSheetBtn.disabled = true;
                 addToSheetBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 availableSlotsText.innerText = '0';
                 return;
             }
-
             addToSheetBtn.disabled = false;
             addToSheetBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-
             for (let i = 1; i <= remaining; i++) {
                 const opt = document.createElement('option');
-                opt.value = i;
-                opt.text = `${i} Photo${i > 1 ? 's' : ''}`;
+                opt.value = i; opt.text = `${i} Photo${i > 1 ? 's' : ''}`;
                 if (i === remaining) opt.selected = true; 
                 photoCountSelect.appendChild(opt);
             }
@@ -464,51 +486,38 @@
         }
         updatePhotoCountDropdown();
 
-        // --- CAMERA LOGIC (UPGRADE 1) ---
-        
+        // --- CAMERA LOGIC ---
         async function startCamera(facingMode = currentFacingMode) {
             cameraModal.classList.remove('hidden');
             camLoading.classList.remove('hidden');
+            camLoadingText.innerText = "Camera Shuru Ho Raha Hai...";
             
-            // Camera on hotay hi home aur back buttons ko chupa dein
             if(floatingMobileBtn) floatingMobileBtn.style.display = 'none';
             if(floatingDesktopBtn) floatingDesktopBtn.style.display = 'none';
             
-            // Puraana stream stop karein taake naya (front/back) shuru ho sakay
             if (cameraStream) {
                 cameraStream.getTracks().forEach(track => track.stop());
             }
 
             try {
-                const constraints = {
-                    video: { 
-                        facingMode: { ideal: facingMode },
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
-                    }
-                };
+                const constraints = { video: { facingMode: { ideal: facingMode }, width: { ideal: 1920 }, height: { ideal: 1080 } } };
                 cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
                 videoElement.srcObject = cameraStream;
-                currentFacingMode = facingMode; // Update state
+                currentFacingMode = facingMode; 
                 
-                // Front camera ko sheeshay (mirror) ki tarah show karein taake view theek nazar aaye
-                if (currentFacingMode === "user") {
-                    videoElement.style.transform = "scaleX(-1)";
-                } else {
-                    videoElement.style.transform = "scaleX(1)";
-                }
+                if (currentFacingMode === "user") videoElement.style.transform = "scaleX(-1)";
+                else videoElement.style.transform = "scaleX(1)";
 
                 camLoading.classList.add('hidden');
-                
-                // Reset Camera filters
                 camExposureSlider.value = 100;
                 camContrastSlider.value = 100;
+                camBeautifySlider.value = 0;
+                camBgColor.value = 'none';
                 applyCameraFilters();
-
             } catch (err) {
                 console.error("Camera error:", err);
                 camLoading.classList.add('hidden');
-                alert("Camera shuru karne mein masla hua. Barae meharbani permission check karein.");
+                alert("Camera permission denied ya error aya hai.");
                 stopCamera();
             }
         }
@@ -521,7 +530,6 @@
             videoElement.srcObject = null;
             cameraModal.classList.add('hidden');
             
-            // Camera band honay ke baad buttons dobara dikha dein
             if(floatingMobileBtn) floatingMobileBtn.style.display = '';
             if(floatingDesktopBtn) floatingDesktopBtn.style.display = '';
         }
@@ -529,14 +537,22 @@
         function applyCameraFilters() {
             let exp = camExposureSlider.value;
             let con = camContrastSlider.value;
+            let beauty = camBeautifySlider.value;
+            
             camExpVal.innerText = exp;
             camContVal.innerText = con;
-            // Using CSS filters to simulate Hardware Exposure/ISO
-            videoElement.style.filter = `brightness(${exp}%) contrast(${con}%)`;
+            camBeautyVal.innerText = beauty;
+            
+            // Beauty calculation: up to 1.5px blur and 150% saturation
+            let blurVal = (beauty / 100) * 1.5;
+            let satVal = 100 + (beauty * 0.5);
+
+            videoElement.style.filter = `brightness(${exp}%) contrast(${con}%) saturate(${satVal}%) blur(${blurVal}px)`;
         }
 
         camExposureSlider.addEventListener('input', applyCameraFilters);
         camContrastSlider.addEventListener('input', applyCameraFilters);
+        camBeautifySlider.addEventListener('input', applyCameraFilters);
 
         flipCameraBtn.addEventListener('click', () => {
             const newMode = currentFacingMode === "environment" ? "user" : "environment";
@@ -553,103 +569,141 @@
 
         closeCameraBtn.addEventListener('click', stopCamera);
 
-        capturePhotoBtn.addEventListener('click', () => {
+        capturePhotoBtn.addEventListener('click', async () => {
             if (!cameraStream) return;
             
-            // Draw video frame to a temporary canvas
             const canvas = document.createElement('canvas');
             canvas.width = videoElement.videoWidth;
             canvas.height = videoElement.videoHeight;
             const ctx = canvas.getContext('2d');
             
-            // Bake the camera filters (Exposure/Contrast) directly into the captured image
-            ctx.filter = `brightness(${camExposureSlider.value}%) contrast(${camContrastSlider.value}%)`;
+            // Bake filters
+            let beauty = camBeautifySlider.value;
+            let blurVal = (beauty / 100) * 1.5;
+            let satVal = 100 + (beauty * 0.5);
+            ctx.filter = `brightness(${camExposureSlider.value}%) contrast(${camContrastSlider.value}%) saturate(${satVal}%) blur(${blurVal}px)`;
             
-            // Agar front camera istemal hua tha toh tasweer ko dobara seedha (un-mirror) karein save karne se pehle
             if (currentFacingMode === "user") {
                 ctx.translate(canvas.width, 0);
                 ctx.scale(-1, 1);
             }
-
             ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            let dataUrl = canvas.toDataURL('image/jpeg', 1.0);
             
-            const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
+            // Auto Remove Background Logic if Blue/White selected during capture!
+            let chosenBg = camBgColor.value;
+            if (chosenBg !== 'none') {
+                camLoadingText.innerText = "Background hataya ja raha hai (AI)...";
+                camLoading.classList.remove('hidden');
+                try {
+                    let config = { publicPath: 'https://unpkg.com/@imgly/background-removal@1.4.3/dist/' };
+                    let blob = await imglyRemoveBackground(dataUrl, config);
+                    dataUrl = URL.createObjectURL(blob);
+                } catch(e) {
+                    console.error(e);
+                    alert("AI Background removal fail ho gaya. Original photo load ho rahi hai.");
+                }
+            }
+
             stopCamera();
             
-            // Load the captured image into our cropping pipeline
-            loadImageIntoEditor(dataUrl);
+            // Load and keep the BG setting in sync
+            loadImageIntoEditor(dataUrl, false);
+            imgBgColor.value = chosenBg;
+            applyImageAdjustments();
         });
 
-        // --- IMAGE ADJUSTMENT LOGIC (UPGRADE 2) ---
-
+        // --- IMAGE ADJUSTMENT LOGIC ---
         function applyImageAdjustments() {
             let exp = imgExposureSlider.value;
             let con = imgContrastSlider.value;
+            let beauty = imgBeautifySlider.value;
+            let bg = imgBgColor.value;
+
             imgExpVal.innerText = exp + '%';
             imgContVal.innerText = con + '%';
+            imgBeautyVal.innerText = beauty + '%';
             
-            let filterString = `brightness(${exp}%) contrast(${con}%)`;
+            let blurVal = (beauty / 100) * 1.5;
+            let satVal = 100 + (beauty * 0.5);
+            let filterString = `brightness(${exp}%) contrast(${con}%) saturate(${satVal}%) blur(${blurVal}px)`;
             
-            // Apply visual filters to standard and perspective images
             imageToCrop.style.filter = filterString;
             perspectiveImg.style.filter = filterString;
 
-            // FIX: Cropper.js apni alag images (clone) banata hai live preview ke liye, 
-            // isliye un tamaam cropper images par bhi live filter apply karna zaroori hai
+            // Apply Background color to view
+            let actualBgColor = bg === 'blue' ? '#005bb5' : (bg === 'white' ? '#ffffff' : '#e5e7eb');
+            cropperWrapper.style.backgroundColor = actualBgColor;
+            perspectiveWrapper.style.backgroundColor = actualBgColor;
+
             document.querySelectorAll('.cropper-container img').forEach(img => {
                 img.style.filter = filterString;
                 img.style.transition = 'filter 0.1s';
+            });
+            document.querySelectorAll('.cropper-wrap-box, .cropper-canvas').forEach(el => {
+                el.style.backgroundColor = actualBgColor;
             });
         }
 
         imgExposureSlider.addEventListener('input', applyImageAdjustments);
         imgContrastSlider.addEventListener('input', applyImageAdjustments);
+        imgBeautifySlider.addEventListener('input', applyImageAdjustments);
+        imgBgColor.addEventListener('change', applyImageAdjustments);
+
+        // AI Background Removal Button Event
+        removeBgBtn.addEventListener('click', async () => {
+            if (!imageToCrop.src) return;
+            removeBgBtn.disabled = true;
+            removeBgBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            
+            try {
+                let config = { publicPath: 'https://unpkg.com/@imgly/background-removal@1.4.3/dist/' };
+                let blob = await imglyRemoveBackground(imageToCrop.src, config);
+                let url = URL.createObjectURL(blob);
+                
+                // Keep the current rotation and sliders intact
+                loadImageIntoEditor(url, true);
+            } catch(e) {
+                console.error(e);
+                alert("Background hatane mein masla pesh aya. Internet connection check karein.");
+            }
+            
+            removeBgBtn.disabled = false;
+            removeBgBtn.innerHTML = '<i class="fa-solid fa-scissors"></i> AI Remove';
+        });
 
         // Rotation
         function updateRotation() {
-            if (cropper && !isPerspectiveMode) {
-                cropper.rotateTo(parseFloat(rotationSlider.value));
-            }
+            if (cropper && !isPerspectiveMode) cropper.rotateTo(parseFloat(rotationSlider.value));
         }
         rotationSlider.addEventListener('input', updateRotation);
-        rotateLeftBtn.addEventListener('click', () => {
-            rotationSlider.value = Math.max(-45, parseFloat(rotationSlider.value) - 1);
-            updateRotation();
-        });
-        rotateRightBtn.addEventListener('click', () => {
-            rotationSlider.value = Math.min(45, parseFloat(rotationSlider.value) + 1);
-            updateRotation();
-        });
+        rotateLeftBtn.addEventListener('click', () => { rotationSlider.value = Math.max(-45, parseFloat(rotationSlider.value) - 1); updateRotation(); });
+        rotateRightBtn.addEventListener('click', () => { rotationSlider.value = Math.min(45, parseFloat(rotationSlider.value) + 1); updateRotation(); });
 
         resetAdjustmentsBtn.addEventListener('click', () => {
             imgExposureSlider.value = 100;
             imgContrastSlider.value = 100;
+            imgBeautifySlider.value = 0;
             rotationSlider.value = 0;
+            imgBgColor.value = 'none';
             applyImageAdjustments();
             updateRotation();
         });
 
         // --- PERSPECTIVE TOOL LOGIC ---
-        let perspectivePts = [
-            {x: 0.15, y: 0.1}, {x: 0.85, y: 0.1},
-            {x: 0.85, y: 0.9}, {x: 0.15, y: 0.9}
-        ];
+        let perspectivePts = [ {x: 0.15, y: 0.1}, {x: 0.85, y: 0.1}, {x: 0.85, y: 0.9}, {x: 0.15, y: 0.9} ];
         let activeHandle = null;
 
         function renderPerspectiveUI() {
             const w = perspectiveImg.clientWidth;
             const h = perspectiveImg.clientHeight;
             if(w === 0 || h === 0) return;
-
             const handles = document.querySelectorAll('.handle');
             let pointsStr = '';
-            
             perspectivePts.forEach((p, i) => {
-                const px = p.x * w;
-                const py = p.y * h;
+                const px = p.x * w; const py = p.y * h;
                 pointsStr += `${px},${py} `;
-                handles[i].setAttribute('cx', px);
-                handles[i].setAttribute('cy', py);
+                handles[i].setAttribute('cx', px); handles[i].setAttribute('cy', py);
             });
             perspectivePoly.setAttribute('points', pointsStr.trim());
         }
@@ -669,19 +723,10 @@
             if (activeHandle !== null) {
                 e.preventDefault();
                 const rect = perspectiveImg.getBoundingClientRect();
-                let clientX = e.clientX;
-                let clientY = e.clientY;
-                if(e.touches && e.touches.length > 0) {
-                    clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
-                }
-
-                let nx = (clientX - rect.left) / rect.width;
-                let ny = (clientY - rect.top) / rect.height;
-
-                nx = Math.max(0, Math.min(1, nx));
-                ny = Math.max(0, Math.min(1, ny));
-
+                let clientX = e.clientX; let clientY = e.clientY;
+                if(e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+                let nx = (clientX - rect.left) / rect.width; let ny = (clientY - rect.top) / rect.height;
+                nx = Math.max(0, Math.min(1, nx)); ny = Math.max(0, Math.min(1, ny));
                 perspectivePts[activeHandle] = {x: nx, y: ny};
                 renderPerspectiveUI();
             }
@@ -689,10 +734,8 @@
 
         function endDrag() {
             activeHandle = null;
-            document.removeEventListener('mousemove', drag);
-            document.removeEventListener('touchmove', drag);
-            document.removeEventListener('mouseup', endDrag);
-            document.removeEventListener('touchend', endDrag);
+            document.removeEventListener('mousemove', drag); document.removeEventListener('touchmove', drag);
+            document.removeEventListener('mouseup', endDrag); document.removeEventListener('touchend', endDrag);
         }
 
         perspectiveSvg.addEventListener('mousedown', startDrag);
@@ -700,27 +743,24 @@
         perspectiveImg.onload = renderPerspectiveUI;
         window.addEventListener('resize', renderPerspectiveUI);
 
-        // Extract perspective with CSS Filters Baked IN
         function extractPerspectiveCanvas(imgElement, ptsPercent, outW, outH) {
-            const natW = imgElement.naturalWidth;
-            const natH = imgElement.naturalHeight;
-            
+            const natW = imgElement.naturalWidth; const natH = imgElement.naturalHeight;
             const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = natW;
-            tempCanvas.height = natH;
+            tempCanvas.width = natW; tempCanvas.height = natH;
             const tCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
             
-            // BAKE EXPOSURE AND CONTRAST FILTERS
-            tCtx.filter = `brightness(${imgExposureSlider.value}%) contrast(${imgContrastSlider.value}%)`;
+            // Bake BEAUTIFY
+            let beauty = imgBeautifySlider.value;
+            let blurVal = (beauty / 100) * 1.5;
+            let satVal = 100 + (beauty * 0.5);
+            tCtx.filter = `brightness(${imgExposureSlider.value}%) contrast(${imgContrastSlider.value}%) saturate(${satVal}%) blur(${blurVal}px)`;
             tCtx.drawImage(imgElement, 0, 0);
             const srcData = tCtx.getImageData(0, 0, natW, natH);
 
             const outCanvas = document.createElement('canvas');
-            outCanvas.width = outW;
-            outCanvas.height = outH;
+            outCanvas.width = outW; outCanvas.height = outH;
             const oCtx = outCanvas.getContext('2d');
             const outData = oCtx.createImageData(outW, outH);
-
             const pts = ptsPercent.map(p => ({ x: p.x * natW, y: p.y * natH }));
 
             for (let y = 0; y < outH; y++) {
@@ -729,18 +769,17 @@
                     const nx = x / outW;
                     const srcX = pts[0].x * (1 - nx) * (1 - ny) + pts[1].x * nx * (1 - ny) + pts[2].x * nx * ny + pts[3].x * (1 - nx) * ny;
                     const srcY = pts[0].y * (1 - nx) * (1 - ny) + pts[1].y * nx * (1 - ny) + pts[2].y * nx * ny + pts[3].y * (1 - nx) * ny;
-
-                    const sx = Math.floor(srcX);
-                    const sy = Math.floor(srcY);
+                    const sx = Math.floor(srcX); const sy = Math.floor(srcY);
                     const outIndex = (y * outW + x) * 4;
                     if (sx >= 0 && sx < natW && sy >= 0 && sy < natH) {
                         const srcIndex = (sy * natW + sx) * 4;
+                        // Handle transparency properly
                         outData.data[outIndex] = srcData.data[srcIndex];
                         outData.data[outIndex+1] = srcData.data[srcIndex+1];
                         outData.data[outIndex+2] = srcData.data[srcIndex+2];
                         outData.data[outIndex+3] = srcData.data[srcIndex+3];
                     } else {
-                        outData.data[outIndex] = 255; outData.data[outIndex+1] = 255; outData.data[outIndex+2] = 255; outData.data[outIndex+3] = 255;
+                        outData.data[outIndex] = 0; outData.data[outIndex+1] = 0; outData.data[outIndex+2] = 0; outData.data[outIndex+3] = 0;
                     }
                 }
             }
@@ -748,39 +787,34 @@
             return outCanvas;
         }
 
-        // --- TOGGLE EVENT ---
         perspectiveToggle.addEventListener('change', function(e) {
             isPerspectiveMode = e.target.checked;
             if (isPerspectiveMode) {
                 modeLabelText.innerText = "Perspective Selection (Tirchi Photos)";
-                modeLabelText.classList.remove('text-blue-700');
-                modeLabelText.classList.add('text-purple-700');
-                cropperWrapper.classList.add('hidden');
-                rotationControls.classList.add('hidden');
+                modeLabelText.classList.remove('text-blue-700'); modeLabelText.classList.add('text-purple-700');
+                cropperWrapper.classList.add('hidden'); rotationControls.classList.add('hidden');
                 perspectiveWrapper.classList.remove('hidden');
                 renderPerspectiveUI();
             } else {
                 modeLabelText.innerText = "Flat Box Selection";
-                modeLabelText.classList.remove('text-purple-700');
-                modeLabelText.classList.add('text-blue-700');
-                perspectiveWrapper.classList.add('hidden');
-                cropperWrapper.classList.remove('hidden');
-                if (imageToCrop.src) {
-                    rotationControls.classList.remove('hidden');
-                }
+                modeLabelText.classList.remove('text-purple-700'); modeLabelText.classList.add('text-blue-700');
+                perspectiveWrapper.classList.add('hidden'); cropperWrapper.classList.remove('hidden');
+                if (imageToCrop.src) rotationControls.classList.remove('hidden');
             }
         });
 
         // --- LOAD IMAGE PIPELINE ---
-        function loadImageIntoEditor(imgSrc) {
+        function loadImageIntoEditor(imgSrc, keepSettings = false) {
             updatePhotoCountDropdown();
-            photoNumberInput.value = getNextPhotoNumber();
+            if(!keepSettings) photoNumberInput.value = getNextPhotoNumber();
             
-            // Reset adjustments for fresh photo
-            imgExposureSlider.value = 100;
-            imgContrastSlider.value = 100;
-            rotationSlider.value = 0;
-            applyImageAdjustments();
+            if(!keepSettings) {
+                imgExposureSlider.value = 100;
+                imgContrastSlider.value = 100;
+                imgBeautifySlider.value = 0;
+                rotationSlider.value = 0;
+                imgBgColor.value = 'none';
+            }
             
             imageToCrop.src = imgSrc;
             perspectiveImg.src = imgSrc;
@@ -792,11 +826,11 @@
             
             if (isPerspectiveMode) {
                 perspectiveWrapper.classList.remove('hidden');
-                cropperWrapper.classList.add('hidden'); // FIX: Added this to hide flat cropper
+                cropperWrapper.classList.add('hidden'); 
                 rotationControls.classList.add('hidden');
             } else {
                 cropperWrapper.classList.remove('hidden');
-                perspectiveWrapper.classList.add('hidden'); // FIX: Added this to hide perspective cropper
+                perspectiveWrapper.classList.add('hidden'); 
                 rotationControls.classList.remove('hidden');
             }
 
@@ -815,324 +849,191 @@
                 cropBoxResizable: true,
                 toggleDragModeOnDblclick: false,
                 ready: function() {
-                    // Jab cropper load ho jaye, tab dobara adjustment filters apply karein
                     applyImageAdjustments();
                 }
             });
         }
 
-        // --- UNIFIED FILE PROCESSOR (For Upload, Drag, and Paste) ---
         function processFile(file) {
-            if (!file || !file.type.startsWith('image/')) {
-                alert("Sirf tasweer (image) upload ki ja sakti hai!");
-                return;
-            }
-            if (printSheetSlots.length >= MAX_SLOTS) {
-                alert("Sheet already full hai. Pehle 'Sheet Saaf Karein' par click karein.");
-                return;
-            }
+            if (!file || !file.type.startsWith('image/')) { alert("Sirf tasweer (image) upload ki ja sakti hai!"); return; }
+            if (printSheetSlots.length >= MAX_SLOTS) { alert("Sheet full hai. Pehle 'Sheet Saaf Karein'."); return; }
             const reader = new FileReader();
-            reader.onload = function(event) {
-                loadImageIntoEditor(event.target.result);
-            };
+            reader.onload = function(event) { loadImageIntoEditor(event.target.result); };
             reader.readAsDataURL(file);
         }
 
         imageUpload.addEventListener('change', function(e) {
-            const files = e.target.files;
-            if (files && files.length > 0) {
-                processFile(files[0]);
-                imageUpload.value = ''; // Taake dobara same photo select ki ja sakay
+            if (e.target.files && e.target.files.length > 0) {
+                processFile(e.target.files[0]); imageUpload.value = '';
             }
         });
 
-        // --- PASTE & DRAG/DROP LOGIC (UPGRADE 3) ---
-        const pasteBtn = document.getElementById('pasteBtn');
-        const dropZone = document.getElementById('dropZone');
-        const dragOverlay = document.getElementById('dragOverlay');
-
-        // 1. Paste Button Click Handler
         pasteBtn.addEventListener('click', async () => {
             try {
                 const clipboardItems = await navigator.clipboard.read();
                 for (const clipboardItem of clipboardItems) {
                     const imageTypes = clipboardItem.types.filter(type => type.startsWith('image/'));
                     if (imageTypes.length > 0) {
-                        const blob = await clipboardItem.getType(imageTypes[0]);
-                        processFile(blob);
-                        return;
+                        const blob = await clipboardItem.getType(imageTypes[0]); processFile(blob); return;
                     }
                 }
-                alert("Clipboard mein koi image nahi mili. Pehle kisi photo ko copy karein (Ctrl+C).");
-            } catch (err) {
-                console.error(err);
-                alert("Paste ki ijazat nahi mili. Aap keyboard se 'Ctrl + V' daba kar paste karein.");
-            }
+                alert("Clipboard mein image nahi mili (Ctrl+C karein pehle).");
+            } catch (err) { alert("Paste ki ijazat nahi mili. 'Ctrl + V' dabayen."); }
         });
 
-        // 2. Global Keyboard Ctrl+V Handler
         window.addEventListener('paste', e => {
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
             for (let index in items) {
                 const item = items[index];
                 if (item.kind === 'file' && item.type.startsWith('image/')) {
-                    const blob = item.getAsFile();
-                    processFile(blob);
-                    e.preventDefault(); // Browser ke default behaviour ko rokne ke liye
-                    break;
+                    processFile(item.getAsFile()); e.preventDefault(); break;
                 }
             }
         });
 
-        // 3. Drag and Drop Handlers
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            document.body.addEventListener(eventName, preventDefaults, false);
-            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+            dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
         });
 
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
         ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => {
-                dropZone.classList.add('dragover');
-                dragOverlay.classList.remove('hidden');
-            }, false);
+            dropZone.addEventListener(eventName, () => { dropZone.classList.add('dragover'); dragOverlay.classList.remove('hidden'); }, false);
         });
 
         ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => {
-                dropZone.classList.remove('dragover');
-                dragOverlay.classList.add('hidden');
-            }, false);
+            dropZone.addEventListener(eventName, () => { dropZone.classList.remove('dragover'); dragOverlay.classList.add('hidden'); }, false);
         });
 
-        dropZone.addEventListener('drop', e => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if (files && files.length > 0) {
-                processFile(files[0]);
-            }
-        }, false);
-        
-        // Agar ghalti se image body pe kahin drop ho jaye tab bhi capture karein
-        document.body.addEventListener('drop', e => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if (files && files.length > 0 && !dropZone.contains(e.target)) {
-                 processFile(files[0]);
-            }
-        }, false);
+        dropZone.addEventListener('drop', e => { if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]); }, false);
+        document.body.addEventListener('drop', e => { if (e.dataTransfer.files.length > 0 && !dropZone.contains(e.target)) processFile(e.dataTransfer.files[0]); }, false);
 
-        // --- SHEET GENERATION ---
         function renderFinalSheet() {
-            const sheetWidth = 1200;
-            const sheetHeight = 1800;
-            const rotW = 531; 
-            const rotH = 413; 
+            const sheetWidth = 1200; const sheetHeight = 1800;
+            const rotW = 531; const rotH = 413; 
 
             const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = sheetWidth;
-            finalCanvas.height = sheetHeight;
+            finalCanvas.width = sheetWidth; finalCanvas.height = sheetHeight;
             const fCtx = finalCanvas.getContext('2d');
 
-            fCtx.fillStyle = '#ffffff';
-            fCtx.fillRect(0, 0, sheetWidth, sheetHeight);
-
-            const cols = 2;
-            const maxRows = 4;
-            const marginX = (sheetWidth - (cols * rotW)) / (cols + 1);
-            const marginY = (sheetHeight - (maxRows * rotH)) / (maxRows + 1);
+            fCtx.fillStyle = '#ffffff'; fCtx.fillRect(0, 0, sheetWidth, sheetHeight);
+            const marginX = (sheetWidth - (2 * rotW)) / 3;
+            const marginY = (sheetHeight - (4 * rotH)) / 5;
 
             for (let i = 0; i < printSheetSlots.length; i++) {
                 let slot = printSheetSlots[i];
-                let c = i % 2; 
-                let r = Math.floor(i / 2); 
-
+                let c = i % 2; let r = Math.floor(i / 2); 
                 let posX = marginX + (c * (rotW + marginX));
                 let posY = marginY + (r * (rotH + marginY));
 
                 fCtx.drawImage(slot.canvas, posX, posY);
-
-                fCtx.strokeStyle = '#cccccc';
-                fCtx.lineWidth = 2;
-                fCtx.strokeRect(posX, posY, rotW, rotH);
+                fCtx.strokeStyle = '#cccccc'; fCtx.lineWidth = 2; fCtx.strokeRect(posX, posY, rotW, rotH);
                 
-                fCtx.save();
-                fCtx.fillStyle = '#666666';
-                fCtx.font = '16px monospace';
-                fCtx.textAlign = 'center';
-                fCtx.textBaseline = 'middle';
-                
+                fCtx.save(); fCtx.fillStyle = '#666666'; fCtx.font = '16px monospace';
+                fCtx.textAlign = 'center'; fCtx.textBaseline = 'middle';
                 let textX = c === 0 ? posX + rotW + (marginX / 2) - 8 : posX - (marginX / 2) + 8;
                 let textY = posY + (rotH / 2);
-                
-                fCtx.translate(textX, textY);
-                fCtx.rotate(Math.PI / 2); 
-                fCtx.fillText(slot.metaText, 0, 0);
-                fCtx.restore();
+                fCtx.translate(textX, textY); fCtx.rotate(Math.PI / 2); 
+                fCtx.fillText(slot.metaText, 0, 0); fCtx.restore();
             }
 
             finalOutputDataUrl = finalCanvas.toDataURL('image/jpeg', 1.0);
             resultPreview.src = finalOutputDataUrl;
-
-            resultPlaceholder.classList.add('hidden');
-            resultContainer.classList.remove('hidden');
+            resultPlaceholder.classList.add('hidden'); resultContainer.classList.remove('hidden');
             previewSlotsText.innerText = printSheetSlots.length;
         }
 
         addToSheetBtn.addEventListener('click', function() {
             if (!imageToCrop.src) return;
 
-            const cropW = 413;
-            const cropH = 531;
+            const cropW = 413; const cropH = 531;
             let croppedCanvas;
 
             if (isPerspectiveMode) {
-                // Perspective logic already bakes the filter in extractPerspectiveCanvas()
                 croppedCanvas = extractPerspectiveCanvas(perspectiveImg, perspectivePts, cropW, cropH);
             } else {
                 if (!cropper) return;
                 let rawCanvas = cropper.getCroppedCanvas({ width: cropW, height: cropH, imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
-                
-                // BAKE EXPOSURE AND CONTRAST FILTERS FOR STANDARD CROP
                 croppedCanvas = document.createElement('canvas');
-                croppedCanvas.width = cropW;
-                croppedCanvas.height = cropH;
+                croppedCanvas.width = cropW; croppedCanvas.height = cropH;
                 let cCtx = croppedCanvas.getContext('2d');
-                cCtx.filter = `brightness(${imgExposureSlider.value}%) contrast(${imgContrastSlider.value}%)`;
+                
+                // Bake Beauty Filters
+                let beauty = imgBeautifySlider.value;
+                let blurVal = (beauty / 100) * 1.5;
+                let satVal = 100 + (beauty * 0.5);
+                cCtx.filter = `brightness(${imgExposureSlider.value}%) contrast(${imgContrastSlider.value}%) saturate(${satVal}%) blur(${blurVal}px)`;
                 cCtx.drawImage(rawCanvas, 0, 0);
             }
 
-            // Rotate 90 degrees canvas
-            const rotW = cropH; 
-            const rotH = cropW; 
-            const rotatedCanvas = document.createElement('canvas');
-            rotatedCanvas.width = rotW;
-            rotatedCanvas.height = rotH;
-            const rCtx = rotatedCanvas.getContext('2d');
+            // --- Fill Actual Background Color First (For White/Blue) ---
+            let bg = imgBgColor.value;
+            let coloredBgCanvas = document.createElement('canvas');
+            coloredBgCanvas.width = cropW; coloredBgCanvas.height = cropH;
+            let finalBgCtx = coloredBgCanvas.getContext('2d');
+            
+            if(bg !== 'none') {
+                finalBgCtx.fillStyle = bg === 'blue' ? '#005bb5' : '#ffffff';
+                finalBgCtx.fillRect(0, 0, cropW, cropH);
+            }
+            finalBgCtx.drawImage(croppedCanvas, 0, 0);
+            croppedCanvas = coloredBgCanvas;
+            // -------------------------------------------------------------
 
-            rCtx.translate(rotW / 2, rotH / 2);
-            rCtx.rotate(90 * Math.PI / 180);
+            const rotW = cropH; const rotH = cropW; 
+            const rotatedCanvas = document.createElement('canvas');
+            rotatedCanvas.width = rotW; rotatedCanvas.height = rotH;
+            const rCtx = rotatedCanvas.getContext('2d');
+            rCtx.translate(rotW / 2, rotH / 2); rCtx.rotate(90 * Math.PI / 180);
             rCtx.drawImage(croppedCanvas, -cropW / 2, -cropH / 2, cropW, cropH);
 
             const copies = parseInt(photoCountSelect.value);
-            const metaDate = captureDateInput.value || 'No Date';
-            const metaNum = photoNumberInput.value || 'No ID';
-            const metaText = `${metaDate} | ${metaNum}`;
+            const metaText = `${captureDateInput.value || 'No Date'} | ${photoNumberInput.value || 'No ID'}`;
 
             for (let i = 0; i < copies; i++) {
-                if (printSheetSlots.length < MAX_SLOTS) {
-                    printSheetSlots.push({ canvas: rotatedCanvas, metaText: metaText });
-                }
+                if (printSheetSlots.length < MAX_SLOTS) printSheetSlots.push({ canvas: rotatedCanvas, metaText: metaText });
             }
 
-            renderFinalSheet();
-            updatePhotoCountDropdown();
+            renderFinalSheet(); updatePhotoCountDropdown();
 
-            // Reset Left Panel UI
-            cropperWrapper.classList.add('hidden');
-            perspectiveWrapper.classList.add('hidden');
-            cropSettings.classList.add('hidden');
-            imageAdjustmentsPanel.classList.add('hidden');
-            cropModeToggle.classList.add('hidden');
-
-            initialMessage.classList.remove('hidden');
+            cropperWrapper.classList.add('hidden'); perspectiveWrapper.classList.add('hidden');
+            cropSettings.classList.add('hidden'); imageAdjustmentsPanel.classList.add('hidden');
+            cropModeToggle.classList.add('hidden'); initialMessage.classList.remove('hidden');
             
             const remaining = MAX_SLOTS - printSheetSlots.length;
             if (remaining > 0) {
-                initialMessage.innerHTML = `
-                    <i class="fa-solid fa-circle-check text-green-500 text-5xl mb-3"></i>
+                initialMessage.innerHTML = `<i class="fa-solid fa-circle-check text-green-500 text-5xl mb-3"></i>
                     <p class="text-gray-800 font-bold text-lg mb-1">Photos Sheet Mein Add Ho Gayin!</p>
                     <p class="text-gray-600 mb-3">Sheet par abhi bhi <span class="font-bold text-blue-600">${remaining} photos</span> ki jagah baqi hai.</p>
-                    <p class="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">Doosri photo upload karein ya camera se lein taake sheet pur ho.</p>
-                `;
+                    <p class="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">Doosri photo upload karein ya camera se lein taake sheet pur ho.</p>`;
             } else {
-                initialMessage.innerHTML = `
-                    <i class="fa-solid fa-star text-yellow-500 text-5xl mb-3"></i>
-                    <p class="text-gray-800 font-bold text-lg mb-1">Sheet Mukammal Bhar Gayi Hai (8/8)</p>
-                    <p class="text-gray-600">Ab aap sheet download ya print kar sakte hain.</p>
-                `;
+                initialMessage.innerHTML = `<i class="fa-solid fa-star text-yellow-500 text-5xl mb-3"></i>
+                    <p class="text-gray-800 font-bold text-lg mb-1">Sheet Bhar Gayi Hai (8/8)</p><p class="text-gray-600">Ab aap sheet download ya print kar sakte hain.</p>`;
             }
-
-            imageUpload.value = '';
-            imageToCrop.src = '';
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
-
-            if(window.innerWidth < 1024) {
-                resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            imageUpload.value = ''; imageToCrop.src = '';
+            if (cropper) { cropper.destroy(); cropper = null; }
+            if(window.innerWidth < 1024) resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
 
         clearSheetBtn.addEventListener('click', function() {
-            printSheetSlots = []; 
-            updatePhotoCountDropdown();
-            previewSlotsText.innerText = '0';
-            resultContainer.classList.add('hidden');
-            resultPlaceholder.classList.remove('hidden');
-            finalOutputDataUrl = null;
-
+            printSheetSlots = []; updatePhotoCountDropdown();
+            previewSlotsText.innerText = '0'; resultContainer.classList.add('hidden');
+            resultPlaceholder.classList.remove('hidden'); finalOutputDataUrl = null;
             if (cropSettings.classList.contains('hidden')) {
-                initialMessage.innerHTML = `
-                    <i class="fa-solid fa-images text-4xl mb-3 text-blue-300"></i>
-                    <p class="font-medium text-gray-600">Nayi sheet shuru karne ke liye photo upload karein ya Camera istemal karein.</p>
-                `;
+                initialMessage.innerHTML = `<i class="fa-solid fa-images text-4xl mb-3 text-blue-300"></i>
+                    <p class="font-medium text-gray-600">Nayi sheet shuru karne ke liye photo upload karein ya Camera istemal karein.</p>`;
                 initialMessage.classList.remove('hidden');
             }
         });
 
-        function getSafeFileName() {
-            const dDate = captureDateInput.value || 'Date';
-            return `Daiba_Photosheet_${dDate}`.replace(/[^a-zA-Z0-9-]/g, '_');
-        }
-
-        downloadJpgBtn.addEventListener('click', function() {
-            if (!finalOutputDataUrl) return;
-            const link = document.createElement('a');
-            link.download = `${getSafeFileName()}.jpg`;
-            link.href = finalOutputDataUrl;
-            link.click();
-        });
-
-        downloadPdfBtn.addEventListener('click', function() {
-            if (!finalOutputDataUrl) return;
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'in', format: [4, 6] });
-            doc.addImage(finalOutputDataUrl, 'JPEG', 0, 0, 4, 6);
-            doc.save(`${getSafeFileName()}.pdf`);
-        });
-
+        function getSafeFileName() { return `Daiba_Photosheet_${captureDateInput.value || 'Date'}`.replace(/[^a-zA-Z0-9-]/g, '_'); }
+        downloadJpgBtn.addEventListener('click', function() { if (!finalOutputDataUrl) return; const link = document.createElement('a'); link.download = `${getSafeFileName()}.jpg`; link.href = finalOutputDataUrl; link.click(); });
+        downloadPdfBtn.addEventListener('click', function() { if (!finalOutputDataUrl) return; const doc = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'in', format: [4, 6] }); doc.addImage(finalOutputDataUrl, 'JPEG', 0, 0, 4, 6); doc.save(`${getSafeFileName()}.pdf`); });
         printBtn.addEventListener('click', function() {
             if (!finalOutputDataUrl) return;
             const printWindow = window.open('', '_blank');
-            if (!printWindow) {
-                alert("Please allow popups for this site to use the print feature.");
-                return;
-            }
-            const html = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Print Passport Photos</title>
-                    <style>
-                        @page { size: 4in 6in; margin: 0; }
-                        body, html { margin: 0; padding: 0; width: 4in; height: 6in; background-color: white; }
-                        img { width: 100%; height: 100%; object-fit: cover; display: block; }
-                    </style>
-                </head>
-                <body>
-                    <img src="${finalOutputDataUrl}" onload="window.print(); window.close();" />
-                </body>
-                </html>
-            `;
-            printWindow.document.open();
-            printWindow.document.write(html);
-            printWindow.document.close();
+            if (!printWindow) { alert("Popups allow karein."); return; }
+            const html = `<!DOCTYPE html><html><head><title>Print</title><style>@page{size:4in 6in;margin:0;}body,html{margin:0;padding:0;width:4in;height:6in;}img{width:100%;height:100%;object-fit:cover;display:block;}</style></head><body><img src="${finalOutputDataUrl}" onload="window.print(); window.close();" /></body></html>`;
+            printWindow.document.open(); printWindow.document.write(html); printWindow.document.close();
         });
     </script>
 </body>
