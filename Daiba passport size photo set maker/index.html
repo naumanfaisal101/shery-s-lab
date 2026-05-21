@@ -74,12 +74,12 @@
 <body class="min-h-screen p-2 sm:p-4 md:p-8 overflow-x-hidden">
 
     <!-- Mobile Floating Home Button (Sirf mobile par nazar aayega) -->
-    <a href="../index.html" class="sm:hidden fixed bottom-6 right-6 z-[9999] bg-blue-900 hover:bg-blue-800 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-2xl transition-transform active:scale-95 border-2 border-white">
+    <a id="floatingMobileBtn" href="../index.html" class="sm:hidden fixed bottom-6 right-6 z-[9999] bg-blue-900 hover:bg-blue-800 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-2xl transition-transform active:scale-95 border-2 border-white">
         <i class="fa-solid fa-house text-xl"></i>
     </a>
 
     <!-- Desktop Floating Back Button (Mobile par hide ho jayega) -->
-    <a href="../index.html" class="hidden sm:flex items-center gap-2 fixed bottom-8 right-8 z-[9999] bg-blue-900 hover:bg-blue-800 text-white py-3 px-6 rounded-full font-bold text-sm shadow-xl transition-all hover:scale-105 border-2 border-white">
+    <a id="floatingDesktopBtn" href="../index.html" class="hidden sm:flex items-center gap-2 fixed bottom-8 right-8 z-[9999] bg-blue-900 hover:bg-blue-800 text-white py-3 px-6 rounded-full font-bold text-sm shadow-xl transition-all hover:scale-105 border-2 border-white">
         <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
     </a>
 
@@ -88,9 +88,14 @@
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col">
             <div class="p-4 bg-gray-900 text-white flex justify-between items-center">
                 <h3 class="font-bold text-lg"><i class="fa-solid fa-camera mr-2"></i> Camera Live View</h3>
-                <button id="closeCameraBtn" class="text-red-400 hover:text-red-300 transition-colors">
-                    <i class="fa-solid fa-times text-2xl"></i>
-                </button>
+                <div class="flex items-center gap-4">
+                    <button id="flipCameraBtn" class="text-blue-400 hover:text-blue-300 transition-colors" title="Front/Back Camera Switch">
+                        <i class="fa-solid fa-camera-rotate text-2xl"></i>
+                    </button>
+                    <button id="closeCameraBtn" class="text-red-400 hover:text-red-300 transition-colors">
+                        <i class="fa-solid fa-times text-2xl"></i>
+                    </button>
+                </div>
             </div>
             
             <div class="relative bg-black flex-grow flex items-center justify-center">
@@ -124,16 +129,17 @@
     </div>
 
     <div class="max-w-5xl mx-auto w-full">
-        <header class="mb-8 sm:mb-10 flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 sm:gap-6 bg-white p-5 sm:p-8 rounded-2xl shadow-sm border border-gray-100 relative">
+        <!-- FIX: Added sm:pr-40 to prevent Home Page button from overlapping the text -->
+        <header class="mb-8 sm:mb-10 flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 sm:gap-6 bg-white p-5 sm:p-8 sm:pr-40 rounded-2xl shadow-sm border border-gray-100 relative">
             
             <!-- Header Home Button (Desktop ke liye) -->
-            <a href="../index.html" class="hidden sm:flex absolute top-6 right-6 bg-gray-50 hover:bg-gray-100 text-gray-600 px-4 py-2 rounded-full font-medium text-sm transition items-center gap-2 border border-gray-200">
+            <a href="index.html" class="hidden sm:flex absolute top-6 right-6 bg-gray-50 hover:bg-gray-100 text-gray-600 px-4 py-2 rounded-full font-medium text-sm transition items-center gap-2 border border-gray-200">
                 <i class="fa-solid fa-house"></i> Home Page
             </a>
 
             <!-- Logo (Ab Clickable Hai) -->
             <div class="relative shrink-0 group">
-                <a href="../index.html" title="Go to Home Page">
+                <a href="index.html" title="Go to Home Page">
                     <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 via-red-400 to-yellow-400 blur-md opacity-60 scale-110 group-hover:scale-125 transition-all duration-300"></div>
                     <img src="Gemini_Generated_Image_57wlmt57wlmt57wl.jpg" 
                          onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Daiba&background=ec4899&color=fff&size=200&font-size=0.4';" 
@@ -144,7 +150,7 @@
             
             <div class="text-center sm:text-left mt-2 sm:mt-0 max-w-full">
                 <!-- Title (Ab Clickable Hai) -->
-                <a href="../index.html" class="inline-block hover:opacity-80 transition-opacity" title="Go to Home Page">
+                <a href="index.html" class="inline-block hover:opacity-80 transition-opacity" title="Go to Home Page">
                     <h1 class="text-2xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-purple-600 mb-2 sm:mb-3 tracking-tight break-words">
                         Daiba Passport Photo Set Maker
                     </h1>
@@ -167,24 +173,25 @@
                 <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">1. Photo Chunein</h2>
                 
                 <div id="dropZone" class="mb-6 bg-gray-50 p-4 rounded-lg border-2 border-dashed border-gray-200 transition-all relative overflow-hidden">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
+                    <!-- FIX: Added items-end to grid and h-[44px] whitespace-nowrap to all inputs to make heights uniform -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10 items-end">
                         <!-- File Upload -->
-                        <div>
+                        <div class="w-full">
                             <label class="block text-sm font-medium text-gray-700 mb-2">File Upload Karein</label>
                             <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/jpg" 
-                                   class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors border border-gray-300 rounded-md p-1 bg-white">
+                                   class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors border border-gray-300 rounded-md p-1.5 bg-white h-[44px]">
                         </div>
                         <!-- Camera Button -->
-                        <div>
+                        <div class="w-full">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Ya Camera Istemal</label>
-                            <button id="openCameraBtn" class="w-full bg-blue-600 text-white py-[10px] px-4 rounded-md hover:bg-blue-700 transition flex justify-center items-center gap-2 font-medium">
+                            <button id="openCameraBtn" class="w-full bg-blue-600 text-white px-4 rounded-md hover:bg-blue-700 transition flex justify-center items-center gap-2 font-medium h-[44px] whitespace-nowrap">
                                 <i class="fa-solid fa-camera"></i> Camera
                             </button>
                         </div>
                         <!-- Paste Button -->
-                        <div>
+                        <div class="w-full">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Ya Copy Paste Karein</label>
-                            <button id="pasteBtn" class="w-full bg-purple-600 text-white py-[10px] px-4 rounded-md hover:bg-purple-700 transition flex justify-center items-center gap-2 font-medium" title="Ctrl+V bhi kaam karega">
+                            <button id="pasteBtn" class="w-full bg-purple-600 text-white px-4 rounded-md hover:bg-purple-700 transition flex justify-center items-center gap-2 font-medium h-[44px] whitespace-nowrap" title="Ctrl+V bhi kaam karega">
                                 <i class="fa-solid fa-clipboard"></i> Paste Image
                             </button>
                         </div>
@@ -403,7 +410,11 @@
         const camExpVal = document.getElementById('camExpVal');
         const camContVal = document.getElementById('camContVal');
         const camLoading = document.getElementById('camLoading');
+        const flipCameraBtn = document.getElementById('flipCameraBtn');
+        const floatingMobileBtn = document.getElementById('floatingMobileBtn');
+        const floatingDesktopBtn = document.getElementById('floatingDesktopBtn');
         let cameraStream = null;
+        let currentFacingMode = "environment"; // By default back camera
 
         captureDateInput.value = new Date().toISOString().split('T')[0];
 
@@ -450,20 +461,38 @@
 
         // --- CAMERA LOGIC (UPGRADE 1) ---
         
-        async function startCamera() {
+        async function startCamera(facingMode = currentFacingMode) {
             cameraModal.classList.remove('hidden');
             camLoading.classList.remove('hidden');
+            
+            // Camera on hotay hi home aur back buttons ko chupa dein
+            if(floatingMobileBtn) floatingMobileBtn.style.display = 'none';
+            if(floatingDesktopBtn) floatingDesktopBtn.style.display = 'none';
+            
+            // Puraana stream stop karein taake naya (front/back) shuru ho sakay
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+            }
+
             try {
-                // Try to get high quality back camera first, fallback to user camera
                 const constraints = {
                     video: { 
-                        facingMode: { ideal: "environment" },
+                        facingMode: { ideal: facingMode },
                         width: { ideal: 1920 },
                         height: { ideal: 1080 }
                     }
                 };
                 cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
                 videoElement.srcObject = cameraStream;
+                currentFacingMode = facingMode; // Update state
+                
+                // Front camera ko sheeshay (mirror) ki tarah show karein taake view theek nazar aaye
+                if (currentFacingMode === "user") {
+                    videoElement.style.transform = "scaleX(-1)";
+                } else {
+                    videoElement.style.transform = "scaleX(1)";
+                }
+
                 camLoading.classList.add('hidden');
                 
                 // Reset Camera filters
@@ -486,6 +515,10 @@
             }
             videoElement.srcObject = null;
             cameraModal.classList.add('hidden');
+            
+            // Camera band honay ke baad buttons dobara dikha dein
+            if(floatingMobileBtn) floatingMobileBtn.style.display = '';
+            if(floatingDesktopBtn) floatingDesktopBtn.style.display = '';
         }
 
         function applyCameraFilters() {
@@ -499,6 +532,11 @@
 
         camExposureSlider.addEventListener('input', applyCameraFilters);
         camContrastSlider.addEventListener('input', applyCameraFilters);
+
+        flipCameraBtn.addEventListener('click', () => {
+            const newMode = currentFacingMode === "environment" ? "user" : "environment";
+            startCamera(newMode);
+        });
 
         openCameraBtn.addEventListener('click', () => {
             if (printSheetSlots.length >= MAX_SLOTS) {
@@ -521,6 +559,13 @@
             
             // Bake the camera filters (Exposure/Contrast) directly into the captured image
             ctx.filter = `brightness(${camExposureSlider.value}%) contrast(${camContrastSlider.value}%)`;
+            
+            // Agar front camera istemal hua tha toh tasweer ko dobara seedha (un-mirror) karein save karne se pehle
+            if (currentFacingMode === "user") {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+
             ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
             
             const dataUrl = canvas.toDataURL('image/jpeg', 1.0);
