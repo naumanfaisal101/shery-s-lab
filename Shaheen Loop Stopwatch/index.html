@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shaheen Loop Stopwatch | NusratShaheen.inc</title>
+    <!-- Tailwind CSS for modern and premium styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@300;400;600;800&display=swap');
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        }
+        
+        .digital-font {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* Glassmorphism utility */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Custom toggle styling */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10B981;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10B981;
+        }
+
+        /* Ringing Animation */
+        @keyframes ring-shake {
+            0% { transform: rotate(0); }
+            10% { transform: rotate(15deg); }
+            20% { transform: rotate(-15deg); }
+            30% { transform: rotate(14deg); }
+            40% { transform: rotate(-14deg); }
+            50% { transform: rotate(10deg); }
+            60% { transform: rotate(-10deg); }
+            70% { transform: rotate(4deg); }
+            80% { transform: rotate(-4deg); }
+            90% { transform: rotate(2deg); }
+            100% { transform: rotate(0); }
+        }
+        .animate-ring {
+            animation: ring-shake 0.5s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-100 p-4 md:p-8 pt-20 md:pt-8">
+
+    <!-- Top-Left Branding Logo (User's Selected Location) -->
+    <div class="fixed top-4 left-4 md:top-6 md:left-6 z-50 flex items-center gap-3">
+        <div class="relative group">
+            <!-- Neon glow background effect behind the logo -->
+            <div class="absolute -inset-1 bg-gradient-to-r from-amber-500 via-yellow-500 to-teal-500 rounded-2xl blur opacity-30 group-hover:opacity-80 transition duration-500"></div>
+            <!-- Interactive Image Logo -->
+            <img src="LogoStwatch.webp" alt="Shaheen Loop Stopwatch Logo" class="relative w-12 h-12 md:w-16 md:h-16 rounded-2xl object-cover border border-slate-700/80 shadow-2xl transition-transform duration-300 group-hover:scale-105">
+        </div>
+        <!-- Desktop Brand Name indicator -->
+        <div class="hidden md:flex flex-col">
+            <span class="text-xs font-bold text-slate-200 tracking-wider">SHAHEEN</span>
+            <span class="text-[9px] text-slate-400 font-medium">NusratShaheen.inc</span>
+        </div>
+    </div>
+
+    <!-- Header Section -->
+    <header class="max-w-md w-full mx-auto text-center mt-4">
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-indigo-400">
+            Shaheen Loop Stopwatch
+        </h1>
+        <p class="text-slate-400 text-xs md:text-sm mt-1">by NusratShaheen.inc</p>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-md w-full mx-auto my-auto flex flex-col items-center justify-center">
+        
+        <!-- Timer UI Panel -->
+        <div class="glass-panel w-full rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden flex flex-col items-center">
+            
+            <!-- Back to Dashboard Button (Positioned at your selected top-right corner inside the panel) -->
+            <a href="../index.html" class="absolute top-4 right-4 text-[10px] md:text-xs font-semibold px-2.5 py-1.5 rounded-full bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 border border-indigo-500/30 flex items-center gap-1 transition-all shadow-lg active:scale-95 z-20 hover:text-white">
+                <i data-lucide="arrow-left" class="w-3 h-3"></i>
+                <span>Back to Dashboard</span>
+            </a>
+
+            <!-- Progress Circle -->
+            <div class="relative w-64 h-64 flex items-center justify-center mb-6">
+                <svg class="absolute top-0 left-0 w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    <!-- Background Circle -->
+                    <circle cx="50" cy="50" r="44" stroke="#334155" stroke-width="4" fill="transparent" />
+                    <!-- Foreground Progress Circle -->
+                    <circle id="progress-bar" cx="50" cy="50" r="44" stroke="#10b981" stroke-width="5" fill="transparent"
+                            stroke-dasharray="276.4" stroke-dashoffset="0" stroke-linecap="round" class="transition-all duration-1000 ease-linear" />
+                </svg>
+
+                <!-- Status Icon / Bell Indicator inside circle -->
+                <div class="absolute top-8 text-center flex flex-col items-center">
+                    <div id="bell-icon-container" class="text-emerald-400">
+                        <i data-lucide="bell" class="w-8 h-8"></i>
+                    </div>
+                </div>
+
+                <!-- Numerical Countdown Display -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center mt-4">
+                    <span id="timer-display" class="text-5xl md:text-6xl font-bold digital-font tracking-wider text-white">00:05</span>
+                    <span id="state-badge" class="mt-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 tracking-wider uppercase">
+                        READY
+                    </span>
+                </div>
+            </div>
+
+            <!-- Custom Roman Urdu Instruction & Status Display -->
+            <div class="w-full text-center py-2 px-4 rounded-xl bg-slate-900/50 border border-slate-800 mb-6">
+                <p id="roman-urdu-status" class="text-sm font-medium text-teal-400">
+                    Apna time set karein aur start dabayein!
+                </p>
+            </div>
+
+            <!-- Time Input Form (Only visible when not running) -->
+            <div id="inputs-panel" class="w-full space-y-4 mb-6 transition-all duration-300">
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Minutes Input -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 text-center">Minutes</label>
+                        <div class="relative flex items-center bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2">
+                            <input type="number" id="input-minutes" min="0" max="59" value="0" 
+                                   class="w-full bg-transparent text-center text-xl font-bold text-white focus:outline-none focus:ring-0">
+                        </div>
+                    </div>
+                    <!-- Seconds Input -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 text-center">Seconds</label>
+                        <div class="relative flex items-center bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2">
+                            <input type="number" id="input-seconds" min="0" max="59" value="5" 
+                                   class="w-full bg-transparent text-center text-xl font-bold text-white focus:outline-none focus:ring-0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toggle Switch for Loop Mode -->
+            <div class="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-800/40 border border-slate-700/50 mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
+                        <i data-lucide="repeat-2" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-white">Loop Option (Auto-Repeat)</p>
+                        <p class="text-xs text-slate-400">Alarm bajne ke 2s baad restart hoga</p>
+                    </div>
+                </div>
+                <!-- Toggle switch -->
+                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="toggle" id="loop-toggle" checked
+                           class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-slate-600 border-4 border-slate-800 appearance-none cursor-pointer right-6 transition-all duration-200"/>
+                    <label for="loop-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-700 cursor-pointer"></label>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="w-full grid grid-cols-3 gap-3">
+                <!-- Reset Button -->
+                <button id="btn-reset" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-95 transition-all text-slate-300">
+                    <i data-lucide="rotate-ccw" class="w-5 h-5 mb-1"></i>
+                    <span class="text-xs font-medium">Reset</span>
+                </button>
+                
+                <!-- Start/Pause Button (Spans 2 columns) -->
+                <button id="btn-start" class="col-span-2 flex items-center justify-center gap-2 p-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold active:scale-95 transition-all shadow-lg shadow-emerald-500/10">
+                    <i data-lucide="play" id="start-icon" class="w-5 h-5"></i>
+                    <span id="start-text">Start Timer</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Testing & Utilities Section -->
+        <div class="w-full mt-4 flex items-center justify-between px-2 text-xs text-slate-400">
+            <button id="btn-test-sound" class="flex items-center gap-1.5 hover:text-slate-200 bg-slate-800/30 py-1 px-3 rounded-full border border-slate-800 transition">
+                <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+                <span>Sound Test Karein</span>
+            </button>
+            <div class="flex items-center gap-1">
+                <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-500"></i>
+                <span>Sound allow rakhein</span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer Description & Instructions -->
+    <footer class="max-w-md w-full mx-auto text-center text-slate-500 text-xs py-4 space-y-2 mt-4">
+        <p class="font-medium">💡 Kaise kaam karta hai?</p>
+        <p class="px-4">Time set kar ke start karein. Khatam hote hi 2 second bell bajegi. Agar **Loop** on hai, to automatic 2s baad restart ho jayegi!</p>
+        <p class="text-[10px] text-slate-600">Built using Web Audio Synthesizer (No external asset dependency)</p>
+    </footer>
+
+    <!-- JS Code and Logic -->
+    <script>
+        // Lucide Icons activation
+        lucide.createIcons();
+
+        // Audio Context setup for synth bell
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Web Audio synthesized bell sound
+        function playBell() {
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            
+            // Bell chime complex harmonic frequencies
+            const freqs = [523.25, 783.99, 1046.50, 1318.51, 1567.98]; // C5, G5, C6, E6, G6
+            const gains = [0.4, 0.3, 0.2, 0.15, 0.1];
+
+            freqs.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+                
+                // Attack and long metallic decay
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(gains[idx], now + 0.02);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 2.0);
+            });
+        }
+
+        // Play dual-beat chime for high impact warning
+        let bellInterval = null;
+        function triggerRingingSound() {
+            playBell();
+            // Optional second strike after 0.8 seconds
+            setTimeout(() => {
+                if (timerState === STATE_RINGING) {
+                    playBell();
+                }
+            }, 800);
+        }
+
+        // App States
+        const STATE_READY = 'READY';
+        const STATE_RUNNING = 'RUNNING';
+        const STATE_PAUSED = 'PAUSED';
+        const STATE_RINGING = 'RINGING';
+
+        let timerState = STATE_READY;
+        let countdownValue = 5; // default 5 seconds
+        let totalSecondsSet = 5;
+        let intervalId = null;
+        let ringTimeoutId = null;
+
+        // UI Elements
+        const timerDisplay = document.getElementById('timer-display');
+        const stateBadge = document.getElementById('state-badge');
+        const romanUrduStatus = document.getElementById('roman-urdu-status');
+        const inputMinutes = document.getElementById('input-minutes');
+        const inputSeconds = document.getElementById('input-seconds');
+        const loopToggle = document.getElementById('loop-toggle');
+        const btnStart = document.getElementById('btn-start');
+        const startIcon = document.getElementById('start-icon');
+        const startText = document.getElementById('start-text');
+        const btnReset = document.getElementById('btn-reset');
+        const btnTestSound = document.getElementById('btn-test-sound');
+        const inputsPanel = document.getElementById('inputs-panel');
+        const bellIconContainer = document.getElementById('bell-icon-container');
+        const progressBar = document.getElementById('progress-bar');
+
+        // Circular progress constant circumference
+        const strokeCircumference = 276.4;
+
+        // Initialize display
+        updateTimerDisplay();
+
+        // Listeners
+        btnStart.addEventListener('click', handleStartPause);
+        btnReset.addEventListener('click', handleReset);
+        btnTestSound.addEventListener('click', () => {
+            initAudio();
+            playBell();
+            showStatusMessage("🛎️ Bell ki aawaz test ki ja rahi hai!", "text-yellow-400");
+        });
+
+        inputMinutes.addEventListener('change', syncInputsToTimer);
+        inputSeconds.addEventListener('change', syncInputsToTimer);
+        inputMinutes.addEventListener('input', syncInputsToTimer);
+        inputSeconds.addEventListener('input', syncInputsToTimer);
+
+        // Helper to update visual progress ring
+        function updateProgressRing() {
+            if (totalSecondsSet <= 0) return;
+            const progressRatio = countdownValue / totalSecondsSet;
+            const offset = strokeCircumference * (1 - progressRatio);
+            progressBar.style.strokeDashoffset = offset;
+            
+            // Color changing based on time left
+            if (timerState === STATE_RINGING) {
+                progressBar.setAttribute('stroke', '#ef4444'); // Red on ringing
+            } else if (progressRatio < 0.2) {
+                progressBar.setAttribute('stroke', '#f59e0b'); // Yellow when <20%
+            } else {
+                progressBar.setAttribute('stroke', '#10b981'); // Emerald normally
+            }
+        }
+
+        function showStatusMessage(text, colorClass = "text-teal-400") {
+            romanUrduStatus.className = `text-sm font-medium ${colorClass} transition-all duration-300`;
+            romanUrduStatus.textContent = text;
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(countdownValue / 60);
+            const secs = countdownValue % 60;
+            const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            timerDisplay.textContent = formatted;
+            updateProgressRing();
+        }
+
+        function syncInputsToTimer() {
+            if (timerState !== STATE_READY) return;
+            let mins = parseInt(inputMinutes.value) || 0;
+            let secs = parseInt(inputSeconds.value) || 0;
+            
+            // Bound checks
+            if (mins < 0) mins = 0;
+            if (secs < 0) secs = 0;
+            if (secs > 59) secs = 59;
+
+            countdownValue = (mins * 60) + secs;
+            totalSecondsSet = countdownValue;
+            
+            if (countdownValue <= 0) {
+                countdownValue = 1; // Minimum 1s
+                totalSecondsSet = 1;
+            }
+            updateTimerDisplay();
+        }
+
+        function handleStartPause() {
+            initAudio(); // Resume or init audio context from user gesture
+
+            if (timerState === STATE_READY || timerState === STATE_PAUSED) {
+                startCountdown();
+            } else if (timerState === STATE_RUNNING) {
+                pauseCountdown();
+            } else if (timerState === STATE_RINGING) {
+                // Clicking start during ringing halts loop and resets
+                stopRingingPhase();
+                handleReset();
+            }
+        }
+
+        function startCountdown() {
+            if (timerState === STATE_READY) {
+                syncInputsToTimer();
+            }
+            
+            timerState = STATE_RUNNING;
+            stateBadge.textContent = "RUNNING";
+            stateBadge.className = "mt-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-400 tracking-wider";
+            showStatusMessage("⏳ Timer chal raha hai... dhyan rakhein!", "text-emerald-400");
+            
+            // Adjust start button visual state
+            btnStart.classList.remove('from-emerald-500', 'to-teal-500');
+            btnStart.classList.add('from-amber-500', 'to-yellow-500');
+            startIcon.setAttribute('data-lucide', 'pause');
+            startText.textContent = "Pause Timer";
+            lucide.createIcons();
+
+            // Disable input fields while running
+            inputsPanel.classList.add('opacity-40', 'pointer-events-none');
+
+            // Interval execution
+            clearInterval(intervalId);
+            intervalId = setInterval(() => {
+                if (countdownValue > 0) {
+                    countdownValue--;
+                    updateTimerDisplay();
+                }
+
+                if (countdownValue === 0) {
+                    clearInterval(intervalId);
+                    triggerAlarm();
+                }
+            }, 1000);
+        }
+
+        function pauseCountdown() {
+            clearInterval(intervalId);
+            timerState = STATE_PAUSED;
+            stateBadge.textContent = "PAUSED";
+            stateBadge.className = "mt-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-400 tracking-wider";
+            showStatusMessage("⏸️ Timer pause ho gaya hai.", "text-amber-400");
+
+            // Adjust pause button visuals
+            btnStart.classList.remove('from-amber-500', 'to-yellow-500');
+            btnStart.classList.add('from-emerald-500', 'to-teal-500');
+            startIcon.setAttribute('data-lucide', 'play');
+            startText.textContent = "Resume Timer";
+            lucide.createIcons();
+        }
+
+        function triggerAlarm() {
+            timerState = STATE_RINGING;
+            stateBadge.textContent = "RINGING";
+            stateBadge.className = "mt-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-rose-950 text-rose-400 tracking-wider";
+            showStatusMessage("🛎️ Time's up! Bell baj rahi hai...", "text-rose-400 animate-pulse");
+
+            // Apply shaking animation to the bell icon
+            bellIconContainer.classList.add('animate-ring');
+            progressBar.style.strokeDashoffset = '0'; // fill red
+            updateProgressRing();
+
+            // Fire synth chime
+            triggerRingingSound();
+
+            const isLooping = loopToggle.checked;
+
+            // Alarm rings for exactly 2 seconds
+            ringTimeoutId = setTimeout(() => {
+                stopRingingPhase();
+                
+                if (isLooping) {
+                    // Reset value and immediately trigger start again
+                    countdownValue = totalSecondsSet;
+                    updateTimerDisplay();
+                    showStatusMessage("🔄 Loop: Dobara timer shuru ho raha hai!", "text-indigo-400");
+                    setTimeout(() => {
+                        if (timerState === STATE_READY) {
+                            startCountdown();
+                        }
+                    }, 200); // minor break
+                } else {
+                    handleReset();
+                    showStatusMessage("✅ Timer complete ho gaya!", "text-green-400");
+                }
+            }, 2000);
+        }
+
+        function stopRingingPhase() {
+            clearTimeout(ringTimeoutId);
+            bellIconContainer.classList.remove('animate-ring');
+            timerState = STATE_READY;
+        }
+
+        function handleReset() {
+            clearInterval(intervalId);
+            clearTimeout(ringTimeoutId);
+            stopRingingPhase();
+
+            timerState = STATE_READY;
+            stateBadge.textContent = "READY";
+            stateBadge.className = "mt-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 tracking-wider";
+            showStatusMessage("Apna time set karein aur start dabayein!", "text-teal-400");
+
+            // Restore inputs
+            inputsPanel.classList.remove('opacity-40', 'pointer-events-none');
+
+            // Reset start button view
+            btnStart.className = "col-span-2 flex items-center justify-center gap-2 p-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold active:scale-95 transition-all shadow-lg shadow-emerald-500/10";
+            startIcon.setAttribute('data-lucide', 'play');
+            startText.textContent = "Start Timer";
+            lucide.createIcons();
+
+            // Sync from inputs again
+            syncInputsToTimer();
+        }
+    </script>
+</body>
+</html>
