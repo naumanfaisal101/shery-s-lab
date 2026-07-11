@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شاہین ایپلیکیشن ٹائپر - NusratShaheen.inc</title>
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Noto Nastaliq Urdu & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            background-color: #f1f5f9;
+        }
+        
+        /* Urdu Specific Nastaliq Font with local fallbacks for instant rendering */
+        .urdu-text {
+            font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', 'Jonamehr', serif;
+            line-height: 2.6;
+            direction: rtl;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Precise A4 Styling for Screen with Legal Borders */
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            height: 297mm; /* Enforced tight boundary for single-page design */
+            background: white;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Legal Stamp Paper Double Border Frame inside Page */
+        .legal-border {
+            position: absolute;
+            top: 15mm;
+            bottom: 15mm;
+            left: 15mm;
+            right: 15mm;
+            border: 2px double #1e3a8a;
+            pointer-events: none;
+            opacity: 0.15;
+            z-index: 5;
+        }
+
+        /* Watermark Styles */
+        .watermark-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            opacity: 0.04;
+            pointer-events: none;
+            user-select: none;
+            z-index: 1;
+            width: 320px;
+            height: 320px;
+        }
+
+        /* Ultimate Printing Rules to prevent Blank pages and overflow issues */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            body, html {
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                overflow: hidden !important;
+            }
+
+            main {
+                max-width: none !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .grid {
+                display: block !important;
+            }
+
+            #preview-panel {
+                display: block !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+            }
+
+            .preview-scroll-container {
+                padding: 0 !important;
+                display: block !important;
+                overflow: visible !important;
+                width: 100% !important;
+            }
+
+            #print-area {
+                width: 210mm !important;
+                height: 297mm !important;
+                max-height: 297mm !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                border: none !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
+                page-break-before: avoid !important;
+                background: white !important;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+        }
+
+        /* Mobile responsive preview container */
+        @media (max-width: 1024px) {
+            .preview-scroll-container {
+                overflow-x: auto;
+                padding: 10px;
+                display: flex;
+                justify-content: flex-start;
+            }
+            .a4-page {
+                width: 210mm;
+                min-width: 210mm;
+                transform-origin: top left;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800 relative">
+
+    <!-- Back to Dashboard Floating Button (Sized down, semi-transparent on idle, perfectly responsive) -->
+    <a href="../index.html" class="no-print fixed bottom-5 left-5 z-[9999] bg-gradient-to-r from-indigo-900 to-indigo-950 text-white border border-indigo-500/30 px-3.5 py-2.5 rounded-full shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-2 text-xs font-bold opacity-80 hover:opacity-100">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Back to Dashboard</span>
+    </a>
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-md px-4 py-4 sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <!-- Custom Shaheen Premium Logo (Uploaded WebP integrated with beautiful container) -->
+                <div class="bg-white p-0.5 rounded-xl shadow-md flex items-center justify-center w-14 h-14 overflow-hidden border border-indigo-500/30">
+                    <img src="LogoShaheenAplicationTyper.webp" alt="شاہین لوگو" class="w-full h-full object-cover rounded-lg" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22 fill=%22%23fbbf24%22><path d=%22M32,4 L38,15 L56,10 L44,23 L49,38 L32,30 L15,38 L20,23 L8,10 L26,15 Z%22/></svg>';">
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold tracking-tight">شاہین ایپلیکیشن ٹائپر <span class="text-xs font-semibold px-2.5 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full mr-2">NusratShaheen.inc 🦅</span></h1>
+                    <p class="text-xs text-slate-300 mt-0.5">پنڈی بھٹیاں ایڈیشن کے تحت تھانہ سٹی اور تھانہ صدر کی قانونی درخواستیں سیکنڈوں میں لکھیں</p>
+                </div>
+            </div>
+            
+            <!-- Quick Actions Header (Now includes Google Docs Export) -->
+            <div class="flex flex-wrap items-center justify-center lg:justify-end gap-2">
+                <button onclick="triggerPrint()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-bold px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-print"></i>
+                    <span>پرنٹ / PDF بنائیں</span>
+                </button>
+                <button onclick="exportToGoogleDocs()" class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-file-word"></i>
+                    <span>گوگل ڈاکس (Word) ایکسپورٹ</span>
+                </button>
+                <button onclick="copyFormatedText()" class="bg-indigo-600 hover:bg-indigo-700 text-white active:scale-95 px-3.5 py-2.5 rounded-xl transition flex items-center gap-2 text-sm shadow-md">
+                    <i class="fa-solid fa-copy"></i>
+                    <span>کاپی خوبصورت ٹیکسٹ</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 flex flex-col gap-6">
+        
+        <!-- Mobile Navigation Tabs (Only visible on Mobile/Tablet) -->
+        <div class="lg:hidden flex bg-white p-1 rounded-xl shadow-sm border border-slate-200 no-print">
+            <button id="tab-form-btn" onclick="switchTab('form')" class="flex-1 py-3 text-center font-bold text-sm rounded-lg transition duration-200 bg-indigo-950 text-white shadow-sm">
+                <i class="fa-solid fa-pen-to-square ml-2"></i>درخواست لکھیں (فارم)
+            </button>
+            <button id="tab-preview-btn" onclick="switchTab('preview')" class="flex-1 py-3 text-center font-bold text-sm rounded-lg transition duration-200 text-slate-600 hover:bg-slate-100">
+                <i class="fa-solid fa-file-invoice ml-2"></i>A4 پیش نظارہ (پریویو)
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Left Side: Data Entry Panel (5 Columns on Large screens) -->
+            <section id="form-panel" class="lg:col-span-5 bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-5 no-print">
+                
+                <!-- Thana Selector Container -->
+                <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="block text-xs font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-location-crosshairs text-indigo-600"></i>
+                            فوری تھانہ سلیکٹ کریں
+                        </span>
+                        <button onclick="toggleCustomThanaForm()" class="text-[11px] font-bold text-indigo-700 hover:text-indigo-950 transition flex items-center gap-1">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span>نیا تھانہ شامل کریں</span>
+                        </button>
+                    </div>
+
+                    <!-- Pindi Bhattian Default Buttons -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="quickSelectThana('city')" class="py-2.5 px-3 bg-white hover:bg-indigo-600 hover:text-white text-indigo-950 font-bold rounded-lg border border-indigo-100 text-xs transition active:scale-95 flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-building-shield"></i>
+                            <span>تھانہ سٹی پنڈی بھٹیاں</span>
+                        </button>
+                        <button onclick="quickSelectThana('sadar')" class="py-2.5 px-3 bg-white hover:bg-indigo-600 hover:text-white text-indigo-950 font-bold rounded-lg border border-indigo-100 text-xs transition active:scale-95 flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>تھانہ صدر پنڈی بھٹیاں</span>
+                        </button>
+                    </div>
+
+                    <!-- Custom Saved Thanas Area -->
+                    <div id="custom-thanas-section" class="hidden pt-2 border-t border-indigo-100/50">
+                        <span class="block text-[10px] font-bold text-slate-400 mb-2">آپ کے کسٹم تھانے:</span>
+                        <div id="custom-thanas-list" class="grid grid-cols-2 gap-2">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Expandable New Thana Form -->
+                    <div id="new-thana-form" class="hidden bg-white p-3.5 rounded-lg border border-indigo-200 shadow-inner space-y-2.5 mt-2 transition duration-300">
+                        <span class="block text-xs font-bold text-slate-700 border-b pb-1">نیا تھانہ شامل کریں</span>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-0.5">تھانہ / محکمہ کا نام</label>
+                            <input type="text" id="add-thana-name" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs focus:outline-none focus:border-indigo-500" placeholder="مثلاً: تھانہ سٹی چنیوٹ">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-0.5">شہر / مقام</label>
+                                <input type="text" id="add-thana-location" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs focus:outline-none focus:border-indigo-500" placeholder="مثلاً: چنیوٹ">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-0.5">عہدہ دار کا لقب</label>
+                                <input type="text" id="add-thana-authority" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs focus:outline-none focus:border-indigo-500" value="جناب ایس ایچ او صاحب" placeholder="مثلاً: جناب ایس ایچ او صاحب">
+                            </div>
+                        </div>
+                        <div class="flex gap-2 pt-1">
+                            <button onclick="saveNewThana()" class="flex-1 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded text-xs transition">محفوظ کریں</button>
+                            <button onclick="toggleCustomThanaForm()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded text-xs transition">کینسل</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Template Selector -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-sm font-bold text-slate-700">درخواست کا موضوع / ٹیمپلیٹ منتخب کریں:</label>
+                        <span class="text-[10px] bg-indigo-100 text-indigo-950 font-bold px-2 py-0.5 rounded-md">کل 9 ٹیمپلیٹس</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2 max-h-[200px] overflow-y-auto pr-1">
+                        <!-- Custom/Blank (Always First) -->
+                        <button onclick="loadTemplate('customApp', this)" class="template-btn p-2.5 text-right border-2 border-slate-200 rounded-xl hover:border-indigo-600 hover:bg-indigo-50/30 transition text-xs flex flex-col justify-between h-20 active:scale-98">
+                            <span class="font-bold text-indigo-600 flex items-center gap-1">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>خالی / کسٹم فارمیٹ
+                            </span>
+                            <span class="text-[10px] text-slate-400">اپنا فارمیٹ خود لکھیں</span>
+                        </button>
+
+                        <button onclick="loadTemplate('theftApp', this)" class="template-btn p-2.5 text-right border-2 border-slate-200 rounded-xl hover:border-indigo-600 hover:bg-indigo-50/30 transition text-xs flex flex-col justify-between h-20 active:scale-98">
+                            <span class="font-bold text-slate-800">🏍️ موٹر سائیکل/موبائل چوری</span>
+                            <span class="text-[10px] text-slate-400">مقدمہ برائے چوری رپورٹ</span>
+                        </button>
+                        
+                        <button onclick="loadTemplate('lossApp', this)" class="template-btn p-2.5 text-right border-2 border-slate-200 rounded-xl hover:border-indigo-600 hover:bg-indigo-50/30 transition text-xs flex flex-col justify-between h-20 active:scale-98">
+                            <span class="font-bold text-slate-800">🪪 گمشدگی دستاویزات</span>
+                            <span class="text-[10px] text-slate-400">شناختی کارڈ / لائسنس / فائل</span>
+                        </button>
+                        
+                        <button onclick="loadTemplate('disputeApp', this)" class="template-btn p-2.5 text-right border-2 border-slate-200 rounded-xl hover:border-indigo-600 hover:bg-indigo-50/30 transition text-xs flex flex-col justify-between h-20 active:scale-98">
+                            <span class="font-bold text-slate-800">🥊 لڑائی جھگڑا / تنازعہ</span>
+                            <span class="text-[10px] text-slate-400">ہمسایوں یا دیگر کے خلاف</span>
+                        </button>
+                        
+                        <button onclick="loadTemplate('securityApp', this)" class="template-btn p-2.5 text-right border-2 border-slate-200 rounded-xl hover:border-indigo-600 hover:bg-indigo-50/30 transition text-xs flex flex-col justify-between h-20 active:scale-98">
+                            <span class="font-bold text-slate-800">🛡️ تحفظِ جان و مال</span>
+                            <span class="text-[10px] text-slate-400">دھمکیاں ملنے کے خلاف</span>
+                        </button>
+
+                        <!-- Popular Templates -->
+                        <button onclick="loadTemplate('robberyApp', this)" class="template-btn p-2.5 text-right border-2 border-slate-200 rounded-xl hover:border-indigo-600 hover:bg-indigo-50/30 transition text-xs flex flex-col justify-between h-20 active:scale-98">
+                            <span class="font-bold text-slate-800">🏠 مکان چوری / نقب زنی</span>
+                            <span class="text-[10px] text-slate-400">گھر میں چوری کی واردات</span>
+                        </button>
+
+                        <button onclick="loadTemplate('landDisputeApp', this)" class="template-btn p-2.5 text-right border-2 border-slate-200 rounded-xl hover:border-indigo-600 hover:bg-indigo-50/30 transition text-xs flex flex-col justify-between h-20 active:scale-98">
+                            <span class="font-bold text-slate-800">🚜 غیر قانونی قبضہ زمین</span>
+                            <span class="text-[10px] text-slate-400">مداخلت بیجا و زمینی جھگڑا</span>
+                        </button>
+
+                        <button onclick="loadTemplate('missingPersonApp', this)" class="template-btn p-2.5 text-right border-2 border-slate-200 rounded-xl hover:border-indigo-600 hover:bg-indigo-50/30 transition text-xs flex flex-col justify-between h-20 active:scale-98">
+                            <span class="font-bold text-slate-800">👤 لاپتہ فرد رپورٹ</span>
+                            <span class="text-[10px] text-slate-400">گھر سے گمشدہ شخص کی تلاش</span>
+                        </button>
+
+                        <button onclick="loadTemplate('checkBounceApp', this)" class="template-btn p-2.5 text-right border-2 border-slate-200 rounded-xl hover:border-indigo-600 hover:bg-indigo-50/30 transition text-xs flex flex-col justify-between h-20 active:scale-98">
+                            <span class="font-bold text-slate-800">💳 باؤنس چیک / دھوکہ دہی</span>
+                            <span class="text-[10px] text-slate-400">جعلی چیک و کاروباری فراڈ</span>
+                        </button>
+                    </div>
+
+                    <!-- Custom Template Control buttons -->
+                    <div class="mt-3 flex gap-2">
+                        <button onclick="saveCurrentAsCustom()" class="flex-1 py-2 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>محفوظ کریں</span>
+                        </button>
+                        <button id="load-saved-btn" onclick="loadSavedCustomTemplate(this)" class="flex-1 py-2 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm opacity-50 cursor-not-allowed" disabled>
+                            <i class="fa-solid fa-folder-open"></i>
+                            <span>لوڈ کریں</span>
+                        </button>
+                        <button onclick="triggerResetConfirmation()" class="py-2 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-trash-arrow-up"></i>
+                            <span>صاف کریں</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-4 space-y-4">
+                    <!-- Target Authority (بخدمت جناب) -->
+                    <div>
+                        <label for="input-authority" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">بخدمت جناب (عہدہ دار کا لقب)</label>
+                        <input type="text" id="input-authority" oninput="handleInputChange()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="مثلاً: جناب ایس ایچ او صاحب">
+                    </div>
+
+                    <!-- Institution / Organization / Thana -->
+                    <div>
+                        <label for="input-organization" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">تھانہ / محکمہ کا نام</label>
+                        <input type="text" id="input-organization" oninput="handleInputChange()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="مثلاً: تھانہ سٹی پنڈی بھٹیاں">
+                    </div>
+
+                    <!-- Location / City -->
+                    <div>
+                        <label for="input-location" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">شہر / مقام کا نام</label>
+                        <input type="text" id="input-location" oninput="handleInputChange()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="مثلاً: پنڈی بھٹیاں">
+                    </div>
+
+                    <!-- Subject (عنوان) -->
+                    <div>
+                        <label for="input-subject" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">درخواست کا عنوان</label>
+                        <input type="text" id="input-subject" oninput="handleInputChange()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="مثلاً: درخواست برائے درج مقدمہ چوری موٹر سائیکل">
+                    </div>
+
+                    <!-- Salutation (جناب عالی) -->
+                    <div>
+                        <label for="input-salutation" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">آداب و القاب (سلام)</label>
+                        <input type="text" id="input-salutation" oninput="handleInputChange()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" placeholder="مثلاً: جنابِ عالی،">
+                    </div>
+
+                    <!-- Main Body Text (نفس مضمون) -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label for="input-body" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">درخواست کی تفصیل (نفسِ مضمون)</label>
+                            <span class="text-[10px] text-slate-400">محدود سائز آٹو فٹ فعال ہے</span>
+                        </div>
+                        <textarea id="input-body" oninput="handleInputChange()" rows="8" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition resize-y urdu-text text-right" style="line-height: 1.8;" placeholder="درخواست کی مکمل تفصیل قانونی طور پر یہاں درج کریں..."></textarea>
+                    </div>
+
+                    <!-- Applicant Details -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                        <span class="block text-xs font-bold text-indigo-950 uppercase tracking-wider border-b border-slate-200 pb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-address-card"></i>
+                            تفصیلاتِ درخواست گزار (سائل)
+                        </span>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label for="input-name" class="block text-[10px] font-bold text-slate-500 mb-1">نام درخواست گزار (مع ولدیت)</label>
+                                <input type="text" id="input-name" oninput="handleInputChange()" class="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-indigo-500" placeholder="احمد علی ولد محمد سلیم">
+                            </div>
+                            <div>
+                                <label for="input-cnic" class="block text-[10px] font-bold text-slate-500 mb-1">شناختی کارڈ نمبر (CNIC)</label>
+                                <input type="text" id="input-cnic" oninput="handleCNICInput(this)" class="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-indigo-500" placeholder="35404-XXXXXXX-X">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label for="input-phone" class="block text-[10px] font-bold text-slate-500 mb-1">موبائل نمبر</label>
+                                <input type="text" id="input-phone" oninput="handlePhoneInput(this)" class="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-indigo-500" placeholder="0300-1234567">
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label for="input-date" class="block text-[10px] font-bold text-slate-500">تاریخ</label>
+                                    <button onclick="insertCurrentUrduDate()" class="text-[9px] font-bold text-indigo-600 hover:underline">آج کی تاریخ</button>
+                                </div>
+                                <input type="text" id="input-date" oninput="handleInputChange()" class="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-indigo-500" placeholder="6 جولائی 2026ء">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="input-address" class="block text-[10px] font-bold text-slate-500 mb-1">مکمل رہائشی پتہ</label>
+                            <input type="text" id="input-address" oninput="handleInputChange()" class="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-indigo-500" placeholder="محلہ امین پورہ، نزد جامع مسجد، پنڈی بھٹیاں">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page Format Controls -->
+                <div class="border-t border-slate-100 pt-4 space-y-3">
+                    <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider">دستی لے آؤٹ ایڈجسٹمنٹ</span>
+                    
+                    <!-- Font Size Slider -->
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-500 mb-1">
+                            <span>بیس فانٹ سائز (بیک اپ):</span>
+                            <span id="font-size-val">18px</span>
+                        </div>
+                        <input type="range" id="slider-fontsize" min="12" max="24" value="18" oninput="handleSliderChange()" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-950">
+                    </div>
+
+                    <!-- Padding/Margin Slider -->
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-500 mb-1">
+                            <span>صفحے کا حاشیہ (مارجن):</span>
+                            <span id="padding-val">22mm</span>
+                        </div>
+                        <input type="range" id="slider-padding" min="10" max="35" value="22" oninput="handleSliderChange()" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-950">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side: Live A4 Preview Panel -->
+            <section id="preview-panel" class="lg:col-span-7 hidden lg:block overflow-x-auto pb-8">
+                <!-- Page setup toolbar -->
+                <div class="flex justify-between items-center mb-4 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-sm text-sm border border-slate-800 no-print">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse"></span>
+                        <span class="font-bold tracking-wide text-xs md:text-sm">پرنٹ پیش نظارہ (A4 صفحہ)</span>
+                    </div>
+                    <!-- Live fits engine badge status -->
+                    <div id="page-fit-badge" class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>100% فٹ آن پیج</span>
+                    </div>
+                </div>
+
+                <!-- Mobile zoom helper (Only visible on mobile preview tab) -->
+                <div class="lg:hidden mb-3 bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between no-print gap-3">
+                    <span class="text-xs font-bold text-slate-600 whitespace-nowrap">پریویو زوم اسکیل کریں:</span>
+                    <input type="range" id="mobile-zoom-slider" min="30" max="100" value="70" oninput="applyMobileZoom()" class="flex-1 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-950">
+                    <span id="zoom-percentage" class="text-xs font-bold text-slate-900">70%</span>
+                </div>
+
+                <!-- Preview Holder with precise scaling -->
+                <div class="preview-scroll-container flex justify-center">
+                    <!-- The A4 Sheet itself -->
+                    <article id="print-area" class="a4-page p-[22mm] rounded-md transition-all relative overflow-hidden" style="padding: 22mm;">
+                        <!-- Legal double line frame -->
+                        <div class="legal-border"></div>
+
+                        <!-- Scales of Justice Watermark -->
+                        <div class="watermark-container">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8" class="text-indigo-950 w-full h-full">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17m0-17L4 7m8-4l8 4m-8 4h8m-8 0H4M4 7l2 8m-2-8h4m4 8v2m-6-2h4M20 7l-2 8m2-8h-4m4 8h-4m0 0l-2-8" />
+                            </svg>
+                        </div>
+
+                        <div id="preview-inner" class="urdu-text text-right text-slate-900 h-full flex flex-col justify-between relative z-10" style="font-size: 18px;">
+                            
+                            <!-- Center-Aligned Beautiful Address Header -->
+                            <div class="text-center space-y-2 pb-4 border-b-2 border-slate-950/20">
+                                <div class="inline-block text-right space-y-1">
+                                    <div class="flex items-center justify-center gap-1 text-xl font-bold text-slate-950 tracking-wide">
+                                        <span>بخدمت جناب</span>
+                                        <span id="p-authority" class="border-b-2 border-indigo-950/30 px-3 min-w-[180px] text-center inline-block text-indigo-950">جناب ایس ایچ او صاحب</span>
+                                    </div>
+                                    <div class="flex items-center justify-center gap-1 text-lg font-bold text-slate-900">
+                                        <span id="p-organization" class="border-b-2 border-indigo-950/20 px-3 min-w-[220px] text-center inline-block">تھانہ سٹی پنڈی بھٹیاں</span>
+                                    </div>
+                                    <div class="flex items-center justify-center gap-1 text-base text-slate-700">
+                                        <span>تحصیل و مقام</span>
+                                        <span id="p-location" class="border-b-2 border-indigo-950/10 px-3 min-w-[130px] text-center inline-block">پنڈی بھٹیاں</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Subject Line wrapped in a formal legal box -->
+                            <div class="my-4 text-center">
+                                <div class="inline-block border-2 border-slate-900 bg-slate-50/50 px-6 py-1.5 rounded-lg shadow-sm">
+                                    <span class="font-bold text-[1.05em] text-slate-950">
+                                        عنوان: <span id="p-subject" class="text-indigo-950">درخواست برائے کارروائی قانونی</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Salutation -->
+                            <div class="mb-2">
+                                <span id="p-salutation" class="font-bold pr-4 text-slate-950">جنابِ عالی،</span>
+                            </div>
+
+                            <!-- Main Body Text -->
+                            <div id="body-container" class="flex-1 min-h-[100mm] leading-[2.6] text-justify whitespace-pre-line tracking-wide">
+                                <p id="p-body" class="indent-12">گزارشِ احوال یہ ہے کہ سائل پنڈی بھٹیاں کا رہائشی ہے۔ سائل کے ساتھ درج ذیل واقعہ پیش آیا ہے جس کے لیے سائل قانونی چارہ جوئی کا خواہاں ہے۔ برائے مہربانی اس شکایت پر مناسب قانونی کارروائی عمل میں لائی جائے۔</p>
+                            </div>
+
+                            <!-- Footer Signature & Date Block -->
+                            <div class="border-t-2 border-slate-950/10 pt-4 mt-2 flex flex-col md:flex-row justify-between items-end gap-4">
+                                <!-- Left side: Date & Thumb Impression Box -->
+                                <div class="flex flex-col gap-3 text-right flex-1 min-w-[160px]">
+                                    <div>
+                                        <span class="block text-[11px] text-slate-500 font-bold mb-0.5">مورخہ / تاریخ:</span>
+                                        <span id="p-date" class="font-bold text-base text-slate-950">6 جولائی 2026ء</span>
+                                    </div>
+                                    
+                                    <!-- Legal Stamp / Thumb impression area (Updated: Text is Outside the Box) -->
+                                    <div class="flex flex-col items-center gap-1 w-28">
+                                        <div class="w-full h-14 border-2 border-dashed border-indigo-950/30 rounded-lg bg-slate-50/30"></div>
+                                        <span class="text-[11px] text-indigo-950 font-bold tracking-tight">نشانِ انگوٹھا سائل</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Right side: Detailed Applicant info -->
+                                <div class="text-right flex-1 border-r-2 border-slate-300 pr-4 w-full">
+                                    <span class="block text-xs text-indigo-950 font-bold mb-1">المدعی / درخواست گزار:</span>
+                                    <span class="block text-xs text-slate-400 mb-2">دستخط: _________________</span>
+                                    <div class="space-y-1 text-sm">
+                                        <div class="flex gap-1.5">
+                                            <span class="font-bold text-slate-600">نام سائل:</span>
+                                            <span id="p-name" class="text-slate-950 font-bold">احمد علی ولد محمد سلیم</span>
+                                        </div>
+                                        <div class="flex gap-1.5">
+                                            <span class="font-bold text-slate-600">شناختی کارڈ:</span>
+                                            <span id="p-cnic" class="text-slate-900 font-mono tracking-wider">35404-XXXXXXX-X</span>
+                                        </div>
+                                        <div class="flex gap-1.5">
+                                            <span class="font-bold text-slate-600">موبائل نمبر:</span>
+                                            <span id="p-phone" class="text-slate-900 font-mono">0300-1234567</span>
+                                        </div>
+                                        <div class="flex gap-1.5">
+                                            <span class="font-bold text-slate-600">مکمل پتہ:</span>
+                                            <span id="p-address" class="text-slate-900 text-xs">محلہ امین پورہ، نزد جامع مسجد، پنڈی بھٹیاں</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Google Docs Help Modal (Step-by-step guidance for perfect formatting open) -->
+    <div id="docs-help-modal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-lg w-full mx-4 border border-slate-200 transform scale-95 transition-all duration-200">
+            <div class="text-center space-y-4">
+                <div class="inline-flex bg-emerald-100 text-emerald-700 p-4 rounded-full">
+                    <i class="fa-solid fa-file-word text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-950">درخواست گوگل ڈاکس / ورڈ فارمیٹ میں ڈاؤن لوڈ ہو گئی ہے!</h3>
+                <p class="text-sm text-slate-500">گوگل ڈاکس (Google Docs) میں بنا کسی اسٹائل نقصان کے کھولنے کا طریقہ درج ذیل ہے:</p>
+                
+                <div class="text-right bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm space-y-2.5">
+                    <div class="flex items-start gap-2.5">
+                        <span class="bg-emerald-600 text-white font-bold w-5 h-5 rounded-full flex items-center justify-center text-xs mt-0.5">1</span>
+                        <p class="flex-1 text-slate-700 font-medium">اپنے کمپیوٹر یا موبائل میں <strong>گوگل ڈرائیو (Google Drive)</strong> کھولیں۔</p>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <span class="bg-emerald-600 text-white font-bold w-5 h-5 rounded-full flex items-center justify-center text-xs mt-0.5">2</span>
+                        <p class="flex-1 text-slate-700 font-medium">ڈاؤن لوڈ کی گئی فائل <strong>(درخواست.doc)</strong> کو وہاں اپلوڈ کریں۔</p>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <span class="bg-emerald-600 text-white font-bold w-5 h-5 rounded-full flex items-center justify-center text-xs mt-0.5">3</span>
+                        <p class="flex-1 text-slate-700 font-medium">فائل پر رائٹ کلک کر کے <strong>Open with Google Docs</strong> منتخب کریں۔</p>
+                    </div>
+                </div>
+                
+                <p class="text-xs text-indigo-950 bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                    💡 <strong>فائدہ:</strong> اس طریقے سے درخواست کا مرکز الائن ہیڈر، خوبصورت ڈبل بارڈر، سائز اور نوری نستعلیق اسٹائل گوگل ڈاکس میں 100٪ محفوظ رہے گا!
+                </p>
+                
+                <button onclick="closeDocsHelpModal()" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow transition duration-200">
+                    ٹھیک ہے، سمجھ گیا!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Form Confirmation Dialog -->
+    <div id="reset-modal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 border border-slate-200 text-center space-y-4">
+            <div class="inline-flex bg-rose-100 text-rose-700 p-3 rounded-full">
+                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900">کیا آپ تمام لکھی ہوئی تحریر صاف کرنا چاہتے ہیں؟</h3>
+            <p class="text-xs text-slate-500">جیسے ہی آپ تصدیق کریں گے، آپ کا موجودہ غیر محفوظ شدہ ڈرافٹ مستقل طور پر مٹ جائے گا۔</p>
+            <div class="flex gap-2">
+                <button onclick="confirmClearForm()" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-sm transition">جی ہاں، صاف کریں</button>
+                <button onclick="closeResetModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-sm transition">کینسل</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification structure -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-2xl opacity-0 transform translate-y-2 pointer-events-none transition duration-300 flex items-center gap-3 z-50 text-sm border border-slate-800 no-print">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toast-text">کامیابی! تبدیلیاں لاگو کر دی گئی ہیں۔</span>
+    </div>
+
+    <script>
+        // Global variables initialized at the absolute top of the script tag to prevent TDZ/ReferenceErrors
+        let customThanas = [];
+
+        // Custom Police Department & Legal Templates
+        const templates = {
+            customApp: {
+                authority: "جناب ایس ایچ او صاحب",
+                organization: "تھانہ سٹی پنڈی بھٹیاں",
+                location: "پنڈی بھٹیاں",
+                subject: "درخواست برائے [یہاں عنوان درج کریں]",
+                salutation: "جنابِ عالی،",
+                body: "مودبانہ گزارش ہے کہ سائل مسمی [اپنا نام درج کریں] سکنہ [پتہ درج کریں] کا رہائشی ہے۔ عرض حال یہ ہے کہ [یہاں واقعہ کے تفصیلی حالات تحریر کریں]۔\n\nلہذا استدعا کی جاتی ہے کہ مذکورہ معاملے پر قانونی کارروائی کرتے ہوئے سائل کو انصاف فراہم کیا جائے۔ سائل ہمیشہ دعا گو رہے گا۔\n\nعین نوازش ہو گی۔",
+                name: "احمد علی ولد محمد سلیم",
+                cnic: "35404-XXXXXXX-X",
+                phone: "0300-1234567",
+                address: "محلہ امین پورہ, پنڈی بھٹیاں",
+                date: "6 جولائی 2026ء"
+            },
+            theftApp: {
+                authority: "جناب ایس ایچ او صاحب",
+                organization: "تھانہ سٹی پنڈی بھٹیاں",
+                location: "پنڈی بھٹیاں",
+                subject: "درخواست برائے اندراج مقدمہ چوری موٹر سائیکل",
+                salutation: "جنابِ عالی،",
+                body: "مودبانہ گزارش ہے کہ سائل مسمی گزشتہ روز بوقتِ شام تقریباً 5 بجے اپنی موٹر سائیکل سپر ایشیا چائنہ ماڈل 2024ء, جس کا رجسٹریشن نمبر PB-8877 ہے، مین بازار پنڈی بھٹیاں میں واقع کریانہ کی دکان کے باہر لاک کر کے خریداری کے لیے گیا تھا۔\n\nتقریباً 15 منٹ بعد جب سائل خریداری کے بعد دکان سے باہر آیا تو موٹر سائیکل اپنی جگہ پر موجود نہ تھی۔ سائل نے آس پاس اور مین بازار میں اپنے طور پر کافی تلاش کی لیکن موٹر سائیکل کا کوئی سراغ نہ ملا۔ قوی یقین ہے کہ نامعلوم چوروں نے سائل کی موٹر سائیکل چوری کر لی ہے۔\n\nلہذا التماس ہے کہ مذکورہ واقعے کا فوری مقدمہ درج فرما کر موٹر سائیکل کی برآمدگی اور نامعلوم چوروں کی گرفتاری کے لیے قانونی کارروائی عمل میں لائی جائے۔ سائل ہمیشہ دعا گو رہے گا۔\n\nعین نوازش ہو گی۔",
+                name: "احمد علی ولد محمد سلیم",
+                cnic: "35404-1234567-9",
+                phone: "0300-7654321",
+                address: "محلہ امین پورہ، وارڈ نمبر 4، نزد مکہ مسجد، پنڈی بھٹیاں",
+                date: "6 جولائی 2026ء"
+            },
+            lossApp: {
+                authority: "جناب ایس ایچ او صاحب",
+                organization: "تھانہ صدر پنڈی بھٹیاں",
+                location: "پنڈی بھٹیاں",
+                subject: "درخواست برائے گمشدگی شناختی کارڈ اور ضروری دستاویزات",
+                salutation: "جنابِ عالی،",
+                body: "مودبانہ گزارش ہے کہ سائل اپنے کام کے سلسلے میں پنڈی بھٹیاں بائی پاس روڈ پر جا رہا تھا کہ اس دوران سائل کا بٹوّا کہیں گر گیا۔ اس بٹوے میں سائل کا اصل قومی شناختی کارڈ، ڈرائیونگ لائسنس اور مبلغ 3,500 روپے کی نقد رقم موجود تھی۔\n\nسائل نے تمام راستے اور قریبی مقامات پر بٹوے کی بھرپور تلاش کی لیکن تاحال گمشدہ بٹوے کا کوئی سراغ نہ ملا۔ سائل کو خدشہ ہے کہ کوئی غیر ذمہ دار شخص اس کے شناختی کارڈ کا غلط یا مجرمانہ استعمال کر سکتا ہے۔\n\nلہذا استدعا کی جاتی ہے کہ سائل کی اس گمشدگی کی رپورٹ روزنامچہ میں درج فرمائی جائے اور نقل روزنامچہ جاری کی جائے تاکہ سائل نادرا آفس سے نیا شناختی کارڈ حاصل کر سکے۔ نوازش ہو گی۔\n\nعین نوازش ہو گی۔",
+                name: "محمد اسلم ولد بشیر احمد",
+                cnic: "35404-9876543-1",
+                phone: "0303-9876543",
+                address: "پنڈ سجادہ، ڈاکخانہ خاص، تحصیل پنڈی بھٹیاں",
+                date: "6 جولائی 2026ء"
+            },
+            disputeApp: {
+                authority: "جناب ایس ایچ او صاحب",
+                organization: "تھانہ سٹی پنڈی بھٹیاں",
+                location: "پنڈی بھٹیاں",
+                subject: "درخواست برائے قانونی کارروائی خلاف مسمیان (مخالفین)",
+                salutation: "جنابِ عالی،",
+                body: "مودبانہ گزارش ہے کہ سائل پنڈی بھٹیاں کا مستقل رہائشی اور پرامن شہری ہے۔ گزشتہ روز سائل کے پڑوسی مسمی (نام درج کریں) نے بلاوجہ سائل کے گھر کے سامنے گلی میں گندگی پھینکی۔ جب سائل نے پیار اور تمیز سے ایسا کرنے سے منع کیا، تو وہ شخص آپے سے باہر ہو گیا اور گالی گلوچ کرنا شروع کر دی۔\n\nسائل کے منع کرنے پر اس نے اپنے دو دیگر ساتھیوں کے ہمراہ لکڑی کے ڈنڈوں سے سائل پر حملہ کر دیا اور جان سے مارنے کی سنگین دھمکیاں دیں۔ شور سن کر محلے دار جمع ہو گئے جنہوں نے ہمیں مزید مار پیٹ سے بچایا۔\n\nلہذا التماس ہے کہ موقع کا جائزہ لے کر سائل کی جان و مال کا تحفظ یقینی بنایا جائے اور امن عامہ خراب کرنے پر ان مخالفین کے خلاف سخت قانونی کارروائی عمل میں لائی جائے۔\n\nعین نوازش ہو گی۔",
+                name: "ساجد محمود ولد نذیر احمد",
+                cnic: "35404-5554443-7",
+                phone: "0321-4567890",
+                address: "محلہ عیدگاہ, نزد پرانی غلہ منڈی، پنڈی بھٹیاں",
+                date: "6 جولائی 2026ء"
+            },
+            securityApp: {
+                authority: "جناب ایس ایچ او صاحب",
+                organization: "تھانہ صدر پنڈی بھٹیاں",
+                location: "پنڈی بھٹیاں",
+                subject: "درخواست برائے تحفظِ جان و مال اور دھمکی آمیز فون کالز",
+                salutation: "جنابِ عالی،",
+                body: "مودبانہ گزارش ہے کہ سائل کو پچھلے ایک ہفتے سے مختلف نامعلوم فون نمبروں سے سنگین نتائج بھگتنے کی دھمکیاں دی جا رہی ہیں۔ فون کرنے والے افراد سائل کو قتل کرنے اور بچوں کو اغوا کرنے کا کہہ رہے ہیں، جس کی وجہ سے سائل اور اس کے اہلخانہ شدید خوف و ہراس اور شدید ذہنی تناؤ کا شمار ہیں۔\n\nسائل کی کسی سے کوئی ذاتی دشمنی نہیں ہے لیکن ان دھمکیوں کے بعد سائل کا باہر نکلنا اور کاروبار کرنا مشکل ہو چکا ہے۔ ہمیں قوی شبہ ہے کہ کوئی شرپسند ٹولہ ہمیں جانی یا مالی نقصان پہنچا سکتا ہے۔\n\nمهربانی فرما کر مذکورہ فون نمبروں کو ٹریس کر کے سائل اور اس کے اہلخانہ کو فوری طور پر قانونی سیکیورٹی فراہم کی جائے اور ملوث عناصر کو گرفتار کر کے انصاف کے کٹہرے میں لایا جائے۔ عین نوازش ہوگی۔\n\nعین نوازش ہو گی۔",
+                name: "چوہدری محمد بلال ولد ممتاز علی",
+                cnic: "35404-2223334-5",
+                phone: "0345-1239876",
+                address: "رستے جکھڑ، ساہنوالہ روڈ، تحصیل پنڈی بھٹیاں",
+                date: "6 جولائی 2026ء"
+            },
+            robberyApp: {
+                authority: "جناب ایس ایچ او صاحب",
+                organization: "تھانہ صدر پنڈی بھٹیاں",
+                location: "پنڈی بھٹیاں",
+                subject: "درخواست برائے اندراج مقدمہ نقب زنی و چوری مکان",
+                salutation: "جنابِ عالی،",
+                body: "مودبانہ گزارش ہے کہ سائل مع اہلخانہ گزشتہ شب اپنے رشتے دار کی عیادت کے لیے فیصل آباد گیا ہوا تھا اور گھر کو تالے لگے ہوئے تھے۔ صبح جب سائل واپس اپنے گھر پہنچا تو دیکھا کہ مین گیٹ کا تالا ٹوٹا ہوا تھا۔\n\nاندر جانے پر معلوم ہوا کہ کمرے میں پڑی الماری کے بھی تالے ٹوٹے ہوئے تھے اور نامعلوم چوروں نے الماری سے سائل کی اہلیہ کے طلائی زیورات وزنی 3 تولے اور مبلغ 75,000 روپے نقد رقم چوری کر لی ہے۔\n\nلہذا استدعا ہے کہ جائے وقوعہ کا معائنہ فرما کر نامعلوم نقب زنوں کے خلاف فوری مقدمہ درج کیا جائے اور چوری شدہ جائیداد کی برآمدگی عمل میں لائی جائے۔ سائل تاحیات دعا گو رہے گا۔\n\nعین نوازش ہو گی۔",
+                name: "طارق جاوید ولد عبدالغفور",
+                cnic: "35404-3344556-3",
+                phone: "0300-9988776",
+                address: "قصبہ سکھیکی روڈ، تحصیل پنڈی بھٹیاں",
+                date: "6 جولائی 2026ء"
+            },
+            landDisputeApp: {
+                authority: "جناب ایس ایچ او صاحب",
+                organization: "تھانہ صدر پنڈی بھٹیاں",
+                location: "پنڈی بھٹیاں",
+                subject: "درخواست برائے کارروائی پولیس اور روکنے مداخلتِ بیجا اراضی ملکیتی",
+                salutation: "جنابِ عالی،",
+                body: "مودبانہ گزارش ہے کہ سائل اراضی رقبہ واقع موضع ساہنوالہ پنڈی بھٹیاں کا مالک و قابض ہے۔ سائل اس زمین پر سالہا سال سے کاشت کاری کر رہا ہے۔ گزشتہ روز مخالف مسمی (نام درج کریں) اپنے مسلح ساتھیوں کے همراہ زبردستی سائل کی زمین پر داخل ہو گیا اور وہاں کھڑی فصل کو نقصان پہنچانے لگا۔\n\nجب سائل نے اسے روکا تو مخالفین نے اسلحہ تان لیا اور زمین خالی نہ کرنے پر جان سے مارنے کی سنگین دھمکیاں دیں۔ سائل کے پاس ملکیت کے تمام اصل کاغذات موجود ہیں جبکہ مخالفین بلاوجہ غنڈہ گردی کر کے زمین پر غیر قانونی قبضہ کرنا چاہتے ہیں۔\n\nلہذا استدعا ہے کہ موقع پر امن و امان بحال کروایا جائے اور مخالفین کو ملکیتی زمین پر غیر قانونی مداخلت کرنے سے روکا جائے اور ان کے خلاف سخت قانونی ایکشن لیا جائے۔\n\nعین نوازش ہو گی۔",
+                name: "رانا لیاقت علی ولد اکبر علی",
+                cnic: "35404-7778889-1",
+                phone: "0312-8877665",
+                address: "ڈیرہ رانا لیاقت، موضع ساہنوالہ, پنڈی بھٹیاں",
+                date: "6 جولائی 2026ء"
+            },
+            missingPersonApp: {
+                authority: "جناب ایس ایچ او صاحب",
+                organization: "تھانہ سٹی پنڈی بھٹیاں",
+                location: "پنڈی بھٹیاں",
+                subject: "درخواست برائے گمشدگی و تلاش لاپتہ فرد",
+                salutation: "جنابِ عالی،",
+                body: "مودبانہ گزارش ہے کہ سائل کا بیٹا مسمی [نام درج کریں]، عمر تقریباً 14 سال، گزشتہ روز بوقتِ صبح 8 بجے قریبی مارکیٹ سے سودا سلف لینے گیا تھا لیکن تاحال واپس گھر نہیں لوٹا۔ ہم نے اپنے تمام قریبی رشتہ داروں، پڑوسیوں اور دوستوں کے ہاں تلاش کیا ہے لیکن اس کا کہیں کوئی سراغ نہیں مل سکا۔\n\nگمشدہ لڑکے کا حلیہ کچھ یوں ہے: قد تقریباً 5 فٹ، گندمی رنگت، پہنے ہوئے کپڑے شلوار قمیض سفید رنگ۔ ہمیں قوی خدشہ ہے کہ اسے کسی نامعلوم گروہ نے اغوا کر لیا ہے یا وہ کسی حادثے کا شکار ہو گیا ہے۔\n\nبرائے مہربانی اس کی تلاش کے لیے فوری روزنامچہ درج کر کے پنڈی بھٹیاں اور گردونواح میں ناکہ بندی کروائی جائے اور میرے بیٹے کی باحفاظت واپسی میں مدد کی جائے۔ سائل آپ کا مشکور رہے گا۔\n\nعین نوازش ہو گی۔",
+                name: "محمد جمیل ولد حفیظ اللہ",
+                cnic: "35404-6655443-1",
+                phone: "0333-1122334",
+                address: "محلہ فاروق آباد، گلی نمبر 2، پنڈی بھٹیاں",
+                date: "6 جولائی 2026ء"
+            },
+            checkBounceApp: {
+                authority: "جناب ایس ایچ او صاحب",
+                organization: "تھانہ سٹی پنڈی بھٹیاں",
+                location: "پنڈی بھٹیاں",
+                subject: "درخواست برائے اندراج مقدمہ باؤنس ہونے چیک و کاروباری دھوکہ دہی",
+                salutation: "جنابِ عالی،",
+                body: "مودبانہ گزارش ہے کہ سائل غلہ منڈی پنڈی بھٹیاں میں آڑھت کا کاروبار کرتا ہے۔ مخالف مسمی (نام درج کریں) نے سائل سے مبلغ 5,00,000 روپے کا دھان خریدا تھا۔ اس ادائیگی کے عوض مخالف نے سائل کو بینک کا ایک چیک نمبر (چیک نمبر یہاں لکھیں) مورخہ [تاریخ] جاری کیا۔\n\nجب سائل نے مذکورہ چیک کیش کروانے کے لیے متعلقہ بینک میں جمع کروایا تو بینک مینیجر نے فنڈز کی عدم موجودگی (No Funds) کی وجہ سے چیک واپس کر دیا (رپورٹ بینک ہذا منسلک ہے)۔ سائل نے جب مخالف سے رابطہ کیا تو اس نے رقم دینے سے صاف انکار کر دیا اور سنگین دھمکیاں دیں۔\n\nلہذا استدعا کی جاتی ہے کہ کاروباری امانت میں خیانت، دھوکہ دہی اور جعلی چیک دینے پر سائل کی مدعیت میں مخالف کے خلاف فوری مقدمہ درج کر کے قانونی کارروائی کی جائے۔\n\nعین نوازش ہو گی۔",
+                name: "چوہدری محمد عرفان ولد منور علی",
+                cnic: "35404-1112223-9",
+                phone: "0300-5544332",
+                address: "پرانی غلہ منڈی، دکان نمبر 45، پنڈی بھٹیاں",
+                date: "6 جولائی 2026ء"
+            }
+        };
+
+        // Format CNIC with standard dashes on type
+        function handleCNICInput(el) {
+            let digits = el.value.replace(/\D/g, '');
+            if (digits.length > 13) digits = digits.substring(0, 13);
+            
+            let formatted = '';
+            if (digits.length > 0) {
+                formatted += digits.substring(0, Math.min(digits.length, 5));
+            }
+            if (digits.length > 5) {
+                formatted += '-' + digits.substring(5, Math.min(digits.length, 12));
+            }
+            if (digits.length > 12) {
+                formatted += '-' + digits.substring(12, 13);
+            }
+            
+            el.value = formatted;
+            handleInputChange();
+        }
+
+        // Format mobile phone with Pakistani formatting
+        function handlePhoneInput(el) {
+            let digits = el.value.replace(/\D/g, '');
+            if (digits.length > 11) digits = digits.substring(0, 11);
+            
+            let formatted = '';
+            if (digits.length > 0) {
+                formatted += digits.substring(0, Math.min(digits.length, 4));
+            }
+            if (digits.length > 4) {
+                formatted += '-' + digits.substring(4, 11);
+            }
+            
+            el.value = formatted;
+            handleInputChange();
+        }
+
+        // Auto insert current Urdu Date
+        function insertCurrentUrduDate() {
+            const months = ["جنوری", "فروری", "مارچ", "اپریل", "مئی", "جون", "جولائی", "اگست", "ستمبر", "اکتوبر", "نومبر", "دسمبر"];
+            const today = new Date();
+            const day = today.getDate();
+            const month = months[today.getMonth()];
+            const year = today.getFullYear();
+            
+            const formattedDate = `${day} ${month} ${year}ء`;
+            document.getElementById('input-date').value = formattedDate;
+            handleInputChange();
+            showToast("آج کی تاریخ کامیابی سے درج ہو گئی ہے!");
+        }
+
+        // Reset & Clear Form Confirmation Dialog Trigger
+        function triggerResetConfirmation() {
+            document.getElementById('reset-modal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('reset-modal').classList.add('hidden');
+        }
+
+        function confirmClearForm() {
+            document.getElementById('input-authority').value = '';
+            document.getElementById('input-organization').value = '';
+            document.getElementById('input-location').value = '';
+            document.getElementById('input-subject').value = '';
+            document.getElementById('input-salutation').value = 'جنابِ عالی،';
+            document.getElementById('input-body').value = '';
+            document.getElementById('input-name').value = '';
+            document.getElementById('input-cnic').value = '';
+            document.getElementById('input-phone').value = '';
+            document.getElementById('input-address').value = '';
+            document.getElementById('input-date').value = '';
+
+            document.querySelectorAll('.template-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-600', 'bg-indigo-50/30');
+                btn.classList.add('border-slate-200');
+            });
+
+            closeResetModal();
+            handleInputChange();
+            showToast("فارم کامیابی سے صاف کر دیا گیا ہے!");
+        }
+
+        // Save State to LocalStorage dynamically as user types
+        function saveStateToLocalStorage() {
+            const state = {
+                authority: document.getElementById('input-authority').value,
+                organization: document.getElementById('input-organization').value,
+                location: document.getElementById('input-location').value,
+                subject: document.getElementById('input-subject').value,
+                salutation: document.getElementById('input-salutation').value,
+                body: document.getElementById('input-body').value,
+                name: document.getElementById('input-name').value,
+                cnic: document.getElementById('input-cnic').value,
+                phone: document.getElementById('input-phone').value,
+                address: document.getElementById('input-address').value,
+                date: document.getElementById('input-date').value,
+                fontsize: document.getElementById('slider-fontsize').value,
+                padding: document.getElementById('slider-padding').value
+            };
+            localStorage.setItem('saved_state_draft', JSON.stringify(state));
+        }
+
+        // Load State from LocalStorage on mount
+        function loadStateFromLocalStorage() {
+            const stored = localStorage.getItem('saved_state_draft');
+            if (stored) {
+                try {
+                    const data = JSON.parse(stored);
+                    document.getElementById('input-authority').value = data.authority || '';
+                    document.getElementById('input-organization').value = data.organization || '';
+                    document.getElementById('input-location').value = data.location || '';
+                    document.getElementById('input-subject').value = data.subject || '';
+                    document.getElementById('input-salutation').value = data.salutation || 'جنابِ عالی،';
+                    document.getElementById('input-body').value = data.body || '';
+                    document.getElementById('input-name').value = data.name || '';
+                    document.getElementById('input-cnic').value = data.cnic || '';
+                    document.getElementById('input-phone').value = data.phone || '';
+                    document.getElementById('input-address').value = data.address || '';
+                    document.getElementById('input-date').value = data.date || '';
+                    
+                    if(data.fontsize) document.getElementById('slider-fontsize').value = data.fontsize;
+                    if(data.padding) document.getElementById('slider-padding').value = data.padding;
+                } catch(e) {
+                    console.error("Failed to restore storage", e);
+                }
+            }
+        }
+
+        // Handle inputs with change event trigger
+        function handleInputChange() {
+            updatePreview();
+            saveStateToLocalStorage();
+        }
+
+        // Handle sliders change
+        function handleSliderChange() {
+            adjustStyles();
+            saveStateToLocalStorage();
+        }
+
+        // MAGICAL ANTI-OVERFLOW ALGORITHM (AGI-Grade Auto Scaling)
+        function autoScaleContent() {
+            const printArea = document.getElementById('print-area');
+            const previewInner = document.getElementById('preview-inner');
+            const sliderFont = document.getElementById('slider-fontsize');
+            const pageFitBadge = document.getElementById('page-fit-badge');
+
+            // Maximum bounds allowed on 297mm A4 page
+            const targetMaxHeight = 1120; // safe clientHeight inside A4 boundary in pixels
+            let currentFontSize = parseFloat(sliderFont.value);
+            
+            // Temporary variable for testing layout
+            previewInner.style.fontSize = currentFontSize + 'px';
+            
+            let attempts = 0;
+            const maxAttempts = 20;
+            let autoScaled = false;
+
+            // Loop to scale down until it completely fits inside the page
+            while (previewInner.scrollHeight > targetMaxHeight && currentFontSize > 11 && attempts < maxAttempts) {
+                currentFontSize -= 0.5;
+                previewInner.style.fontSize = currentFontSize + 'px';
+                attempts++;
+                autoScaled = true;
+            }
+
+            // Update user with live feedback pill
+            if (autoScaled) {
+                pageFitBadge.className = "px-2.5 py-1 text-xs font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1 animate-pulse";
+                pageFitBadge.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> <span>آٹو فٹ فعال (فانٹ ${Math.round(currentFontSize)}px)</span>`;
+            } else {
+                pageFitBadge.className = "px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1";
+                pageFitBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>100% فٹ آن پیج</span>`;
+            }
+        }
+
+        // Thana quick selection helper
+        function quickSelectThana(type) {
+            const orgInput = document.getElementById('input-organization');
+            const authInput = document.getElementById('input-authority');
+            const locInput = document.getElementById('input-location');
+            
+            authInput.value = "جناب ایس ایچ او صاحب";
+            locInput.value = "پنڈی بھٹیاں";
+
+            if (type === 'city') {
+                orgInput.value = "تھانہ سٹی پنڈی بھٹیاں";
+                showToast("تھانہ سٹی پنڈی بھٹیاں سلیکٹ کر لیا گیا ہے!");
+            } else if (type === 'sadar') {
+                orgInput.value = "تھانہ صدر پنڈی بھٹیاں";
+                showToast("تھانہ صدر پنڈی بھٹیاں سلیکٹ کر لیا گیا ہے!");
+            }
+            handleInputChange();
+        }
+
+        // Toggle custom Thana creation form
+        function toggleCustomThanaForm() {
+            const form = document.getElementById('new-thana-form');
+            if (form.classList.contains('hidden')) {
+                form.classList.remove('hidden');
+            } else {
+                form.classList.add('hidden');
+                clearThanaForm();
+            }
+        }
+
+        // Clear custom Thana inputs
+        function clearThanaForm() {
+            document.getElementById('add-thana-name').value = '';
+            document.getElementById('add-thana-location').value = 'پنڈی بھٹیاں';
+            document.getElementById('add-thana-authority').value = 'جناب ایس ایچ او صاحب';
+        }
+
+        // Save Custom Thana to storage
+        function saveNewThana() {
+            const name = document.getElementById('add-thana-name').value.trim();
+            const location = document.getElementById('add-thana-location').value.trim();
+            const authority = document.getElementById('add-thana-authority').value.trim();
+
+            if (!name || !location || !authority) {
+                showToast("براہ کرم تمام فیلڈز کو مکمل بھریں!");
+                return;
+            }
+
+            const newThana = { name, location, authority };
+            customThanas.push(newThana);
+            
+            localStorage.setItem('saved_custom_thanas_list', JSON.stringify(customThanas));
+            renderCustomThanas();
+            toggleCustomThanaForm();
+            showToast(`کامیابی! "${name}" کو فہرست میں شامل کر دیا گیا ہے۔`);
+        }
+
+        // Render Custom Thanas UI
+        function renderCustomThanas() {
+            const listContainer = document.getElementById('custom-thanas-list');
+            const section = document.getElementById('custom-thanas-section');
+            
+            listContainer.innerHTML = '';
+            if (customThanas.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+
+            customThanas.forEach((thana, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = "relative group";
+
+                const selectBtn = document.createElement('button');
+                selectBtn.className = "w-full py-2 px-2 bg-white hover:bg-indigo-600 hover:text-white text-indigo-950 font-semibold rounded-lg border border-indigo-100 text-[11px] transition active:scale-95 flex items-center justify-center gap-1.5 shadow-sm truncate pr-4";
+                selectBtn.innerHTML = `<i class="fa-solid fa-map-pin text-[10px]"></i> <span class="truncate">${thana.name}</span>`;
+                selectBtn.onclick = () => selectCustomThanaItem(index);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = "absolute right-1 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center text-[8px] font-bold shadow opacity-0 group-hover:opacity-100 transition z-10";
+                deleteBtn.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteCustomThanaItem(index);
+                };
+
+                wrapper.appendChild(selectBtn);
+                wrapper.appendChild(deleteBtn);
+                listContainer.appendChild(wrapper);
+            });
+        }
+
+        function selectCustomThanaItem(index) {
+            const thana = customThanas[index];
+            if (!thana) return;
+
+            document.getElementById('input-organization').value = thana.name;
+            document.getElementById('input-authority').value = thana.authority;
+            document.getElementById('input-location').value = thana.location;
+
+            handleInputChange();
+            showToast(`تھانہ "${thana.name}" کو لوڈ کر لیا گیا ہے!`);
+        }
+
+        function deleteCustomThanaItem(index) {
+            const removedName = customThanas[index].name;
+            customThanas.splice(index, 1);
+            localStorage.setItem('saved_custom_thanas_list', JSON.stringify(customThanas));
+            renderCustomThanas();
+            showToast(`"${removedName}" کو خارج کر دیا گیا۔`);
+        }
+
+        function loadCustomThanasFromStorage() {
+            const stored = localStorage.getItem('saved_custom_thanas_list');
+            if (stored) {
+                try {
+                    customThanas = JSON.parse(stored);
+                } catch(e) {
+                    customThanas = [];
+                }
+            }
+            renderCustomThanas();
+        }
+
+        // Mobile zoom scales preview without breaking A4 aspect ratio
+        function applyMobileZoom() {
+            const val = document.getElementById('mobile-zoom-slider').value;
+            document.getElementById('zoom-percentage').textContent = val + '%';
+            
+            const page = document.getElementById('print-area');
+            if (window.innerWidth < 1024) {
+                page.style.transform = `scale(${val / 100})`;
+            } else {
+                page.style.transform = 'none';
+            }
+        }
+
+        // Tab switches on mobile devices
+        function switchTab(tab) {
+            const formBtn = document.getElementById('tab-form-btn');
+            const previewBtn = document.getElementById('tab-preview-btn');
+            const formPanel = document.getElementById('form-panel');
+            const previewPanel = document.getElementById('preview-panel');
+
+            if (tab === 'form') {
+                formBtn.className = "flex-1 py-3 text-center font-bold text-sm rounded-lg transition duration-200 bg-indigo-950 text-white shadow-sm";
+                previewBtn.className = "flex-1 py-3 text-center font-bold text-sm rounded-lg transition duration-200 text-slate-600 hover:bg-slate-100";
+                formPanel.classList.remove('hidden');
+                previewPanel.classList.add('hidden');
+            } else {
+                previewBtn.className = "flex-1 py-3 text-center font-bold text-sm rounded-lg transition duration-200 bg-indigo-950 text-white shadow-sm";
+                formBtn.className = "flex-1 py-3 text-center font-bold text-sm rounded-lg transition duration-200 text-slate-600 hover:bg-slate-100";
+                formPanel.classList.add('hidden');
+                previewPanel.classList.remove('hidden');
+                previewPanel.classList.add('block');
+                // Apply mobile zoom instantly when preview loaded
+                setTimeout(applyMobileZoom, 50);
+            }
+        }
+
+        // Custom templates mechanisms
+        function saveCurrentAsCustom() {
+            const customTemplate = {
+                authority: document.getElementById('input-authority').value,
+                organization: document.getElementById('input-organization').value,
+                location: document.getElementById('input-location').value,
+                subject: document.getElementById('input-subject').value,
+                salutation: document.getElementById('input-salutation').value,
+                body: document.getElementById('input-body').value,
+                name: document.getElementById('input-name').value,
+                cnic: document.getElementById('input-cnic').value,
+                phone: document.getElementById('input-phone').value,
+                address: document.getElementById('input-address').value,
+                date: document.getElementById('input-date').value
+            };
+
+            localStorage.setItem('saved_custom_urdu_template', JSON.stringify(customTemplate));
+            showToast("درخواست کا فارمیٹ کامیابی سے محفوظ ہو گیا ہے!");
+            checkSavedTemplate();
+        }
+
+        function checkSavedTemplate() {
+            const saved = localStorage.getItem('saved_custom_urdu_template');
+            const btn = document.getElementById('load-saved-btn');
+            if (saved) {
+                btn.removeAttribute('disabled');
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.classList.add('bg-emerald-50', 'hover:bg-emerald-100', 'text-emerald-950', 'border-emerald-200');
+            } else {
+                btn.setAttribute('disabled', 'true');
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                btn.classList.remove('bg-emerald-50', 'hover:bg-emerald-100', 'text-emerald-950', 'border-emerald-200');
+            }
+        }
+
+        function loadSavedCustomTemplate(btn) {
+            const saved = localStorage.getItem('saved_custom_urdu_template');
+            if (!saved) return;
+
+            const data = JSON.parse(saved);
+            
+            document.getElementById('input-authority').value = data.authority;
+            document.getElementById('input-organization').value = data.organization;
+            document.getElementById('input-location').value = data.location;
+            document.getElementById('input-subject').value = data.subject;
+            document.getElementById('input-salutation').value = data.salutation;
+            document.getElementById('input-body').value = data.body;
+            document.getElementById('input-name').value = data.name;
+            document.getElementById('input-cnic').value = data.cnic;
+            document.getElementById('input-phone').value = data.phone;
+            document.getElementById('input-address').value = data.address;
+            document.getElementById('input-date').value = data.date;
+
+            document.querySelectorAll('.template-btn').forEach(b => {
+                b.classList.remove('border-indigo-600', 'bg-indigo-50/30');
+                b.classList.add('border-slate-200');
+            });
+
+            handleInputChange();
+            showToast("آپ کا محفوظ شدہ کسٹم ڈرافٹ کامیابی سے لوڈ ہو گیا ہے!");
+        }
+
+        // Load active template data into form fields
+        function loadTemplate(key, element, showToastNotification = true) {
+            const data = templates[key];
+            if (!data) return;
+
+            document.getElementById('input-authority').value = data.authority;
+            document.getElementById('input-organization').value = data.organization;
+            document.getElementById('input-location').value = data.location;
+            document.getElementById('input-subject').value = data.subject;
+            document.getElementById('input-salutation').value = data.salutation;
+            document.getElementById('input-body').value = data.body;
+            document.getElementById('input-name').value = data.name;
+            document.getElementById('input-cnic').value = data.cnic;
+            document.getElementById('input-phone').value = data.phone;
+            document.getElementById('input-address').value = data.address;
+            document.getElementById('input-date').value = data.date;
+
+            document.querySelectorAll('.template-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-600', 'bg-indigo-50/30');
+                btn.classList.add('border-slate-200');
+            });
+            
+            if (element) {
+                element.classList.add('border-indigo-600', 'bg-indigo-50/30');
+                element.classList.remove('border-slate-200');
+            }
+
+            handleInputChange();
+            if (showToastNotification) {
+                showToast("درخواست کا ڈرافٹ کامیابی سے لوڈ ہو گیا ہے!");
+            }
+        }
+
+        // Live synchronizing from form to preview
+        function updatePreview() {
+            const authVal = document.getElementById('input-authority').value || 'جناب ایس ایچ او صاحب';
+            const orgVal = document.getElementById('input-organization').value || 'تھانہ سٹی پنڈی بھٹیاں';
+            const locVal = document.getElementById('input-location').value || 'پنڈی بھٹیاں';
+
+            const pAuthority = document.querySelectorAll('#p-authority');
+            const pOrganization = document.querySelectorAll('#p-organization');
+            const pLocation = document.querySelectorAll('#p-location');
+
+            pAuthority.forEach(el => el.textContent = authVal);
+            pOrganization.forEach(el => el.textContent = orgVal);
+            pLocation.forEach(el => el.textContent = locVal);
+
+            document.getElementById('p-subject').textContent = document.getElementById('input-subject').value || 'درخواست برائے کارروائی قانونی';
+            document.getElementById('p-salutation').textContent = document.getElementById('input-salutation').value || 'جنابِ عالی،';
+            document.getElementById('p-body').textContent = document.getElementById('input-body').value || 'گزارشِ احوال یہ ہے کہ سائل پنڈی بھٹیاں کا رہائشی ہے۔ سائل کے ساتھ درج ذیل واقعہ پیش آیا ہے...';
+            document.getElementById('p-name').textContent = document.getElementById('input-name').value || 'احمد علی ولد محمد سلیم';
+            document.getElementById('p-cnic').textContent = document.getElementById('input-cnic').value || '35404-XXXXXXX-X';
+            document.getElementById('p-phone').textContent = document.getElementById('input-phone').value || '0300-1234567';
+            document.getElementById('p-address').textContent = document.getElementById('input-address').value || 'محلہ امین پورہ، نزد جامع مسجد، پنڈی بھٹیاں';
+            document.getElementById('p-date').textContent = document.getElementById('input-date').value || '6 جولائی 2026ء';
+
+            // Run magical auto-scaling calculation immediately
+            autoScaleContent();
+        }
+
+        // Style adjustment sliders (Font size & Padding)
+        function adjustStyles() {
+            const fontSize = document.getElementById('slider-fontsize').value;
+            const padding = document.getElementById('slider-padding').value;
+
+            document.getElementById('font-size-val').textContent = fontSize + 'px';
+            document.getElementById('padding-val').textContent = padding + 'mm';
+
+            const previewInner = document.getElementById('preview-inner');
+            const printArea = document.getElementById('print-area');
+
+            previewInner.style.fontSize = fontSize + 'px';
+            printArea.style.padding = padding + 'mm';
+
+            // Call fitting engine immediately after manual overrides
+            autoScaleContent();
+        }
+
+        // Generate and download formal Google Docs/Word-compatible file
+        function exportToGoogleDocs() {
+            const auth = document.getElementById('input-authority').value || 'جناب ایس ایچ او صاحب';
+            const org = document.getElementById('input-organization').value || 'تھانہ سٹی پنڈی بھٹیاں';
+            const loc = document.getElementById('input-location').value || 'پنڈی بھٹیاں';
+            const sub = document.getElementById('input-subject').value || 'درخواست برائے کارروائی قانونی';
+            const sal = document.getElementById('input-salutation').value || 'جنابِ عالی،';
+            const body = document.getElementById('input-body').value || 'گزارشِ احوال یہ ہے کہ سائل...';
+            const name = document.getElementById('input-name').value || 'احمد علی ولد محمد سلیم';
+            const cnic = document.getElementById('input-cnic').value || '35404-XXXXXXX-X';
+            const phone = document.getElementById('input-phone').value || '0300-1234567';
+            const addr = document.getElementById('input-address').value || 'محلہ امین پورہ، پنڈی بھٹیاں';
+            const date = document.getElementById('input-date').value || '6 جولائی 2026ء';
+
+            // High fidelity MS Word / Google Docs XML Wrapper with Styles preserved
+            const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head>
+                <title>درخواست - پنڈی بھٹیاں</title>
+                <!--[if gte mso 9]>
+                <xml>
+                    <w:WordDocument>
+                        <w:View>Print</w:View>
+                        <w:Zoom>100</w:Zoom>
+                        <w:DoNotOptimizeForBrowser/>
+                    </w:WordDocument>
+                </xml>
+                <![endif]-->
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
+                    p, div, span, table, td, tr {
+                        font-family: 'Noto Nastaliq Urdu', 'Segoe UI', serif;
+                        direction: rtl;
+                        unicode-bidi: embed;
+                    }
+                </style>
+            </head>
+            <body style="font-family:'Noto Nastaliq Urdu', 'Segoe UI', serif; direction: rtl; padding: 40px; background-color: #ffffff;">`;
+
+            const footer = `</body></html>`;
+
+            // HTML Body with Center aligned Header and Double Underlines matching preview
+            const htmlContent = `
+                <div style="font-family: 'Noto Nastaliq Urdu', 'Segoe UI', serif; font-size: 18px; line-height: 2.6; text-align: right; color: #000000; padding: 30px; border: 4px double #1e3a8a; border-radius: 8px;">
+                    
+                    <!-- Center Aligned Beautiful Header -->
+                    <div style="text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #000000;">
+                        <div style="display: inline-block; text-align: right;">
+                            <p style="margin: 5px 0; font-size: 22px; font-weight: bold; text-align: center;">بخدمت جناب <span style="border-bottom: 2px solid #1e3a8a; padding: 0 15px; min-width: 180px; display: inline-block;">${auth}</span></p>
+                            <p style="margin: 5px 0; font-size: 20px; font-weight: bold; text-align: center;"><span style="border-bottom: 1px dashed #475569; padding: 0 15px; min-width: 220px; display: inline-block;">${org}</span></p>
+                            <p style="margin: 5px 0; font-size: 16px; text-align: center; color: #475569;">تحصیل و مقام <span style="border-bottom: 1px dashed #94a3b8; padding: 0 10px; min-width: 120px; display: inline-block;">${loc}</span></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Subject Box centered -->
+                    <div style="text-align: center; margin: 25px 0;">
+                        <div style="display: inline-block; border: 2px solid #000000; background-color: #f8fafc; padding: 8px 25px; border-radius: 6px; text-align: center;">
+                            <span style="font-weight: bold; font-size: 20px;">عنوان: ${sub}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <p style="font-weight: bold; padding-right: 15px; font-size: 19px; margin-right: 20px;">${sal}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 40px; text-align: justify; text-indent: 40px; white-space: pre-line; font-size: 18px; line-height: 2.6;">
+                        ${body}
+                    </div>
+                    
+                    <hr style="border: 0; border-top: 2px solid #000000; margin-bottom: 25px;" />
+                    
+                    <table dir="rtl" style="width: 100%; border-collapse: collapse; font-family: 'Noto Nastaliq Urdu', 'Segoe UI', serif;">
+                        <tr>
+                            <td style="width: 45%; vertical-align: top; text-align: right;">
+                                <span style="font-size: 12px; color: #64748b; font-weight: bold; display: block;">مورخہ / تاریخ:</span>
+                                <span style="font-weight: bold; font-size: 16px; color: #000000;">${date}</span>
+                                <br><br>
+                                <div style="display: inline-block; text-align: center;">
+                                    <table style="border: 2px dashed #a1a1aa; border-radius: 6px; width: 90px; height: 60px; background-color: #fcfcfc;">
+                                        <tr><td></td></tr>
+                                    </table>
+                                    <span style="font-size: 11px; color: #64748b; font-weight: bold; display: block; margin-top: 5px; text-align: center;">نشانِ انگوٹھا سائل</span>
+                                </div>
+                            </td>
+                            <td style="width: 55%; vertical-align: top; text-align: right; border-right: 3px solid #1e3a8a; padding-right: 15px;">
+                                <span style="font-size: 12px; color: #1e3a8a; font-weight: bold; display: block; margin-bottom: 5px;">المدعی / درخواست گزار:</span>
+                                <span style="font-size: 11px; color: #64748b; display: block; margin-bottom: 8px;">دستخط: _________________</span>
+                                <p style="margin: 3px 0; color: #000000; font-size: 16px;"><strong>نام:</strong> <span style="font-weight: bold;">${name}</span></p>
+                                <p style="margin: 3px 0; color: #334155; font-size: 14px;"><strong>شناختی کارڈ نمبر:</strong> <span>${cnic}</span></p>
+                                <p style="margin: 3px 0; color: #334155; font-size: 14px;"><strong>موبائل نمبر:</strong> <span>${phone}</span></p>
+                                <p style="margin: 3px 0; color: #475569; font-size: 13px;"><strong>پتہ:</strong> <span>${addr}</span></p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+
+            const finalDoc = header + htmlContent + footer;
+            const blob = new Blob([finalDoc], { type: 'application/msword;charset=utf-8' });
+            
+            // Generate link for immediate download
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `درخواست_${sub.replace(/\s+/g, '_')}.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showDocsInstructionModal();
+        }
+
+        // Show Help Modal
+        function showDocsInstructionModal() {
+            const modal = document.getElementById('docs-help-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.firstElementChild.classList.remove('scale-95');
+                modal.firstElementChild.classList.add('scale-100');
+            }, 10);
+        }
+
+        // Close Help Modal
+        function closeDocsHelpModal() {
+            const modal = document.getElementById('docs-help-modal');
+            modal.firstElementChild.classList.remove('scale-100');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        // Copy beautiful rich-formatted HTML to Clipboard (perfect for Google Docs / MS Word)
+        async function copyFormatedText() {
+            const auth = document.getElementById('input-authority').value || 'جناب ایس ایچ او صاحب';
+            const org = document.getElementById('input-organization').value || 'تھانہ سٹی پنڈی بھٹیاں';
+            const loc = document.getElementById('input-location').value || 'پنڈی بھٹیاں';
+            const sub = document.getElementById('input-subject').value || 'درخواست برائے کارروائی قانونی';
+            const sal = document.getElementById('input-salutation').value || 'جنابِ عالی،';
+            const body = document.getElementById('input-body').value || 'گزارشِ احوال یہ ہے کہ سائل...';
+            const name = document.getElementById('input-name').value || 'احمد علی ولد محمد سلیم';
+            const cnic = document.getElementById('input-cnic').value || '35404-XXXXXXX-X';
+            const phone = document.getElementById('input-phone').value || '0300-1234567';
+            const addr = document.getElementById('input-address').value || 'محلہ امین پورہ، پنڈی بھٹیاں';
+            const date = document.getElementById('input-date').value || '6 جولائی 2026ء';
+
+            // Custom built high fidelity HTML template with Center Address alignments, borders & empty thumb impression boxes
+            const htmlString = `
+                <div dir="rtl" style="font-family: 'Noto Nastaliq Urdu', 'Urdu Typesetting', 'Segoe UI', serif; font-size: 18px; line-height: 2.6; text-align: right; color: #000000; padding: 30px; background-color: #ffffff; border: 1px solid #e2e8f0; max-width: 750px; margin: auto;">
+                    
+                    <!-- Center Aligned Beautiful Header -->
+                    <div style="text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #000000;">
+                        <div style="display: inline-block; text-align: right;">
+                            <p style="margin: 3px 0; font-size: 21px; font-weight: bold; text-align: center;">بخدمت جناب <span style="border-bottom: 2px solid #1e3a8a; padding: 0 15px; min-width: 180px; display: inline-block;">${auth}</span></p>
+                            <p style="margin: 3px 0; font-size: 19px; font-weight: bold; text-align: center;"><span style="border-bottom: 1px dashed #475569; padding: 0 15px; min-width: 220px; display: inline-block;">${org}</span></p>
+                            <p style="margin: 3px 0; font-size: 16px; text-align: center; color: #475569;">تحصیل و مقام <span style="border-bottom: 1px dashed #94a3b8; padding: 0 10px; min-width: 120px; display: inline-block;">${loc}</span></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Subject Box centered -->
+                    <div style="text-align: center; margin: 25px 0;">
+                        <div style="display: inline-block; border: 2px solid #000000; background-color: #f8fafc; padding: 8px 25px; border-radius: 6px;">
+                            <span style="font-weight: bold; font-size: 19px;">عنوان: ${sub}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <p style="font-weight: bold; padding-right: 15px; font-size: 18px;">${sal}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 40px; text-align: justify; text-indent: 40px; white-space: pre-line; font-size: 18px; line-height: 2.6;">
+                        ${body}
+                    </div>
+                    
+                    <hr style="border: 0; border-top: 1px solid #cbd5e1; margin-bottom: 25px;" />
+                    
+                    <table dir="rtl" style="width: 100%; border-collapse: collapse; font-family: inherit;">
+                        <tr>
+                            <td style="width: 45%; vertical-align: top; text-align: right;">
+                                <span style="font-size: 11px; color: #64748b; font-weight: bold; display: block;">مورخہ / تاریخ:</span>
+                                <span style="font-weight: bold; font-size: 16px; color: #000000;">${date}</span>
+                                <br><br>
+                                <div style="display: inline-block; text-align: center;">
+                                    <div style="width: 90px; height: 60px; border: 2px dashed #cbd5e1; border-radius: 6px; background-color: #fafafa; margin-bottom: 5px;"></div>
+                                    <span style="font-size: 11px; color: #64748b; font-weight: bold; display: block;">نشانِ انگوٹھا سائل</span>
+                                </div>
+                            </td>
+                            <td style="width: 55%; vertical-align: top; text-align: right; border-right: 3px solid #1e3a8a; padding-right: 15px;">
+                                <span style="font-size: 12px; color: #1e3a8a; font-weight: bold; display: block; margin-bottom: 5px;">المدعی / درخواست گزار:</span>
+                                <span style="font-size: 11px; color: #64748b; display: block; margin-bottom: 8px;">دستخط: _________________</span>
+                                <p style="margin: 3px 0; color: #000000; font-size: 15px;"><strong>نام:</strong> <span style="font-weight: bold;">${name}</span></p>
+                                <p style="margin: 3px 0; color: #334155; font-size: 14px;"><strong>شناختی کارڈ نمبر:</strong> <span>${cnic}</span></p>
+                                <p style="margin: 3px 0; color: #334155; font-size: 14px;"><strong>موبائل نمبر:</strong> <span>${phone}</span></p>
+                                <p style="margin: 3px 0; color: #475569; font-size: 13px;"><strong>پتہ:</strong> <span>${addr}</span></p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+
+            const plainText = `بخدمت جناب: ${auth}\nتھانہ / ادارہ: ${org}\nمقام / تحصیل: ${loc}\n\nعنوان: ${sub}\n\n${sal}\n\n${body}\n\nالمدعی/درخواست گزار\nدستخط: _________________\nنام: ${name}\nشناختی کارڈ نمبر: ${cnic}\nموبائل نمبر: ${phone}\nمورخہ: ${date}\nپتہ: ${addr}`;
+
+            if (navigator.clipboard && window.ClipboardItem) {
+                try {
+                    const blobHtml = new Blob([htmlString], { type: 'text/html' });
+                    const blobText = new Blob([plainText], { type: 'text/plain' });
+                    const data = [new ClipboardItem({
+                        'text/html': blobHtml,
+                        'text/plain': blobText
+                    })];
+                    await navigator.clipboard.write(data);
+                    showToast("درخواست کے خوبصورت مرکز الائن ہیڈر اور دیگر فارمیٹنگ کو کلپ بورڈ پر منتقل کر دیا گیا ہے۔ آپ گوگل ڈاکس میں براہ راست پیسٹ کریں!");
+                    return;
+                } catch (err) {
+                    console.warn("Modern clipboard API failed. Using fallback...", err);
+                }
+            }
+
+            // Fallback for older browsers
+            const container = document.createElement('div');
+            container.innerHTML = htmlString;
+            container.style.position = 'fixed';
+            container.style.pointerEvents = 'none';
+            container.style.opacity = '0';
+            container.style.right = '-9999px';
+            document.body.appendChild(container);
+
+            window.getSelection().removeAllRanges();
+            const range = document.createRange();
+            range.selectNode(container);
+            window.getSelection().addRange(range);
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast("درخواست کی خوبصورت فارمیٹنگ کاپی ہو گئی ہے!");
+                } else {
+                    showToast("معذرت، کاپی کرنے میں ناکامی ہوئی۔");
+                }
+            } catch (err) {
+                showToast("براہِ کرم ٹیکسٹ خود منتخب کر کے کاپی کریں۔");
+            }
+
+            document.body.removeChild(container);
+            window.getSelection().removeAllRanges();
+        }
+
+        // Custom Toast Notification System
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+            toastText.textContent = message;
+            
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 4000);
+        }
+
+        // Trigger safe print dialog
+        function triggerPrint() {
+            window.print();
+        }
+
+        // Initial setup on window load
+        window.onload = function() {
+            // First load the saved state if available
+            loadStateFromLocalStorage();
+            
+            // Now load templates control check
+            checkSavedTemplate();
+            
+            // Explicitly load custom Thanas from storage
+            loadCustomThanasFromStorage();
+            
+            // Set first preview render
+            updatePreview();
+            
+            // Attach window resize scaling adaptors
+            window.addEventListener('resize', applyMobileZoom);
+        }
+    </script>
+</body>
+</html>
