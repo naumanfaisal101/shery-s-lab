@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>381 تسبیح پرو - Nusrat Shaheen Inc</title>
+    
+    <!-- Tailwind CSS with Dark Mode config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0a1511',
+                        darkCard: '#11221c',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts for Urdu & Arabic Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto_Nastaliq_Urdu:wght@400..700&family=Noto_Sans_Arabic:wght@100..900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            background-color: #f0f6f2; /* Light mode bg */
+            transition: background-color 0.3s, color 0.3s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body.dark {
+            background-color: #0a1511; /* Dark mode bg */
+            color: #e2e8f0;
+        }
+        .urdu-text {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            line-height: 2.8;
+        }
+        
+        /* Custom smooth scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #1b4d3e; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #c5a059; }
+        
+        .zoom-img-container {
+            transition: transform 0.2s ease-out;
+            transform-origin: center center;
+        }
+
+        /* --- SMART MODE CSS (Adaptive Screen Split - 65% / 35% with Min-Height Fix) --- */
+        body.smart-mode {
+            overflow: hidden; /* Prevent scrolling the body */
+        }
+        body.smart-mode header,
+        body.smart-mode footer,
+        body.smart-mode #calendarSection,
+        body.smart-mode #wazifaSection,
+        body.smart-mode #fineTuneControls {
+            display: none !important;
+        }
+        body.smart-mode main {
+            display: flex !important;
+            flex-direction: column !important;
+            padding: 0 !important;
+            gap: 0 !important;
+            height: 100vh !important;
+            max-width: 100% !important;
+        }
+        body.smart-mode #imageSection {
+            flex: none !important;
+            border-radius: 0;
+            border: none;
+            height: 62vh !important; /* 62% for reading cards to allow rest for controls */
+            margin: 0;
+            border-bottom: 4px solid #c5a059;
+        }
+        body.smart-mode #counterSection {
+            flex: 1 !important;
+            border-radius: 0;
+            border: none;
+            height: 38vh !important; /* Increased space to prevent hidden buttons on 100% zoom */
+            min-height: 260px !important; /* Critical safe limit on Chrome 100% Zoom */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between !important;
+            padding: 10px 16px !important;
+            overflow: hidden;
+        }
+        
+        /* Smart Horizontal layout adjustment inside the counter section */
+        body.smart-mode .smart-mode-container {
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            height: 100% !important;
+            width: 100% !important;
+            gap: 16px !important;
+        }
+        
+        /* Left Handed Class for Mirroring Layout */
+        body.smart-mode .smart-mode-container.left-handed {
+            flex-direction: row-reverse !important;
+        }
+
+        body.smart-mode .smart-left-col {
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            height: 100% !important;
+        }
+        body.smart-mode .smart-right-col {
+            flex: 1.2 !important;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        body.smart-mode .smart-right-col #tapBtn {
+            height: 90% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Compact layout sizing for smart-mode widgets */
+        body.smart-mode .counter-circle-wrapper {
+            width: 7.5rem !important;
+            height: 7.5rem !important;
+            border-width: 3px !important;
+        }
+        body.smart-mode #counterOutput {
+            font-size: 2.5rem !important;
+        }
+        body.smart-mode #wazifaArabicContainer,
+        body.smart-mode #progressBarContainer {
+            display: none !important; /* Hide extra layout items to protect screen estate */
+        }
+        
+        /* Exit Smart Mode Button */
+        #exitSmartModeBtn { display: none; }
+        body.smart-mode #exitSmartModeBtn {
+            display: flex;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-800 transition-colors duration-300">
+
+    <header class="bg-[#1b4d3e] dark:bg-[#0d2a21] text-white shadow-lg sticky top-0 z-50 border-b-4 border-[#c5a059]">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#c5a059] to-[#ebd29c] flex items-center justify-center font-bold text-emerald-950 shadow-md">
+                        <span class="text-lg font-sans">381</span>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-black tracking-wide font-sans leading-tight">381 تسبیح پرو</h1>
+                        <p class="text-[9px] text-emerald-200/80 font-mono">Nusrat Shaheen Inc</p>
+                    </div>
+                </div>
+                <!-- Mobile only quick actions -->
+                <div class="md:hidden flex items-center gap-2">
+                    <button onclick="toggleDarkMode()" class="w-8 h-8 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-700 text-sm" id="themeToggleMobile">🌙</button>
+                    <button onclick="toggleSmartMode()" class="bg-amber-500 text-amber-950 font-bold text-xs px-2 py-1.5 rounded-lg shadow-md animate-pulse">🎯 سمارٹ موڈ</button>
+                </div>
+            </div>
+            
+            <!-- Tools and Info -->
+            <div class="flex flex-wrap items-center gap-2 justify-center w-full md:w-auto">
+                <!-- Wake Lock Screen on option -->
+                <button onclick="toggleWakeLock()" id="wakeLockBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs px-3 py-1.5 rounded-lg shadow transition-all border border-slate-700 font-bold flex items-center gap-1 cursor-pointer">
+                    📱 اسکرین آن رکھیں: <span id="wakeLockStatus" class="text-red-400 font-extrabold">بند</span>
+                </button>
+
+                <!-- Handedness layout toggle -->
+                <button onclick="toggleHandedness()" id="handednessBtn" class="bg-indigo-950 hover:bg-indigo-900 text-indigo-200 text-xs px-3 py-1.5 rounded-lg shadow transition-all border border-indigo-700 font-bold cursor-pointer">
+                    🔁 دائیں ہاتھ کی ترتیب
+                </button>
+
+                <div class="hidden md:flex items-center gap-2">
+                    <button onclick="toggleDarkMode()" class="w-8 h-8 rounded-full bg-emerald-900/50 flex items-center justify-center border border-emerald-700 text-sm" id="themeToggleDesktop" title="نائٹ موڈ">🌙</button>
+                    <button onclick="toggleSmartMode()" class="bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-xs px-3 py-1.5 rounded-lg shadow-md transition-all flex items-center gap-1 cursor-pointer">🎯 سمارٹ موڈ</button>
+                </div>
+
+                <div class="bg-emerald-900/80 px-2 py-1 rounded-lg border border-emerald-700 text-[11px] flex items-center gap-1">
+                    <span class="text-amber-400">🌙</span>
+                    <span>مغرب: <input type="time" id="maghribTimeInput" value="18:00" onchange="updateMaghribTime()" class="bg-emerald-950 text-white border-none rounded px-1 text-center font-mono focus:outline-none w-14 cursor-pointer"></span>
+                </div>
+                
+                <div class="bg-amber-500/10 text-amber-300 px-2 py-1 rounded-lg border border-amber-500/30 text-[11px] font-bold" id="islamicDayLabel">
+                    لوڈ ہو رہا ہے...
+                </div>
+                
+                <button onclick="confirmResetAll()" class="bg-red-700/95 hover:bg-red-600 text-white transition-all text-[11px] font-bold px-2 py-1 rounded-lg shadow cursor-pointer flex items-center gap-1">
+                    🔄 ری سیٹ آل
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Global Exit Smart Mode Button -->
+    <button id="exitSmartModeBtn" onclick="toggleSmartMode()" class="bg-red-600 text-white px-4 py-2 rounded-xl font-bold shadow-2xl border-2 border-white items-center gap-2 hover:bg-red-700 transition cursor-pointer">
+        <span>❌ سمارٹ موڈ بند کریں</span>
+    </button>
+
+    <main class="max-w-7xl mx-auto w-full flex-grow p-4 grid grid-cols-1 lg:grid-cols-12 gap-6 transition-all duration-300">
+        
+        <!-- RIGHT COLUMN: Interactive Original Image Reader -->
+        <section id="imageSection" class="lg:col-span-7 bg-white dark:bg-darkCard rounded-2xl shadow-md border-2 border-emerald-100 dark:border-emerald-900/50 overflow-hidden flex flex-col h-[420px] lg:h-[800px] transition-colors">
+            
+            <div class="bg-gradient-to-r from-[#143a2f] to-[#1b4d3e] dark:from-[#0a1a15] dark:to-[#0f2e25] p-2 text-white flex flex-col sm:flex-row justify-between items-center gap-2 border-b border-[#c5a059]/40">
+                <div class="flex items-center gap-2">
+                    <span class="text-amber-400">📖</span>
+                    <h2 class="text-xs font-bold font-sans">اصل تعلیمی کارڈز (زوم ایبل)</h2>
+                </div>
+                <div class="flex flex-wrap gap-1 justify-center">
+                    <button onclick="switchImagePage(1)" id="imgTab1" class="px-2 py-1 text-[10px] font-bold rounded bg-emerald-800 text-emerald-100 transition-all cursor-pointer">صفحہ 1</button>
+                    <button onclick="switchImagePage(2)" id="imgTab2" class="px-2 py-1 text-[10px] font-bold rounded bg-emerald-800 text-emerald-100 transition-all cursor-pointer">صفحہ 2</button>
+                    <button onclick="switchImagePage(3)" id="imgTab3" class="px-2 py-1 text-[10px] font-bold rounded bg-emerald-800 text-emerald-100 transition-all cursor-pointer">صفحہ 3</button>
+                    <button onclick="switchImagePage(4)" id="imgTab4" class="px-2 py-1 text-[10px] font-bold rounded bg-[#c5a059] text-emerald-950 transition-all cursor-pointer">صفحہ 4</button>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-[#152b22] border-b border-slate-100 dark:border-emerald-900/30 p-1.5 flex justify-between items-center px-3">
+                <div class="flex items-center gap-1.5">
+                    <button onclick="adjustZoom(0.15)" class="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900 text-[#1b4d3e] dark:text-emerald-200 font-bold text-sm hover:bg-emerald-200 transition flex items-center justify-center cursor-pointer">➕</button>
+                    <button onclick="adjustZoom(-0.15)" class="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900 text-[#1b4d3e] dark:text-emerald-200 font-bold text-sm hover:bg-emerald-200 transition flex items-center justify-center cursor-pointer">➖</button>
+                    <button onclick="resetZoom()" class="px-2 py-0.5 text-[10px] bg-slate-200 dark:bg-slate-700 dark:text-slate-200 rounded-md hover:bg-slate-300 transition cursor-pointer">اصلی سائز</button>
+                </div>
+                <div class="text-[9px] text-slate-500 dark:text-slate-400">تصویر گھسیٹیں (Drag / Pinch)</div>
+            </div>
+
+            <div id="imageStage" class="flex-grow overflow-auto bg-slate-200 dark:bg-[#0d1f19] relative flex items-center justify-center cursor-grab active:cursor-grabbing p-2">
+                <div id="zoomWrapper" class="zoom-img-container shadow-xl max-w-full">
+                    <img id="readerImg" src="Mah-e-Safar Ki Taleem Shareef-4.jpg" alt="تعلیمی کارڈ" class="rounded border border-slate-300 dark:border-emerald-900/50 shadow max-h-[100%] mx-auto" draggable="false">
+                </div>
+            </div>
+            
+            <div id="infoSection" class="bg-emerald-50/50 dark:bg-[#0f241d] p-2 border-t border-slate-100 dark:border-emerald-900/30 text-center">
+                <p id="pageDescription" class="text-[10px] text-emerald-950 dark:text-emerald-200 font-bold leading-relaxed">
+                    صفحہ 4: چاروں مخصوص دعائیں (78, 19, 121, 106) اور تسبیحات۔
+                </p>
+            </div>
+        </section>
+
+        <!-- LEFT COLUMN: Advanced Digital Tasbih Counter -->
+        <section class="lg:col-span-5 flex flex-col gap-4">
+
+            <!-- Collapsible 30 Days Safar Calendar -->
+            <div id="calendarSection" class="bg-white dark:bg-darkCard rounded-2xl shadow-md border-2 border-emerald-100 dark:border-emerald-900/50 p-3 transition-colors">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-black text-[#1b4d3e] dark:text-emerald-400 flex items-center gap-1.5">
+                        <span>📅</span>
+                        <span>صفر ٹریکر کیلنڈر</span>
+                    </h3>
+                    <button onclick="toggleCalendar()" id="calToggleBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] px-2 py-1 rounded border border-slate-200 dark:border-slate-700 cursor-pointer">
+                        کیلنڈر دکھائیں 🔽
+                    </button>
+                </div>
+                
+                <!-- Hidden by default -->
+                <div class="grid-cols-6 gap-1.5 mt-3 hidden" id="safarCalendarGrid">
+                    <!-- Javascript generated items -->
+                </div>
+            </div>
+            
+            <!-- Wazifa Category Selection -->
+            <div id="wazifaSection" class="bg-white dark:bg-darkCard rounded-2xl shadow-md border-2 border-emerald-100 dark:border-emerald-900/50 p-3 transition-colors">
+                <h3 class="text-xs font-bold text-emerald-950 dark:text-emerald-300 mb-2 flex items-center gap-1.5">
+                    <span>📿</span>
+                    <span>وظیفہ/تسبیح کا انتخاب کریں:</span>
+                </h3>
+                
+                <div class="grid grid-cols-2 gap-1 mb-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                    <button onclick="setCategory('duas')" id="catTab1" class="py-1.5 text-[10px] font-extrabold rounded-lg transition-all bg-[#1b4d3e] text-white shadow cursor-pointer">
+                        1۔ مخصوص دعائیں (تاکیدی)
+                    </button>
+                    <button onclick="setCategory('tasbihat')" id="catTab2" class="py-1.5 text-[10px] font-extrabold rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer">
+                        2۔ عام تسبیحات (اختیاری)
+                    </button>
+                </div>
+
+                <div id="itemsGrid" class="grid grid-cols-2 gap-1.5 max-h-[140px] overflow-y-auto pr-1">
+                    <!-- Javascript populated buttons -->
+                </div>
+            </div>
+
+            <!-- Interactive Counter Screen -->
+            <div id="counterSection" class="bg-white dark:bg-darkCard rounded-3xl shadow-xl border-4 border-emerald-800 dark:border-emerald-900/80 p-4 flex-grow flex flex-col justify-between text-center relative overflow-hidden transition-colors">
+                
+                <div id="smartModeContainer" class="smart-mode-container w-full h-full flex flex-col justify-between">
+                    
+                    <!-- Smart Mode Split: Left/Top Column -->
+                    <div class="smart-left-col w-full flex flex-col items-center justify-between relative h-full">
+                        <div class="flex justify-between items-center w-full z-10 my-1">
+                            <span id="activeWazifaLabel" class="bg-amber-100 dark:bg-amber-900/40 text-amber-950 dark:text-amber-200 font-black text-[11px] px-2.5 py-1 rounded-full border border-amber-300 dark:border-amber-700/50 shadow-sm truncate max-w-[150px]">
+                                لوڈ ہو رہا ہے...
+                            </span>
+                            <div class="flex items-center gap-1.5">
+                                <div class="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-700 flex items-center gap-1">
+                                    ہدف: <span id="activeTarget" class="text-emerald-800 dark:text-emerald-400 font-extrabold text-xs">0</span>
+                                </div>
+                                <button onclick="editTarget()" class="text-[9px] bg-emerald-100 dark:bg-emerald-900/50 hover:bg-emerald-200 text-emerald-950 dark:text-emerald-200 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-700 transition cursor-pointer" title="ہدف تبدیل کریں">
+                                    ✍️ ترمیم
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Circular Progress & Live Digit Screen -->
+                        <div class="my-auto relative flex items-center justify-center z-10 py-1">
+                            <div class="counter-circle-wrapper w-40 h-40 rounded-full border-4 border-emerald-50 dark:border-emerald-900/30 bg-slate-50 dark:bg-[#0a1511] shadow-inner flex flex-col justify-center items-center relative transition-colors">
+                                <div id="counterOutput" class="text-4xl font-black font-mono text-slate-800 dark:text-slate-100 tracking-wider">000</div>
+                                <div class="text-[8px] text-emerald-800 dark:text-emerald-500 font-black tracking-widest uppercase mt-0.5">تعداد (Count)</div>
+                                
+                                <div id="completionBadge" class="absolute -bottom-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold text-[9px] py-0.5 px-2 rounded-full shadow hidden animate-bounce border border-white">
+                                    ✓ ہدف مکمل
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Safe external container for Sound and Vibration buttons so they NEVER hide digits -->
+                        <div class="flex justify-center gap-2 mt-auto mb-1 z-10 w-full">
+                            <button onclick="toggleAudioMute()" id="soundToggle" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-1 text-[11px] font-bold cursor-pointer transition">
+                                <span>🔊 آواز: آن</span>
+                            </button>
+                            <button onclick="toggleHaptic()" id="vibeToggle" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-1 text-[11px] font-bold cursor-pointer transition">
+                                <span>📳 وائبریشن: آن</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Arabic wazifa line (Auto hidden in smart mode container) -->
+                    <div id="wazifaArabicContainer" class="my-1 z-10 hidden md:block">
+                        <p id="wazifaArabic" class="text-sm font-bold text-emerald-950 dark:text-emerald-100 tracking-wide leading-relaxed min-h-[30px] flex items-center justify-center px-1 font-sans">
+                            -
+                        </p>
+                    </div>
+
+                    <!-- Progress bar (Auto hidden in smart mode container) -->
+                    <div id="progressBarContainer" class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mb-3 overflow-hidden border border-slate-200 dark:border-slate-700 shadow-inner z-10">
+                        <div id="progressBar" class="bg-gradient-to-r from-[#c5a059] to-[#1b4d3e] h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+
+                    <!-- Smart Mode Split: Right/Bottom Column -->
+                    <div class="smart-right-col relative z-10 flex-grow flex items-center justify-center h-full">
+                        <button id="tapBtn" class="w-full py-4 md:py-6 rounded-2xl bg-gradient-to-b from-[#1b4d3e] to-[#113329] dark:from-[#13382c] dark:to-[#0a1f18] text-white font-extrabold text-lg shadow-lg hover:shadow-xl active:scale-95 border-2 border-white dark:border-[#1b4d3e] outline outline-2 outline-emerald-100 dark:outline-[#0d2a21] flex flex-col items-center justify-center transition-all cursor-pointer select-none">
+                            <span class="tracking-widest text-[#c5a059]">پڑھیے (TAP)</span>
+                            <span class="text-[9px] text-emerald-200/80 mt-0.5 font-sans">اسکرین پر دبائیں</span>
+                        </button>
+                    </div>
+
+                </div>
+
+                <div id="fineTuneControls" class="flex gap-2 mt-3 border-t border-slate-100 dark:border-slate-800 pt-2 justify-between z-10">
+                    <button onclick="adjustCounter(-1)" class="flex-1 py-1 text-[10px] font-bold rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer">
+                        ➖ نفی (1-)
+                    </button>
+                    <button onclick="resetCurrentWazifa()" class="flex-1 py-1 text-[10px] font-bold rounded-lg border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer">
+                        🔄 تسبیح ری سیٹ
+                    </button>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- App Custom Prompt Modal for Targets -->
+    <div id="targetModal" class="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center hidden p-4">
+        <div class="bg-white dark:bg-darkCard rounded-2xl max-w-sm w-full p-5 text-center shadow-2xl border-t-4 border-emerald-800">
+            <h4 class="text-emerald-950 dark:text-emerald-300 font-bold text-sm mb-1">نیا ہدف درج کریں</h4>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 mb-4">اس وظیفے کے لیے اپنی پسند کا ہدف درج کریں۔</p>
+            <input type="number" id="customTargetInput" min="1" class="w-full p-2 border-2 border-emerald-100 dark:border-emerald-900/50 bg-slate-50 dark:bg-slate-900 dark:text-white rounded-xl text-center text-lg font-bold mb-4 focus:outline-none focus:border-emerald-600">
+            <div class="flex gap-2">
+                <button onclick="saveCustomTarget()" class="flex-1 bg-[#1b4d3e] text-white font-bold py-2 rounded-xl text-xs cursor-pointer">محفوظ کریں</button>
+                <button onclick="closeTargetModal()" class="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold py-2 rounded-xl text-xs cursor-pointer">منسوخ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Beautiful Custom Safe Warning/Confirmation Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/70 z-[310] flex items-center justify-center hidden p-4">
+        <div class="bg-white dark:bg-darkCard rounded-2xl max-w-sm w-full p-5 text-center shadow-2xl border-t-4 border-red-700">
+            <div class="w-12 h-12 bg-red-50 dark:bg-red-900/30 text-red-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-3">⚠️</div>
+            <h4 class="text-slate-900 dark:text-slate-200 font-bold text-sm mb-1" id="confirmModalTitle">تصدیق درکار ہے</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-5 leading-relaxed" id="confirmModalMessage">کیا آپ واقعی یہ عمل کرنا چاہتے ہیں؟</p>
+            <div class="flex gap-2">
+                <button id="confirmModalYesBtn" class="flex-1 bg-red-700 hover:bg-red-600 text-white font-bold py-2 rounded-xl transition text-xs cursor-pointer">جی ہاں، تصدیق</button>
+                <button id="confirmModalNoBtn" class="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold py-2 rounded-xl transition text-xs cursor-pointer">منسوخ</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white dark:bg-[#0d2a21] border-t border-emerald-100 dark:border-emerald-900/50 py-2 text-center text-[10px] text-slate-500 dark:text-slate-400 shadow-inner z-10 transition-colors">
+        <p class="font-extrabold text-slate-800 dark:text-slate-200 urdu-text text-sm">381 تسبیح پرو - ڈیجیٹل ایڈیشن</p>
+        <p class="text-slate-400 dark:text-slate-500 -mt-2">Made with ❤️ by Nusrat Shaheen Inc</p>
+    </footer>
+
+    <script>
+        // Audio Engine (Ensures unlock on first tap)
+        let audioCtx = null;
+        let isMuted = false;
+        let isHapticEnabled = true;
+        let isLeftHanded = false;
+        let wakeLock = null;
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Global unlocker attached to the body to catch the very first interaction
+        document.body.addEventListener('touchstart', initAudioContext, {once:true});
+        document.body.addEventListener('click', initAudioContext, {once:true});
+
+        function playClickSound() {
+            if (isMuted) return;
+            initAudioContext();
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(850, audioCtx.currentTime); // Soft High beep
+                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime); 
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch(e) {}
+        }
+
+        function playSuccessChime() {
+            if (isMuted) return;
+            initAudioContext();
+            if (!audioCtx) return;
+            try {
+                const now = audioCtx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // Beautiful C Major Ascending Chord
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                    gain.gain.setValueAtTime(0, now + idx * 0.1);
+                    gain.gain.linearRampToValueAtTime(0.3, now + idx * 0.1 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.5);
+                    osc.start(now + idx * 0.1);
+                    osc.stop(now + idx * 0.1 + 0.6);
+                });
+            } catch(e) {}
+        }
+
+        function triggerVibration() {
+            if (isHapticEnabled && navigator.vibrate) {
+                navigator.vibrate(40);
+            }
+        }
+
+        function toggleAudioMute() {
+            isMuted = !isMuted;
+            document.getElementById('soundToggle').innerHTML = isMuted ? '<span>🔇 آواز: بند</span>' : '<span>🔊 آواز: آن</span>';
+            if (!isMuted) { playClickSound(); }
+        }
+
+        function toggleHaptic() {
+            isHapticEnabled = !isHapticEnabled;
+            document.getElementById('vibeToggle').innerHTML = isHapticEnabled ? '<span>📳 وائبریشن: آن</span>' : '<span>📴 وائبریشن: بند</span>';
+        }
+
+        // Mirror layout for right/left handed users
+        function toggleHandedness() {
+            isLeftHanded = !isLeftHanded;
+            const container = document.getElementById('smartModeContainer');
+            const btn = document.getElementById('handednessBtn');
+            if (isLeftHanded) {
+                container.classList.add('left-handed');
+                btn.innerText = '🔁 بائیں ہاتھ کی ترتیب';
+            } else {
+                container.classList.remove('left-handed');
+                btn.innerText = '🔁 دائیں ہاتھ کی ترتیب';
+            }
+        }
+
+        // Screen Wake Lock API to prevent mobile screen sleep during Dhikr
+        async function toggleWakeLock() {
+            const statusLabel = document.getElementById('wakeLockStatus');
+            const btn = document.getElementById('wakeLockBtn');
+            
+            if (wakeLock !== null) {
+                // Release wake lock
+                try {
+                    await wakeLock.release();
+                    wakeLock = null;
+                    statusLabel.innerText = 'بند';
+                    statusLabel.className = 'text-red-400 font-extrabold';
+                    btn.className = "bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs px-3 py-1.5 rounded-lg shadow transition-all border border-slate-700 font-bold flex items-center gap-1 cursor-pointer";
+                } catch (err) {
+                    console.error(err);
+                }
+                return;
+            }
+
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    statusLabel.innerText = 'فعال';
+                    statusLabel.className = 'text-emerald-400 font-extrabold';
+                    btn.className = "bg-emerald-950 hover:bg-emerald-900 text-emerald-200 text-xs px-3 py-1.5 rounded-lg shadow transition-all border border-emerald-700 font-bold flex items-center gap-1 cursor-pointer";
+                    
+                    // Auto re-acquire wake lock if tab is switched/visibility changed
+                    document.addEventListener('visibilitychange', async () => {
+                        if (wakeLock !== null && document.visibilityState === 'visible') {
+                            wakeLock = await navigator.wakeLock.request('screen');
+                        }
+                    });
+                } else {
+                    alert("آپ کا براؤزر اسکرین آن رکھنے کے اس فیچر کو سپورٹ نہیں کرتا۔");
+                }
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+                statusLabel.innerText = 'غیر فعال';
+                statusLabel.className = 'text-amber-400 font-extrabold';
+            }
+        }
+    </script>
+
+    <script>
+        // Image Zoom & Pan
+        let zoomLevel = 1.0;
+        const zoomWrapper = document.getElementById('zoomWrapper');
+        const imageStage = document.getElementById('imageStage');
+        let isDragging = false, startX, startY, scrollLeft, scrollTop;
+
+        function attachDragEvents() {
+            imageStage.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.pageX - imageStage.offsetLeft;
+                startY = e.pageY - imageStage.offsetTop;
+                scrollLeft = imageStage.scrollLeft;
+                scrollTop = imageStage.scrollTop;
+            });
+            imageStage.addEventListener('mouseleave', () => isDragging = false);
+            imageStage.addEventListener('mouseup', () => isDragging = false);
+            imageStage.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const walkX = (e.pageX - imageStage.offsetLeft - startX) * 1.5; 
+                const walkY = (e.pageY - imageStage.offsetTop - startY) * 1.5;
+                imageStage.scrollLeft = scrollLeft - walkX;
+                imageStage.scrollTop = scrollTop - walkY;
+            });
+            imageStage.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                startX = e.touches[0].pageX - imageStage.offsetLeft;
+                startY = e.touches[0].pageY - imageStage.offsetTop;
+                scrollLeft = imageStage.scrollLeft;
+                scrollTop = imageStage.scrollTop;
+            });
+            imageStage.addEventListener('touchend', () => isDragging = false);
+            imageStage.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const walkX = (e.touches[0].pageX - imageStage.offsetLeft - startX) * 1.5;
+                const walkY = (e.touches[0].pageY - imageStage.offsetTop - startY) * 1.5;
+                imageStage.scrollLeft = scrollLeft - walkX;
+                imageStage.scrollTop = scrollTop - walkY;
+            });
+        }
+        attachDragEvents();
+
+        function adjustZoom(amount) {
+            zoomLevel = Math.max(0.5, Math.min(4.0, zoomLevel + amount));
+            zoomWrapper.style.transform = `scale(${zoomLevel})`;
+        }
+        function resetZoom() {
+            zoomLevel = 1.0;
+            zoomWrapper.style.transform = 'scale(1)';
+            imageStage.scrollLeft = 0; imageStage.scrollTop = 0;
+        }
+
+        const pageDescriptions = {
+            1: "صفحہ 1: ماہِ صفر کی اہمیت، حقیقتِ صدقہ اور بزرگوں کی احتیاطی تعلیمات۔",
+            2: "صفحہ 2: وسوسوں کا علاج، شکر گزاری اور نیت۔",
+            3: "صفحہ 3: تسبیحات اور دعاؤں کی تفصیل۔",
+            4: "صفحہ 4: چاروں مخصوص دعائیں (78, 19, 121, 106) اور تسبیحات۔"
+        };
+
+        function switchImagePage(pageNum) {
+            document.getElementById('readerImg').src = `Mah-e-Safar Ki Taleem Shareef-${pageNum}.jpg`;
+            resetZoom();
+            for (let i = 1; i <= 4; i++) {
+                const btn = document.getElementById(`imgTab${i}`);
+                if (i === pageNum) {
+                    btn.className = "px-2 py-1 text-[10px] font-bold rounded bg-[#c5a059] text-emerald-950 transition-all cursor-pointer";
+                } else {
+                    btn.className = "px-2 py-1 text-[10px] font-bold rounded bg-emerald-800 text-emerald-100 hover:bg-emerald-700 transition-all cursor-pointer";
+                }
+            }
+            document.getElementById('pageDescription').innerText = pageDescriptions[pageNum];
+        }
+
+        // Night Mode / Dark Mode Toggle
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const body = document.body;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                body.classList.remove('dark');
+                localStorage.setItem('381_theme', 'light');
+                document.getElementById('themeToggleDesktop').innerText = '🌙';
+                document.getElementById('themeToggleMobile').innerText = '🌙';
+            } else {
+                html.classList.add('dark');
+                body.classList.add('dark');
+                localStorage.setItem('381_theme', 'dark');
+                document.getElementById('themeToggleDesktop').innerText = '☀️';
+                document.getElementById('themeToggleMobile').innerText = '☀️';
+            }
+        }
+
+        // Smart Mode (Focus Mode) Toggle
+        function toggleSmartMode() {
+            const body = document.body;
+            body.classList.toggle('smart-mode');
+            if(body.classList.contains('smart-mode')){
+                // Switch image to page 4 generally for reading the selected Dua
+                const activeWazifa = itemsData[currentCategory][activeItemIdx];
+                switchImagePage(activeWazifa.sourcePage);
+            }
+        }
+
+        // Calendar Visibility Toggle
+        function toggleCalendar() {
+            const grid = document.getElementById('safarCalendarGrid');
+            const btn = document.getElementById('calToggleBtn');
+            if (grid.classList.contains('hidden')) {
+                grid.classList.remove('hidden');
+                grid.classList.add('grid');
+                btn.innerText = 'کیلنڈر چھپائیں 🔼';
+            } else {
+                grid.classList.add('hidden');
+                grid.classList.remove('grid');
+                btn.innerText = 'کیلنڈر دکھائیں 🔽';
+            }
+        }
+
+        // Custom Confirmation Modal Logic
+        let confirmAction = null;
+        function showCustomConfirm(title, message, onConfirm) {
+            document.getElementById('confirmModalTitle').innerText = title;
+            document.getElementById('confirmModalMessage').innerText = message;
+            document.getElementById('confirmModal').classList.remove('hidden');
+            confirmAction = onConfirm;
+        }
+        document.getElementById('confirmModalNoBtn').onclick = () => {
+            document.getElementById('confirmModal').classList.add('hidden');
+            confirmAction = null;
+        };
+        document.getElementById('confirmModalYesBtn').onclick = () => {
+            if (confirmAction) confirmAction();
+            document.getElementById('confirmModal').classList.add('hidden');
+            confirmAction = null;
+        };
+    </script>
+
+    <script>
+        // Comprehensive Database representing all Duas and short tasbihs with correct default counts
+        const itemsData = {
+            duas: [
+                { id: 'dua78', name: 'دعا نمبر 78 (تاکیدی)', text: 'بِسْمِ اللہِ الرَّحْمٰنِ الرَّحِیْمِ۔۔۔ اَللّٰھُمَّ اِنِّیْ اَعُوْذُ بِنُوْرِ قُدْسِکَ۔۔۔', defaultTarget: 3, sourcePage: 4 },
+                { id: 'dua19', name: 'دعا نمبر 19 (تاکیدی)', text: 'اَللّٰھُمَّ اِنَّا نَعُوْذُبِکَ مِن جَھْدِ الْبَلَاءِ۔۔۔', defaultTarget: 3, sourcePage: 4 },
+                { id: 'dua121', name: 'دعا نمبر 121 (تاکیدی)', text: 'اَللّٰھُمَّ اِنِّیْ اَسْئَلُکَ مِنْ خَیْرِ کُلِّہٖ مَا سَأَلَکَ مِنْھُ۔۔۔', defaultTarget: 3, sourcePage: 4 },
+                { id: 'dua106', name: 'دعا نمبر 106 (تاکیدی)', text: 'بِسْمِ اللہِ الرَّحْمٰنِ الرَّحِیْمِ۔ اَقْسَمْتُ عَلَیْکَ بِبَسْطِ یَدَیْکَ۔۔۔', defaultTarget: 3, sourcePage: 4 }
+            ],
+            tasbihat: [
+                { id: 'istighfar', name: 'استغفر اللہ', text: 'اَسْتَغْفِرُ اللہَ', defaultTarget: 100, sourcePage: 4 },
+                { id: 'ayat_karima', name: 'آیت کریمہ', text: 'لَّآ اِلٰہَ اِلَّآ اَنْتَ سُبْحٰنَکَ اِنِّیْ کُنْتُ مِنَ الظّٰلِمِیْنَ', defaultTarget: 100, sourcePage: 4 },
+                { id: 'bismillah', name: 'بسم اللہ شریف', text: 'بِسْمِ اللہِ الرَّحْمٰنِ الرَّحِیْمِ', defaultTarget: 313, sourcePage: 4 },
+                { id: 'yalateef', name: 'یا لطیف', text: 'یَا لَطِیفُ', defaultTarget: 2000, sourcePage: 4 }
+            ]
+        };
+
+        let activeSafarDay = 1;
+        let maghribTime = "18:00"; 
+        let calendarDatabase = {}; 
+        let currentCategory = 'duas';
+        let activeItemIdx = 0;
+
+        function saveDatabase() {
+            localStorage.setItem('381_pro_db_v3', JSON.stringify(calendarDatabase));
+            localStorage.setItem('381_pro_day_v3', activeSafarDay);
+            localStorage.setItem('381_pro_maghrib_v3', maghribTime);
+        }
+
+        function initDatabase() {
+            // Load theme
+            const savedTheme = localStorage.getItem('381_theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.body.classList.add('dark');
+                document.getElementById('themeToggleDesktop').innerText = '☀️';
+                document.getElementById('themeToggleMobile').innerText = '☀️';
+            }
+
+            const savedMaghrib = localStorage.getItem('381_pro_maghrib_v3');
+            if (savedMaghrib) {
+                maghribTime = savedMaghrib;
+                document.getElementById('maghribTimeInput').value = maghribTime;
+            }
+
+            const savedDb = localStorage.getItem('381_pro_db_v3');
+            if (savedDb) {
+                calendarDatabase = JSON.parse(savedDb);
+                const savedDay = localStorage.getItem('381_pro_day_v3');
+                activeSafarDay = savedDay ? parseInt(savedDay) : 1;
+            } else {
+                for (let d = 1; d <= 30; d++) {
+                    calendarDatabase[`day_${d}`] = { counts: {}, targets: {} };
+                    itemsData.duas.forEach(item => {
+                        calendarDatabase[`day_${d}`].counts[item.id] = 0;
+                        calendarDatabase[`day_${d}`].targets[item.id] = item.defaultTarget;
+                    });
+                    itemsData.tasbihat.forEach(item => {
+                        calendarDatabase[`day_${d}`].counts[item.id] = 0;
+                        calendarDatabase[`day_${d}`].targets[item.id] = item.defaultTarget;
+                    });
+                }
+                saveDatabase();
+            }
+
+            checkIslamicDayFlip();
+            renderSafarCalendar();
+            renderWazifaList();
+            updateDisplay();
+        }
+
+        function checkIslamicDayFlip() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMin = now.getMinutes();
+            const parts = maghribTime.split(':');
+            const maghribHour = parseInt(parts[0]);
+            const maghribMin = parseInt(parts[1]);
+
+            let passedMaghrib = false;
+            if (currentHour > maghribHour || (currentHour === maghribHour && currentMin >= maghribMin)) {
+                passedMaghrib = true;
+            }
+
+            const label = document.getElementById('islamicDayLabel');
+            if (passedMaghrib) {
+                label.innerText = `مغرب کے بعد اگلا دن (دن ${activeSafarDay})`;
+                label.className = "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 px-2 py-1 rounded-lg border border-emerald-500/30 text-[10px] font-bold";
+            } else {
+                label.innerText = `مغرب سے قبل (دن ${activeSafarDay})`;
+                label.className = "bg-amber-500/10 text-amber-600 dark:text-amber-300 px-2 py-1 rounded-lg border border-amber-500/30 text-[10px] font-bold";
+            }
+        }
+
+        function updateMaghribTime() {
+            maghribTime = document.getElementById('maghribTimeInput').value;
+            saveDatabase();
+            checkIslamicDayFlip();
+        }
+
+        function renderSafarCalendar() {
+            const container = document.getElementById('safarCalendarGrid');
+            container.innerHTML = '';
+            for (let d = 1; d <= 30; d++) {
+                const dayKey = `day_${d}`;
+                const data = calendarDatabase[dayKey];
+                
+                let compulsoryCompleted = true;
+                let started = false;
+
+                itemsData.duas.forEach(item => {
+                    const c = data.counts[item.id] || 0;
+                    const t = data.targets[item.id] || item.defaultTarget;
+                    if (c < t) compulsoryCompleted = false;
+                    if (c > 0) started = true;
+                });
+
+                const isSelected = d === activeSafarDay;
+                let colorClass = "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300";
+                
+                if (compulsoryCompleted && started) {
+                    colorClass = "bg-emerald-600 text-white border-emerald-700";
+                } else if (started) {
+                    colorClass = "bg-amber-100 dark:bg-amber-900/50 text-amber-950 dark:text-amber-200 border-amber-400 dark:border-amber-700";
+                }
+
+                if (isSelected) colorClass += " ring-2 ring-offset-1 ring-emerald-600 dark:ring-emerald-400 font-black scale-105";
+
+                const btn = document.createElement('button');
+                btn.className = `p-1.5 rounded-lg border text-[10px] font-bold flex flex-col items-center justify-center cursor-pointer transition-all ${colorClass}`;
+                btn.innerHTML = `<span>صفر ${d}</span>`;
+                btn.onclick = () => {
+                    activeSafarDay = d;
+                    saveDatabase();
+                    renderSafarCalendar();
+                    renderWazifaList();
+                    updateDisplay();
+                    checkIslamicDayFlip();
+                    initAudioContext();
+                    playClickSound();
+                };
+                container.appendChild(btn);
+            }
+        }
+
+        function setCategory(category) {
+            currentCategory = category;
+            activeItemIdx = 0;
+            const activeClass = "py-1.5 text-[10px] font-extrabold rounded-lg transition-all bg-[#1b4d3e] text-white shadow cursor-pointer";
+            const inactiveClass = "py-1.5 text-[10px] font-extrabold rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer";
+            document.getElementById('catTab1').className = category === 'duas' ? activeClass : inactiveClass;
+            document.getElementById('catTab2').className = category === 'tasbihat' ? activeClass : inactiveClass;
+            renderWazifaList();
+            updateDisplay();
+        }
+
+        function renderWazifaList() {
+            const container = document.getElementById('itemsGrid');
+            container.innerHTML = '';
+            const list = itemsData[currentCategory];
+            const currentDayData = calendarDatabase[`day_${activeSafarDay}`];
+
+            list.forEach((item, index) => {
+                const btn = document.createElement('button');
+                const isSelected = index === activeItemIdx;
+                const countVal = currentDayData.counts[item.id] || 0;
+                const targetVal = currentDayData.targets[item.id] || item.defaultTarget;
+
+                btn.className = `py-1.5 px-1.5 text-[10px] font-bold rounded-xl border transition-all cursor-pointer ${
+                    isSelected ? 
+                    'bg-emerald-50 dark:bg-[#133327] border-emerald-600 dark:border-emerald-400 text-[#1b4d3e] dark:text-emerald-100 shadow-sm' : 
+                    'bg-white dark:bg-[#162921] border-slate-200 dark:border-[#1b4d3e] text-slate-600 dark:text-slate-400'
+                }`;
+                btn.innerHTML = `
+                    <div class="truncate">${item.name}</div>
+                    <div class="text-[9px] text-emerald-800 dark:text-emerald-400 font-bold mt-0.5 font-sans">${countVal} / ${targetVal}</div>
+                `;
+                btn.onclick = () => {
+                    activeItemIdx = index;
+                    renderWazifaList();
+                    updateDisplay();
+                    switchImagePage(item.sourcePage);
+                    initAudioContext();
+                    playClickSound();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function updateDisplay() {
+            const activeWazifa = itemsData[currentCategory][activeItemIdx];
+            const currentDayData = calendarDatabase[`day_${activeSafarDay}`];
+            const currentCount = currentDayData.counts[activeWazifa.id] || 0;
+            const activeTarget = currentDayData.targets[activeWazifa.id] || activeWazifa.defaultTarget;
+
+            document.getElementById('activeWazifaLabel').innerText = activeWazifa.name;
+            document.getElementById('activeTarget').innerText = activeTarget;
+            document.getElementById('wazifaArabic').innerText = activeWazifa.text;
+            document.getElementById('counterOutput').innerText = String(currentCount).padStart(3, '0');
+
+            const percent = Math.min((currentCount / activeTarget) * 100, 100);
+            document.getElementById('progressBar').style.width = `${percent}%`;
+
+            const badge = document.getElementById('completionBadge');
+            if (currentCount >= activeTarget && activeTarget > 0) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function editTarget() {
+            const activeWazifa = itemsData[currentCategory][activeItemIdx];
+            const currentDayData = calendarDatabase[`day_${activeSafarDay}`];
+            document.getElementById('customTargetInput').value = currentDayData.targets[activeWazifa.id] || activeWazifa.defaultTarget;
+            document.getElementById('targetModal').classList.remove('hidden');
+        }
+        function closeTargetModal() { document.getElementById('targetModal').classList.add('hidden'); }
+        
+        function saveCustomTarget() {
+            const activeWazifa = itemsData[currentCategory][activeItemIdx];
+            const val = parseInt(document.getElementById('customTargetInput').value);
+            if (val > 0) {
+                for (let d = 1; d <= 30; d++) {
+                    calendarDatabase[`day_${d}`].targets[activeWazifa.id] = val;
+                }
+                saveDatabase(); updateDisplay(); renderWazifaList(); renderSafarCalendar();
+                closeTargetModal(); initAudioContext(); playClickSound();
+            }
+        }
+
+        function performIncrement() {
+            initAudioContext();
+            const activeWazifa = itemsData[currentCategory][activeItemIdx];
+            const currentDayData = calendarDatabase[`day_${activeSafarDay}`];
+            const activeTarget = currentDayData.targets[activeWazifa.id];
+            
+            currentDayData.counts[activeWazifa.id] = (currentDayData.counts[activeWazifa.id] || 0) + 1;
+            const currentCount = currentDayData.counts[activeWazifa.id];
+            
+            saveDatabase(); updateDisplay(); renderWazifaList(); renderSafarCalendar();
+
+            if (currentCount === activeTarget) {
+                playSuccessChime();
+            } else {
+                playClickSound();
+            }
+            triggerVibration();
+        }
+
+        function adjustCounter(val) {
+            initAudioContext();
+            const activeWazifa = itemsData[currentCategory][activeItemIdx];
+            const currentDayData = calendarDatabase[`day_${activeSafarDay}`];
+            currentDayData.counts[activeWazifa.id] = Math.max(0, (currentDayData.counts[activeWazifa.id] || 0) + val);
+            saveDatabase(); updateDisplay(); renderWazifaList(); renderSafarCalendar(); playClickSound();
+        }
+
+        function resetCurrentWazifa() {
+            const activeWazifa = itemsData[currentCategory][activeItemIdx];
+            showCustomConfirm(
+                'تسبیح ری سیٹ کریں',
+                `کیا آپ واقعی ${activeWazifa.name} کی تسبیح صفر کرنا چاہتے ہیں؟`,
+                () => {
+                    calendarDatabase[`day_${activeSafarDay}`].counts[activeWazifa.id] = 0;
+                    saveDatabase(); updateDisplay(); renderWazifaList(); renderSafarCalendar(); playClickSound();
+                }
+            );
+        }
+
+        function confirmResetAll() {
+            showCustomConfirm(
+                'مکمل ڈیٹا ری سیٹ',
+                'کیا آپ 30 دنوں کے تمام ریکارڈز کو مکمل ری سیٹ کرنا چاہتے ہیں؟ اس عمل کو واپس نہیں لیا جا سکتا۔',
+                () => {
+                    localStorage.removeItem('381_pro_db_v3');
+                    localStorage.removeItem('381_pro_day_v3');
+                    activeSafarDay = 1; calendarDatabase = {};
+                    initDatabase(); playSuccessChime();
+                }
+            );
+        }
+
+        document.getElementById('tapBtn').addEventListener('click', (e) => { e.preventDefault(); performIncrement(); });
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); performIncrement(); } });
+        setInterval(checkIslamicDayFlip, 60000); // Check every minute
+        
+        window.onload = () => {
+            initDatabase();
+            switchImagePage(4); // Default to page 4 containing Duas
+        };
+    </script>
+</body>
+</html>
