@@ -42,6 +42,10 @@
             font-family: 'Noto Nastaliq Urdu', serif;
             line-height: 2.8;
         }
+        .footer-urdu {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            line-height: 1.6 !important; /* Fixed overlap issues */
+        }
         
         /* Custom smooth scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -77,7 +81,7 @@
             flex: none !important;
             border-radius: 0;
             border: none;
-            height: 62vh !important; /* 62% for reading cards to allow rest for controls */
+            height: 65vh !important; /* 65% for reading cards to allow rest for controls */
             margin: 0;
             border-bottom: 4px solid #c5a059;
         }
@@ -85,7 +89,7 @@
             flex: 1 !important;
             border-radius: 0;
             border: none;
-            height: 38vh !important; /* Increased space to prevent hidden buttons on 100% zoom */
+            height: 35vh !important; /* Increased space to prevent hidden buttons on 100% zoom */
             min-height: 260px !important; /* Critical safe limit on Chrome 100% Zoom */
             display: flex;
             flex-direction: column;
@@ -158,6 +162,67 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between text-slate-800 transition-colors duration-300">
 
+    <!-- Password Protection Gateway Screen Overlay -->
+    <div id="authOverlay" class="fixed inset-0 bg-emerald-950 text-white z-[500] flex flex-col justify-center items-center p-4 overflow-y-auto">
+        <div class="max-w-md w-full bg-[#11221c] rounded-3xl p-8 border-2 border-[#c5a059] shadow-2xl space-y-6 text-center">
+            
+            <div class="flex flex-col items-center gap-3">
+                <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-[#c5a059] to-[#ebd29c] flex items-center justify-center font-bold text-emerald-950 shadow-md">
+                    <span class="text-3xl font-sans">381</span>
+                </div>
+                <h2 class="text-2xl font-bold font-sans tracking-wide text-amber-400">381 تسبیح پرو</h2>
+                <p class="text-xs text-emerald-200 font-mono -mt-2">Nusrat Shaheen Inc</p>
+            </div>
+
+            <!-- Password Form -->
+            <div class="space-y-4 pt-4">
+                <label class="block text-xs font-bold text-emerald-200 text-right">براہِ کرم رسائی حاصل کرنے کے لیے پاس ورڈ درج کریں:</label>
+                <div class="flex flex-col gap-3">
+                    <input type="password" id="appPasswordInput" placeholder="پاس ورڈ درج کریں" class="w-full p-4 bg-emerald-900/50 border-2 border-emerald-700 rounded-xl text-center font-mono font-bold tracking-widest text-white focus:outline-none focus:border-[#c5a059] placeholder:text-emerald-700/80">
+                    <button onclick="verifyAppPassword()" class="w-full bg-[#c5a059] hover:bg-amber-500 text-emerald-950 font-bold py-3.5 rounded-xl shadow-lg transition-all text-xs cursor-pointer">
+                        سیکیورٹی چیک پاس کریں
+                    </button>
+                </div>
+                <p id="passwordError" class="text-red-400 text-[10px] hidden font-bold">❌ غلط پاس ورڈ! دوبارہ کوشش کریں۔</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Islamic Warning & Disclaimer Screen Overlay (Triggered AFTER password verification) -->
+    <div id="warningOverlay" class="fixed inset-0 bg-emerald-950/98 text-white z-[400] flex flex-col justify-center items-center p-4 overflow-y-auto hidden">
+        <div class="max-w-md w-full bg-[#11221c] rounded-3xl p-6 border-2 border-[#c5a059] shadow-2xl space-y-5 text-center">
+            
+            <div class="flex flex-col items-center gap-2">
+                <div class="w-12 h-12 rounded-full bg-red-600/20 text-red-400 flex items-center justify-center font-bold text-2xl border border-red-500/30">
+                    ⚠️
+                </div>
+                <h3 class="text-lg font-bold text-amber-500 font-sans tracking-wide">مہم دینی تنبیہ اور دستبرداری</h3>
+            </div>
+
+            <!-- Beautiful Urdu Disclaimer Card -->
+            <div class="bg-red-950/40 border border-red-500/40 rounded-2xl p-4 text-right space-y-4 shadow-inner">
+                <p class="text-[12px] text-slate-200 leading-relaxed font-sans">
+                    اس ایپ میں موجود کسی بھی قسم کے اسلامی پوائنٹ آف ویو، عربی عبارتوں، زبر، زیر، پیش یا املا کی کسی بھی غلطی کی صورت میں براہِ مہربانی ہمیں ہمارے آفیشل ای میل ایڈریس 
+                    <a href="mailto:info@idreesia.com" class="text-amber-400 underline font-bold">info@idreesia.com</a> 
+                    پر مطلع فرمائیں تاکہ ہم اسے فوری درست کر سکیں۔
+                </p>
+                <p class="text-[12px] text-amber-300 leading-relaxed font-sans font-semibold border-t border-red-500/20 pt-2.5">
+                    <strong>بہتر یہی ہے:</strong> آپ سلسلہ ادریسیہ کی طرف سے ملنے والے اصل کاغذی وظائف کو اپنے ہاتھ میں رکھ کر پڑھیں اور اس ایپ کو صرف تسبیح کاؤنٹر کے طور پر استعمال کریں تاکہ پڑھنے کے دوران کوئی غلطی نہ ہو۔
+                </p>
+                <p class="text-[11px] text-red-300 font-bold leading-normal border-t border-red-500/20 pt-2.5 font-sans bg-red-950/20 p-2 rounded-lg">
+                    ملاحظہ فرمائیں: اس ایپ کی پروف ریڈنگ ابھی تک مکمل نہیں ہوئی، لہذا وظائف پڑھتے وقت کسی بھی قسم کی غلطی کے ذمہ دار صارف خود ہوں گے، ڈویلپرز نہیں۔
+                </p>
+            </div>
+
+            <button onclick="acceptWarning()" class="w-full bg-gradient-to-r from-[#c5a059] to-amber-500 hover:from-amber-500 hover:to-amber-400 text-emerald-950 font-bold py-3 rounded-xl shadow-lg transition-all text-xs cursor-pointer">
+                میں متفق ہوں اور آگے بڑھیں
+            </button>
+
+        </div>
+    </div>
+
+    <!-- App Main Header -->
     <header class="bg-[#1b4d3e] dark:bg-[#0d2a21] text-white shadow-lg sticky top-0 z-50 border-b-4 border-[#c5a059]">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
@@ -215,6 +280,7 @@
         <span>❌ سمارٹ موڈ بند کریں</span>
     </button>
 
+    <!-- Main Grid Container -->
     <main class="max-w-7xl mx-auto w-full flex-grow p-4 grid grid-cols-1 lg:grid-cols-12 gap-6 transition-all duration-300">
         
         <!-- RIGHT COLUMN: Interactive Original Image Reader -->
@@ -258,7 +324,7 @@
         <!-- LEFT COLUMN: Advanced Digital Tasbih Counter -->
         <section class="lg:col-span-5 flex flex-col gap-4">
 
-            <!-- Collapsible 30 Days Safar Calendar -->
+            <!-- Collapsible 30 Days Safar Calendar (Default Hidden) -->
             <div id="calendarSection" class="bg-white dark:bg-darkCard rounded-2xl shadow-md border-2 border-emerald-100 dark:border-emerald-900/50 p-3 transition-colors">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xs font-black text-[#1b4d3e] dark:text-emerald-400 flex items-center gap-1.5">
@@ -402,9 +468,10 @@
         </div>
     </div>
 
-    <footer class="bg-white dark:bg-[#0d2a21] border-t border-emerald-100 dark:border-emerald-900/50 py-2 text-center text-[10px] text-slate-500 dark:text-slate-400 shadow-inner z-10 transition-colors">
-        <p class="font-extrabold text-slate-800 dark:text-slate-200 urdu-text text-sm">381 تسبیح پرو - ڈیجیٹل ایڈیشن</p>
-        <p class="text-slate-400 dark:text-slate-500 -mt-2">Made with ❤️ by Nusrat Shaheen Inc</p>
+    <!-- Web App Footer (Strictly fixed line-height overlap issues) -->
+    <footer class="bg-white dark:bg-[#0d2a21] border-t border-emerald-100 dark:border-emerald-900/50 py-3 text-center text-[10px] text-slate-500 dark:text-slate-400 shadow-inner z-10 transition-colors flex flex-col items-center justify-center gap-1">
+        <p class="font-extrabold text-[#1b4d3e] dark:text-emerald-400 footer-urdu text-sm">381 تسبیح پرو - ڈیجیٹل ایڈیشن</p>
+        <p class="text-slate-400 dark:text-slate-500 text-[10px] font-sans font-semibold">Made with ❤️ by Nusrat Shaheen Inc</p>
     </footer>
 
     <script>
@@ -423,6 +490,37 @@
                 audioCtx.resume();
             }
         }
+
+        // Password verification logic
+        function verifyAppPassword() {
+            const input = document.getElementById('appPasswordInput').value;
+            const errorLabel = document.getElementById('passwordError');
+            if (input === 'qiqiqi') {
+                document.getElementById('authOverlay').classList.add('hidden');
+                document.getElementById('warningOverlay').classList.remove('hidden');
+            } else {
+                errorLabel.classList.remove('hidden');
+                errorLabel.className = 'text-red-400 text-xs font-bold mt-1';
+            }
+        }
+
+        // Disclaimer warning acceptance logic
+        function acceptWarning() {
+            document.getElementById('warningOverlay').classList.add('hidden');
+            sessionStorage.setItem('381_verified_auth', 'true');
+            initAudioContext();
+            playSuccessChime();
+        }
+
+        // Auto load authentication state
+        function checkAuthPersistence() {
+            const isAuthed = sessionStorage.getItem('381_verified_auth');
+            if (isAuthed === 'true') {
+                document.getElementById('authOverlay').classList.add('hidden');
+                document.getElementById('warningOverlay').classList.add('hidden');
+            }
+        }
+        checkAuthPersistence();
 
         // Global unlocker attached to the body to catch the very first interaction
         document.body.addEventListener('touchstart', initAudioContext, {once:true});
