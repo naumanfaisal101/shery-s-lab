@@ -53,9 +53,10 @@
         ::-webkit-scrollbar-thumb { background: #1b4d3e; border-radius: 4px; }
         .dark ::-webkit-scrollbar-thumb { background: #c5a059; }
         
+        /* Fixed zoom clipping by changing transform origin to top center */
         .zoom-img-container {
             transition: transform 0.2s ease-out;
-            transform-origin: center center;
+            transform-origin: top center;
         }
 
         /* --- SMART MODE CSS (Adaptive Screen Split - 75% / 25%) --- */
@@ -314,7 +315,8 @@
                 <div class="text-[9px] text-slate-500 dark:text-slate-400 font-sans">تصویر گھسیٹیں (Drag / Pinch)</div>
             </div>
 
-            <div id="imageStage" class="flex-grow overflow-auto bg-slate-200 dark:bg-[#0d1f19] relative flex items-center justify-center cursor-grab active:cursor-grabbing p-2">
+            <!-- FIXED align-items from center to items-start to prevent top-cropping under Chrome 100% Zoom -->
+            <div id="imageStage" class="flex-grow overflow-auto bg-slate-200 dark:bg-[#0d1f19] relative flex items-start justify-center cursor-grab active:cursor-grabbing p-2">
                 <div id="zoomWrapper" class="zoom-img-container shadow-xl max-w-full">
                     <!-- Default loaded to Page 4 containing exact Arabic texts of Duas -->
                     <img id="readerImg" src="Mah-e-Safar Ki Taleem Shareef-4.jpg" alt="تعلیمی کارڈ" class="rounded border border-slate-300 dark:border-emerald-900/50 shadow max-h-[100%] mx-auto" draggable="false">
@@ -693,7 +695,9 @@
         function resetZoom() {
             zoomLevel = 1.0;
             zoomWrapper.style.transform = 'scale(1)';
-            imageStage.scrollLeft = 0; imageStage.scrollTop = 0;
+            // Ensure container scrolls back to top 0,0 to prevent layout cropping
+            imageStage.scrollLeft = 0; 
+            imageStage.scrollTop = 0;
         }
 
         const pageDescriptions = {
