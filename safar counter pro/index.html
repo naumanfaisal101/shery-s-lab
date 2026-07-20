@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>381 تسبیح پرو - Nusrat Shaheen Inc</title>
+    <title>Safar Counter Pro - Nusrat Shaheen Inc</title>
     
     <!-- Tailwind CSS with Dark Mode config -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -58,7 +58,7 @@
             transform-origin: center center;
         }
 
-        /* --- SMART MODE CSS (Adaptive Screen Split - 65% / 35% with Min-Height Fix) --- */
+        /* --- SMART MODE CSS (Adaptive Screen Split - 75% / 25%) --- */
         body.smart-mode {
             overflow: hidden; /* Prevent scrolling the body */
         }
@@ -81,21 +81,24 @@
             flex: none !important;
             border-radius: 0;
             border: none;
-            height: 65vh !important; /* 65% for reading cards to allow rest for controls */
+            height: 75vh !important; /* Exactly 75% of screen for original wazaif images */
             margin: 0;
-            border-bottom: 4px solid #c5a059;
+            border-bottom: 2px solid #c5a059;
         }
         body.smart-mode #counterSection {
-            flex: 1 !important;
+            flex: none !important;
             border-radius: 0;
             border: none;
-            height: 35vh !important; /* Increased space to prevent hidden buttons on 100% zoom */
-            min-height: 260px !important; /* Critical safe limit on Chrome 100% Zoom */
-            display: flex;
-            flex-direction: column;
+            height: 25vh !important; /* Exactly 25% of screen for counter controls */
+            min-height: 190px !important; /* Safety limit for 100% zoom */
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
             justify-content: space-between !important;
-            padding: 10px 16px !important;
+            padding: 8px 16px !important;
             overflow: hidden;
+            background-color: #11221c !important; /* Premium dark background for smart bar */
+            color: #ffffff !important;
         }
         
         /* Smart Horizontal layout adjustment inside the counter section */
@@ -108,31 +111,34 @@
             gap: 16px !important;
         }
         
-        /* Left Handed Class for Mirroring Layout */
+        /* Left Handed Class for Mirroring Layout in Smart mode */
         body.smart-mode .smart-mode-container.left-handed {
             flex-direction: row-reverse !important;
         }
 
         body.smart-mode .smart-left-col {
-            flex: 1 !important;
+            flex: 1.2 !important;
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
-            justify-content: space-between !important;
+            justify-content: center !important;
             height: 100% !important;
+            gap: 6px !important;
         }
         body.smart-mode .smart-right-col {
-            flex: 1.2 !important;
-            height: 100% !important;
+            flex: 1 !important;
+            height: 85% !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
         }
         body.smart-mode .smart-right-col #tapBtn {
-            height: 90% !important;
+            height: 100% !important;
             width: 100% !important;
             margin: 0 !important;
-            padding: 0 !important;
+            padding: 0 10px !important;
+            flex-direction: column !important;
+            gap: 4px;
         }
         
         /* Compact layout sizing for smart-mode widgets */
@@ -142,7 +148,7 @@
             border-width: 3px !important;
         }
         body.smart-mode #counterOutput {
-            font-size: 2.5rem !important;
+            font-size: 2rem !important;
         }
         body.smart-mode #wazifaArabicContainer,
         body.smart-mode #progressBarContainer {
@@ -162,15 +168,15 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between text-slate-800 transition-colors duration-300">
 
-    <!-- Password Protection Gateway Screen Overlay -->
+    <!-- Password Protection Gateway Screen Overlay (Forces login check every session) -->
     <div id="authOverlay" class="fixed inset-0 bg-emerald-950 text-white z-[500] flex flex-col justify-center items-center p-4 overflow-y-auto">
         <div class="max-w-md w-full bg-[#11221c] rounded-3xl p-8 border-2 border-[#c5a059] shadow-2xl space-y-6 text-center">
             
             <div class="flex flex-col items-center gap-3">
                 <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-[#c5a059] to-[#ebd29c] flex items-center justify-center font-bold text-emerald-950 shadow-md">
-                    <span class="text-3xl font-sans">381</span>
+                    <span class="text-3xl font-sans">📿</span>
                 </div>
-                <h2 class="text-2xl font-bold font-sans tracking-wide text-amber-400">381 تسبیح پرو</h2>
+                <h2 class="text-2xl font-bold font-sans tracking-wide text-amber-400">Safar Counter Pro</h2>
                 <p class="text-xs text-emerald-200 font-mono -mt-2">Nusrat Shaheen Inc</p>
             </div>
 
@@ -197,7 +203,7 @@
                 <div class="w-12 h-12 rounded-full bg-red-600/20 text-red-400 flex items-center justify-center font-bold text-2xl border border-red-500/30">
                     ⚠️
                 </div>
-                <h3 class="text-lg font-bold text-amber-500 font-sans tracking-wide">مہم دینی تنبیہ اور دستبرداری</h3>
+                <h3 class="text-lg font-bold text-amber-500 font-sans tracking-wide">اہم دینی تنبیہ اور دستبرداری</h3>
             </div>
 
             <!-- Beautiful Urdu Disclaimer Card -->
@@ -228,10 +234,10 @@
             <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
                 <div class="flex items-center gap-2">
                     <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#c5a059] to-[#ebd29c] flex items-center justify-center font-bold text-emerald-950 shadow-md">
-                        <span class="text-lg font-sans">381</span>
+                        <span class="text-lg font-sans">📿</span>
                     </div>
                     <div>
-                        <h1 class="text-lg font-black tracking-wide font-sans leading-tight">381 تسبیح پرو</h1>
+                        <h1 class="text-lg font-black tracking-wide font-sans leading-tight">Safar Counter Pro</h1>
                         <p class="text-[9px] text-emerald-200/80 font-mono">Nusrat Shaheen Inc</p>
                     </div>
                 </div>
@@ -283,7 +289,7 @@
     <!-- Main Grid Container -->
     <main class="max-w-7xl mx-auto w-full flex-grow p-4 grid grid-cols-1 lg:grid-cols-12 gap-6 transition-all duration-300">
         
-        <!-- RIGHT COLUMN: Interactive Original Image Reader -->
+        <!-- RIGHT COLUMN: Interactive Original Image Reader (Uses verbatim files uploaded by user) -->
         <section id="imageSection" class="lg:col-span-7 bg-white dark:bg-darkCard rounded-2xl shadow-md border-2 border-emerald-100 dark:border-emerald-900/50 overflow-hidden flex flex-col h-[420px] lg:h-[800px] transition-colors">
             
             <div class="bg-gradient-to-r from-[#143a2f] to-[#1b4d3e] dark:from-[#0a1a15] dark:to-[#0f2e25] p-2 text-white flex flex-col sm:flex-row justify-between items-center gap-2 border-b border-[#c5a059]/40">
@@ -305,11 +311,12 @@
                     <button onclick="adjustZoom(-0.15)" class="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900 text-[#1b4d3e] dark:text-emerald-200 font-bold text-sm hover:bg-emerald-200 transition flex items-center justify-center cursor-pointer">➖</button>
                     <button onclick="resetZoom()" class="px-2 py-0.5 text-[10px] bg-slate-200 dark:bg-slate-700 dark:text-slate-200 rounded-md hover:bg-slate-300 transition cursor-pointer">اصلی سائز</button>
                 </div>
-                <div class="text-[9px] text-slate-500 dark:text-slate-400">تصویر گھسیٹیں (Drag / Pinch)</div>
+                <div class="text-[9px] text-slate-500 dark:text-slate-400 font-sans">تصویر گھسیٹیں (Drag / Pinch)</div>
             </div>
 
             <div id="imageStage" class="flex-grow overflow-auto bg-slate-200 dark:bg-[#0d1f19] relative flex items-center justify-center cursor-grab active:cursor-grabbing p-2">
                 <div id="zoomWrapper" class="zoom-img-container shadow-xl max-w-full">
+                    <!-- Default loaded to Page 4 containing exact Arabic texts of Duas -->
                     <img id="readerImg" src="Mah-e-Safar Ki Taleem Shareef-4.jpg" alt="تعلیمی کارڈ" class="rounded border border-slate-300 dark:border-emerald-900/50 shadow max-h-[100%] mx-auto" draggable="false">
                 </div>
             </div>
@@ -324,7 +331,7 @@
         <!-- LEFT COLUMN: Advanced Digital Tasbih Counter -->
         <section class="lg:col-span-5 flex flex-col gap-4">
 
-            <!-- Collapsible 30 Days Safar Calendar (Default Hidden) -->
+            <!-- Collapsible 30 Days Safar Calendar (Default Hidden as per instructions) -->
             <div id="calendarSection" class="bg-white dark:bg-darkCard rounded-2xl shadow-md border-2 border-emerald-100 dark:border-emerald-900/50 p-3 transition-colors">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xs font-black text-[#1b4d3e] dark:text-emerald-400 flex items-center gap-1.5">
@@ -368,15 +375,22 @@
                 
                 <div id="smartModeContainer" class="smart-mode-container w-full h-full flex flex-col justify-between">
                     
-                    <!-- Smart Mode Split: Left/Top Column -->
+                    <!-- Smart Mode Split: Left/Top Column (Optimized to take 25% area safely) -->
                     <div class="smart-left-col w-full flex flex-col items-center justify-between relative h-full">
-                        <div class="flex justify-between items-center w-full z-10 my-1">
-                            <span id="activeWazifaLabel" class="bg-amber-100 dark:bg-amber-900/40 text-amber-950 dark:text-amber-200 font-black text-[11px] px-2.5 py-1 rounded-full border border-amber-300 dark:border-amber-700/50 shadow-sm truncate max-w-[150px]">
-                                لوڈ ہو رہا ہے...
-                            </span>
-                            <div class="flex items-center gap-1.5">
-                                <div class="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-700 flex items-center gap-1">
-                                    ہدف: <span id="activeTarget" class="text-emerald-800 dark:text-emerald-400 font-extrabold text-xs">0</span>
+                        
+                        <!-- Smart-only Active Wazifa Selector Dropdown & Label -->
+                        <div class="flex justify-between items-center w-full z-10 my-1 gap-2">
+                            <!-- Custom Smart Mode Dropdown to easily select wazifa on the fly -->
+                            <div class="flex items-center gap-1">
+                                <label for="smartWazifaSelect" class="hidden sm:inline text-[9px] font-bold text-amber-400">وظیفہ:</label>
+                                <select id="smartWazifaSelect" onchange="handleSmartWazifaChange(this.value)" class="bg-[#1b4d3e] text-white border border-[#c5a059] rounded-lg px-2 py-1 text-[10px] font-bold focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[160px]">
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                            
+                            <div class="flex items-center gap-1">
+                                <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-700 flex items-center gap-1">
+                                    ہدف: <span id="activeTarget" class="text-emerald-800 dark:text-emerald-400 font-extrabold text-[10px]">0</span>
                                 </div>
                                 <button onclick="editTarget()" class="text-[9px] bg-emerald-100 dark:bg-emerald-900/50 hover:bg-emerald-200 text-emerald-950 dark:text-emerald-200 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-700 transition cursor-pointer" title="ہدف تبدیل کریں">
                                     ✍️ ترمیم
@@ -384,24 +398,24 @@
                             </div>
                         </div>
 
-                        <!-- Circular Progress & Live Digit Screen -->
-                        <div class="my-auto relative flex items-center justify-center z-10 py-1">
+                        <!-- Circular Progress & Live Digit Screen (Highly optimized for compact height in smart mode) -->
+                        <div class="my-auto relative flex items-center justify-center z-10 py-0.5">
                             <div class="counter-circle-wrapper w-40 h-40 rounded-full border-4 border-emerald-50 dark:border-emerald-900/30 bg-slate-50 dark:bg-[#0a1511] shadow-inner flex flex-col justify-center items-center relative transition-colors">
                                 <div id="counterOutput" class="text-4xl font-black font-mono text-slate-800 dark:text-slate-100 tracking-wider">000</div>
-                                <div class="text-[8px] text-emerald-800 dark:text-emerald-500 font-black tracking-widest uppercase mt-0.5">تعداد (Count)</div>
+                                <div class="text-[8px] text-emerald-800 dark:text-emerald-500 font-black tracking-widest uppercase mt-0.5 sm:block hidden">تعداد (Count)</div>
                                 
                                 <div id="completionBadge" class="absolute -bottom-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold text-[9px] py-0.5 px-2 rounded-full shadow hidden animate-bounce border border-white">
-                                    ✓ ہدف مکمل
+                                    ✓ مکمل
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Safe external container for Sound and Vibration buttons so they NEVER hide digits -->
-                        <div class="flex justify-center gap-2 mt-auto mb-1 z-10 w-full">
-                            <button onclick="toggleAudioMute()" id="soundToggle" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-1 text-[11px] font-bold cursor-pointer transition">
+                        <!-- Safe external container for Sound and Vibration buttons so they NEVER hide digits (Fixed screenshot bug) -->
+                        <div class="flex justify-center gap-1.5 mt-auto mb-1 z-10 w-full sm:flex-row flex-col items-center">
+                            <button onclick="toggleAudioMute()" id="soundToggle" class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-1 text-[10px] font-bold cursor-pointer transition">
                                 <span>🔊 آواز: آن</span>
                             </button>
-                            <button onclick="toggleHaptic()" id="vibeToggle" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-1 text-[11px] font-bold cursor-pointer transition">
+                            <button onclick="toggleHaptic()" id="vibeToggle" class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-1 text-[10px] font-bold cursor-pointer transition">
                                 <span>📳 وائبریشن: آن</span>
                             </button>
                         </div>
@@ -423,7 +437,7 @@
                     <div class="smart-right-col relative z-10 flex-grow flex items-center justify-center h-full">
                         <button id="tapBtn" class="w-full py-4 md:py-6 rounded-2xl bg-gradient-to-b from-[#1b4d3e] to-[#113329] dark:from-[#13382c] dark:to-[#0a1f18] text-white font-extrabold text-lg shadow-lg hover:shadow-xl active:scale-95 border-2 border-white dark:border-[#1b4d3e] outline outline-2 outline-emerald-100 dark:outline-[#0d2a21] flex flex-col items-center justify-center transition-all cursor-pointer select-none">
                             <span class="tracking-widest text-[#c5a059]">پڑھیے (TAP)</span>
-                            <span class="text-[9px] text-emerald-200/80 mt-0.5 font-sans">اسکرین پر دبائیں</span>
+                            <span class="text-[9px] text-emerald-200/80 mt-0.5 font-sans sm:block hidden">اسکرین پر دبائیں</span>
                         </button>
                     </div>
 
@@ -470,7 +484,7 @@
 
     <!-- Web App Footer (Strictly fixed line-height overlap issues) -->
     <footer class="bg-white dark:bg-[#0d2a21] border-t border-emerald-100 dark:border-emerald-900/50 py-3 text-center text-[10px] text-slate-500 dark:text-slate-400 shadow-inner z-10 transition-colors flex flex-col items-center justify-center gap-1">
-        <p class="font-extrabold text-[#1b4d3e] dark:text-emerald-400 footer-urdu text-sm">381 تسبیح پرو - ڈیجیٹل ایڈیشن</p>
+        <p class="font-extrabold text-[#1b4d3e] dark:text-emerald-400 footer-urdu text-sm">Safar Counter Pro - ڈیجیٹل ایڈیشن</p>
         <p class="text-slate-400 dark:text-slate-500 text-[10px] font-sans font-semibold">Made with ❤️ by Nusrat Shaheen Inc</p>
     </footer>
 
@@ -491,7 +505,7 @@
             }
         }
 
-        // Password verification logic
+        // Password verification logic (Forced check every load)
         function verifyAppPassword() {
             const input = document.getElementById('appPasswordInput').value;
             const errorLabel = document.getElementById('passwordError');
@@ -507,20 +521,9 @@
         // Disclaimer warning acceptance logic
         function acceptWarning() {
             document.getElementById('warningOverlay').classList.add('hidden');
-            sessionStorage.setItem('381_verified_auth', 'true');
             initAudioContext();
             playSuccessChime();
         }
-
-        // Auto load authentication state
-        function checkAuthPersistence() {
-            const isAuthed = sessionStorage.getItem('381_verified_auth');
-            if (isAuthed === 'true') {
-                document.getElementById('authOverlay').classList.add('hidden');
-                document.getElementById('warningOverlay').classList.add('hidden');
-            }
-        }
-        checkAuthPersistence();
 
         // Global unlocker attached to the body to catch the very first interaction
         document.body.addEventListener('touchstart', initAudioContext, {once:true});
@@ -605,7 +608,6 @@
             const btn = document.getElementById('wakeLockBtn');
             
             if (wakeLock !== null) {
-                // Release wake lock
                 try {
                     await wakeLock.release();
                     wakeLock = null;
@@ -625,7 +627,6 @@
                     statusLabel.className = 'text-emerald-400 font-extrabold';
                     btn.className = "bg-emerald-950 hover:bg-emerald-900 text-emerald-200 text-xs px-3 py-1.5 rounded-lg shadow transition-all border border-emerald-700 font-bold flex items-center gap-1 cursor-pointer";
                     
-                    // Auto re-acquire wake lock if tab is switched/visibility changed
                     document.addEventListener('visibilitychange', async () => {
                         if (wakeLock !== null && document.visibilityState === 'visible') {
                             wakeLock = await navigator.wakeLock.request('screen');
@@ -740,7 +741,6 @@
             const body = document.body;
             body.classList.toggle('smart-mode');
             if(body.classList.contains('smart-mode')){
-                // Switch image to page 4 generally for reading the selected Dua
                 const activeWazifa = itemsData[currentCategory][activeItemIdx];
                 switchImagePage(activeWazifa.sourcePage);
             }
@@ -781,7 +781,7 @@
     </script>
 
     <script>
-        // Comprehensive Database representing all Duas and short tasbihs with correct default counts
+        // Updated Database representing all Duas and short tasbihs with correct default counts
         const itemsData = {
             duas: [
                 { id: 'dua78', name: 'دعا نمبر 78 (تاکیدی)', text: 'بِسْمِ اللہِ الرَّحْمٰنِ الرَّحِیْمِ۔۔۔ اَللّٰھُمَّ اِنِّیْ اَعُوْذُ بِنُوْرِ قُدْسِکَ۔۔۔', defaultTarget: 3, sourcePage: 4 },
@@ -810,7 +810,6 @@
         }
 
         function initDatabase() {
-            // Load theme
             const savedTheme = localStorage.getItem('381_theme');
             if (savedTheme === 'dark') {
                 document.documentElement.classList.add('dark');
@@ -848,6 +847,7 @@
             checkIslamicDayFlip();
             renderSafarCalendar();
             renderWazifaList();
+            populateSmartWazifaSelector();
             updateDisplay();
         }
 
@@ -969,16 +969,66 @@
             });
         }
 
+        // Dynamically populate the select option in Smart Mode with both categories
+        function populateSmartWazifaSelector() {
+            const selectEl = document.getElementById('smartWazifaSelect');
+            selectEl.innerHTML = '';
+
+            // Group 1: Compulsory Duas
+            const g1 = document.createElement('optgroup');
+            g1.label = "لازمی دعائیں";
+            itemsData.duas.forEach((item, index) => {
+                const opt = document.createElement('option');
+                opt.value = `duas_${index}`;
+                opt.innerText = item.name;
+                g1.appendChild(opt);
+            });
+            selectEl.appendChild(g1);
+
+            // Group 2: Optional Tasbihat
+            const g2 = document.createElement('optgroup');
+            g2.label = "اختیاری تسبیحات";
+            itemsData.tasbihat.forEach((item, index) => {
+                const opt = document.createElement('option');
+                opt.value = `tasbihat_${index}`;
+                opt.innerText = item.name;
+                g2.appendChild(opt);
+            });
+            selectEl.appendChild(g2);
+        }
+
+        // Handle smart select changes directly
+        function handleSmartWazifaChange(val) {
+            const parts = val.split('_');
+            currentCategory = parts[0];
+            activeItemIdx = parseInt(parts[1]);
+
+            // Sync visual states
+            const activeClass = "py-1.5 text-[10px] font-extrabold rounded-lg transition-all bg-[#1b4d3e] text-white shadow cursor-pointer";
+            const inactiveClass = "py-1.5 text-[10px] font-extrabold rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer";
+            document.getElementById('catTab1').className = currentCategory === 'duas' ? activeClass : inactiveClass;
+            document.getElementById('catTab2').className = currentCategory === 'tasbihat' ? activeClass : inactiveClass;
+
+            const activeWazifa = itemsData[currentCategory][activeItemIdx];
+            switchImagePage(activeWazifa.sourcePage);
+            renderWazifaList();
+            updateDisplay();
+            initAudioContext();
+            playClickSound();
+        }
+
         function updateDisplay() {
             const activeWazifa = itemsData[currentCategory][activeItemIdx];
             const currentDayData = calendarDatabase[`day_${activeSafarDay}`];
             const currentCount = currentDayData.counts[activeWazifa.id] || 0;
             const activeTarget = currentDayData.targets[activeWazifa.id] || activeWazifa.defaultTarget;
 
-            document.getElementById('activeWazifaLabel').innerText = activeWazifa.name;
             document.getElementById('activeTarget').innerText = activeTarget;
             document.getElementById('wazifaArabic').innerText = activeWazifa.text;
             document.getElementById('counterOutput').innerText = String(currentCount).padStart(3, '0');
+
+            // Set the smart mode selector state synchronously
+            document.getElementById('smartWazifaSelect').value = `${currentCategory}_${activeItemIdx}`;
 
             const percent = Math.min((currentCount / activeTarget) * 100, 100);
             document.getElementById('progressBar').style.width = `${percent}%`;
