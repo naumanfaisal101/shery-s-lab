@@ -53,10 +53,11 @@
         ::-webkit-scrollbar-thumb { background: #1b4d3e; border-radius: 4px; }
         .dark ::-webkit-scrollbar-thumb { background: #c5a059; }
         
-        /* Fixed zoom clipping by changing transform origin to top center */
+        /* Smooth transform container for Image Reader */
         .zoom-img-container {
-            transition: transform 0.2s ease-out;
-            transform-origin: top center;
+            transition: transform 0.05s ease-out;
+            transform-origin: center center;
+            will-change: transform;
         }
 
         /* --- SMART MODE CSS (Mobile Adaptive Dynamic Screen Split) --- */
@@ -321,11 +322,11 @@
                 <div class="text-[9px] text-slate-500 dark:text-slate-400 font-sans">تصویر گھسیٹیں (Drag / Pinch)</div>
             </div>
 
-            <!-- FIXED align-items from center to items-start to prevent top-cropping under Chrome 100% Zoom -->
-            <div id="imageStage" class="flex-grow overflow-auto bg-slate-200 dark:bg-[#0d1f19] relative flex items-start justify-center cursor-grab active:cursor-grabbing p-2">
-                <div id="zoomWrapper" class="zoom-img-container shadow-xl max-w-full">
+            <!-- Image Stage with 2D pan/pinch handling -->
+            <div id="imageStage" class="flex-grow overflow-hidden bg-slate-200 dark:bg-[#0d1f19] relative flex items-center justify-center cursor-grab active:cursor-grabbing p-2 select-none touch-none">
+                <div id="zoomWrapper" class="zoom-img-container shadow-xl max-w-full flex items-center justify-center">
                     <!-- Default loaded to Page 4 containing exact Arabic texts of Duas -->
-                    <img id="readerImg" src="Mah-e-Safar Ki Taleem Shareef-4.jpg" alt="تعلیمی کارڈ" class="rounded border border-slate-300 dark:border-emerald-900/50 shadow max-h-[100%] mx-auto" draggable="false">
+                    <img id="readerImg" src="Mah-e-Safar Ki Taleem Shareef-4.jpg" alt="تعلیمی کارڈ" class="rounded border border-slate-300 dark:border-emerald-900/50 shadow max-h-[100%] max-w-[100%] mx-auto object-contain" draggable="false">
                 </div>
             </div>
             
@@ -383,7 +384,7 @@
                 
                 <div id="smartModeContainer" class="smart-mode-container w-full h-full flex flex-col justify-between">
                     
-                    <!-- Smart Mode Split: Left Column (Optimized to take smart area safely without mobile cutoff) -->
+                    <!-- Smart Mode Split: Left Column -->
                     <div class="smart-left-col w-full flex flex-col items-center justify-between relative h-full">
                         
                         <!-- Smart-only Active Wazifa Selector Dropdown & Label -->
@@ -420,7 +421,7 @@
                             </div>
                         </div>
 
-                        <!-- Safe external container for Sound and Vibration buttons so they NEVER hide digits on Mobile -->
+                        <!-- External container for Sound and Vibration buttons -->
                         <div class="flex justify-center gap-1 z-10 w-full sm:flex-row flex-row items-center">
                             <button onclick="toggleAudioMute()" id="soundToggle" class="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-1 text-[9px] font-bold cursor-pointer transition">
                                 <span>🔊 آواز: آن</span>
@@ -431,14 +432,14 @@
                         </div>
                     </div>
 
-                    <!-- Arabic wazifa line (Auto hidden in smart mode container) -->
+                    <!-- Arabic wazifa line -->
                     <div id="wazifaArabicContainer" class="my-1 z-10 hidden md:block">
                         <p id="wazifaArabic" class="text-sm font-bold text-emerald-950 dark:text-emerald-100 tracking-wide leading-relaxed min-h-[30px] flex items-center justify-center px-1 font-sans">
                             -
                         </p>
                     </div>
 
-                    <!-- Progress bar (Auto hidden in smart mode container) -->
+                    <!-- Progress bar -->
                     <div id="progressBarContainer" class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mb-3 overflow-hidden border border-slate-200 dark:border-slate-700 shadow-inner z-10">
                         <div id="progressBar" class="bg-gradient-to-r from-[#c5a059] to-[#1b4d3e] h-full rounded-full transition-all duration-300" style="width: 0%"></div>
                     </div>
@@ -492,19 +493,34 @@
         </div>
     </div>
 
-    <!-- Web App Footer (Strictly fixed line-height overlap issues) -->
+    <!-- Web App Footer -->
     <footer class="bg-white dark:bg-[#0d2a21] border-t border-emerald-100 dark:border-emerald-900/50 py-3 text-center text-[10px] text-slate-500 dark:text-slate-400 shadow-inner z-10 transition-colors flex flex-col items-center justify-center gap-1">
         <p class="font-extrabold text-[#1b4d3e] dark:text-emerald-400 footer-urdu text-sm">Safar Counter Pro - ڈیجیٹل ایڈیشن</p>
         <p class="text-slate-400 dark:text-slate-500 text-[10px] font-sans font-semibold">Made with ❤️ by Nusrat Shaheen Inc</p>
     </footer>
 
     <script>
-        // Audio Engine (Ensures unlock on first tap)
+        // --- AUTHENTICATION & DISCLAIMER FLOW ---
+        function verifyAppPassword() {
+            const input = document.getElementById('appPasswordInput').value;
+            const err = document.getElementById('passwordError');
+            if (input === 'qiqiqi') {
+                err.classList.add('hidden');
+                document.getElementById('authOverlay').classList.add('hidden');
+                document.getElementById('warningOverlay').classList.remove('hidden');
+            } else {
+                err.classList.remove('hidden');
+            }
+        }
+
+        function acceptWarning() {
+            document.getElementById('warningOverlay').classList.add('hidden');
+        }
+
+        // --- AUDIO SYNTHESIZER ENGINE ---
         let audioCtx = null;
-        let isMuted = false;
+        let isAudioMuted = false;
         let isHapticEnabled = true;
-        let isLeftHanded = false;
-        let wakeLock = null;
 
         function initAudioContext() {
             if (!audioCtx) {
@@ -515,197 +531,237 @@
             }
         }
 
-        // Password verification logic (Forced check every load)
-        function verifyAppPassword() {
-            const input = document.getElementById('appPasswordInput').value;
-            const errorLabel = document.getElementById('passwordError');
-            if (input === 'qiqiqi') {
-                document.getElementById('authOverlay').classList.add('hidden');
-                document.getElementById('warningOverlay').classList.remove('hidden');
-            } else {
-                errorLabel.classList.remove('hidden');
-                errorLabel.className = 'text-red-400 text-xs font-bold mt-1';
-            }
-        }
-
-        // Disclaimer warning acceptance logic
-        function acceptWarning() {
-            document.getElementById('warningOverlay').classList.add('hidden');
-            initAudioContext();
-            playSuccessChime();
-        }
-
-        // Global unlocker attached to the body to catch the very first interaction
-        document.body.addEventListener('touchstart', initAudioContext, {once:true});
-        document.body.addEventListener('click', initAudioContext, {once:true});
-
         function playClickSound() {
-            if (isMuted) return;
-            initAudioContext();
-            if (!audioCtx) return;
+            if (isAudioMuted) return;
             try {
+                initAudioContext();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.04);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(850, audioCtx.currentTime); // Soft High beep
-                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.5, audioCtx.currentTime); 
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.1);
+                osc.stop(audioCtx.currentTime + 0.04);
             } catch(e) {}
         }
 
         function playSuccessChime() {
-            if (isMuted) return;
-            initAudioContext();
-            if (!audioCtx) return;
+            if (isAudioMuted) return;
             try {
-                const now = audioCtx.currentTime;
-                const notes = [523.25, 659.25, 783.99, 1046.50]; // Beautiful C Major Ascending Chord
+                initAudioContext();
+                const notes = [523.25, 659.25, 783.99, 1046.50];
                 notes.forEach((freq, idx) => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.08);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.08 + 0.3);
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, now + idx * 0.1);
-                    gain.gain.setValueAtTime(0, now + idx * 0.1);
-                    gain.gain.linearRampToValueAtTime(0.3, now + idx * 0.1 + 0.02);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.5);
-                    osc.start(now + idx * 0.1);
-                    osc.stop(now + idx * 0.1 + 0.6);
+                    osc.start(audioCtx.currentTime + idx * 0.08);
+                    osc.stop(audioCtx.currentTime + idx * 0.08 + 0.3);
                 });
             } catch(e) {}
         }
 
         function triggerVibration() {
             if (isHapticEnabled && navigator.vibrate) {
-                navigator.vibrate(40);
+                navigator.vibrate(30);
             }
         }
 
         function toggleAudioMute() {
-            isMuted = !isMuted;
-            document.getElementById('soundToggle').innerHTML = isMuted ? '<span>🔇 آواز: بند</span>' : '<span>🔊 آواز: آن</span>';
-            if (!isMuted) { playClickSound(); }
+            isAudioMuted = !isAudioMuted;
+            document.getElementById('soundToggle').innerHTML = isAudioMuted ? '<span>🔇 آواز: بند</span>' : '<span>🔊 آواز: آن</span>';
+            if (!isAudioMuted) playClickSound();
         }
 
         function toggleHaptic() {
             isHapticEnabled = !isHapticEnabled;
             document.getElementById('vibeToggle').innerHTML = isHapticEnabled ? '<span>📳 وائبریشن: آن</span>' : '<span>📴 وائبریشن: بند</span>';
+            if (isHapticEnabled) triggerVibration();
         }
 
-        // Mirror layout for right/left handed users
+        // --- WAKE LOCK API ---
+        let wakeLock = null;
+        async function toggleWakeLock() {
+            const btn = document.getElementById('wakeLockBtn');
+            const status = document.getElementById('wakeLockStatus');
+            try {
+                if (!wakeLock) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    status.innerText = "آن";
+                    status.className = "text-emerald-400 font-extrabold";
+                    btn.classList.add('border-emerald-500');
+                } else {
+                    await wakeLock.release();
+                    wakeLock = null;
+                    status.innerText = "بند";
+                    status.className = "text-red-400 font-extrabold";
+                    btn.classList.remove('border-emerald-500');
+                }
+            } catch (err) {
+                status.innerText = "غير فعال";
+            }
+        }
+
+        // --- HANDEDNESS TOGGLE ---
+        let isLeftHanded = false;
         function toggleHandedness() {
             isLeftHanded = !isLeftHanded;
             const container = document.getElementById('smartModeContainer');
             const btn = document.getElementById('handednessBtn');
             if (isLeftHanded) {
                 container.classList.add('left-handed');
-                btn.innerText = '🔁 بائیں ہاتھ کی ترتیب';
+                btn.innerText = "🔁 بائیں ہاتھ کی ترتیب";
             } else {
                 container.classList.remove('left-handed');
-                btn.innerText = '🔁 دائیں ہاتھ کی ترتیب';
+                btn.innerText = "🔁 دائیں ہاتھ کی ترتیب";
             }
         }
 
-        // Screen Wake Lock API to prevent mobile screen sleep during Dhikr
-        async function toggleWakeLock() {
-            const statusLabel = document.getElementById('wakeLockStatus');
-            const btn = document.getElementById('wakeLockBtn');
-            
-            if (wakeLock !== null) {
-                try {
-                    await wakeLock.release();
-                    wakeLock = null;
-                    statusLabel.innerText = 'بند';
-                    statusLabel.className = 'text-red-400 font-extrabold';
-                    btn.className = "bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs px-3 py-1.5 rounded-lg shadow transition-all border border-slate-700 font-bold flex items-center gap-1 cursor-pointer";
-                } catch (err) {
-                    console.error(err);
-                }
-                return;
-            }
+        // --- IMAGE PAN & PINCH ENGINE ---
+        let currentScale = 1.0;
+        let currentX = 0;
+        let currentY = 0;
+        let isPanning = false;
+        let startTouchX = 0;
+        let startTouchY = 0;
+        let initialPinchDist = 0;
+        let initialScaleOnPinch = 1.0;
 
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    statusLabel.innerText = 'فعال';
-                    statusLabel.className = 'text-emerald-400 font-extrabold';
-                    btn.className = "bg-emerald-950 hover:bg-emerald-900 text-emerald-200 text-xs px-3 py-1.5 rounded-lg shadow transition-all border border-emerald-700 font-bold flex items-center gap-1 cursor-pointer";
-                    
-                    document.addEventListener('visibilitychange', async () => {
-                        if (wakeLock !== null && document.visibilityState === 'visible') {
-                            wakeLock = await navigator.wakeLock.request('screen');
-                        }
-                    });
-                } else {
-                    alert("آپ کا براؤزر اسکرین آن رکھنے کے اس فیچر کو سپورٹ نہیں کرتا۔");
-                }
-            } catch (err) {
-                console.error(`${err.name}, ${err.message}`);
-                statusLabel.innerText = 'غیر فعال';
-                statusLabel.className = 'text-amber-400 font-extrabold';
-            }
-        }
-    </script>
-
-    <script>
-        // Image Zoom & Pan
-        let zoomLevel = 1.0;
         const zoomWrapper = document.getElementById('zoomWrapper');
         const imageStage = document.getElementById('imageStage');
-        let isDragging = false, startX, startY, scrollLeft, scrollTop;
+        const readerImg = document.getElementById('readerImg');
 
-        function attachDragEvents() {
-            imageStage.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                startX = e.pageX - imageStage.offsetLeft;
-                startY = e.pageY - imageStage.offsetTop;
-                scrollLeft = imageStage.scrollLeft;
-                scrollTop = imageStage.scrollTop;
-            });
-            imageStage.addEventListener('mouseleave', () => isDragging = false);
-            imageStage.addEventListener('mouseup', () => isDragging = false);
-            imageStage.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                e.preventDefault();
-                const walkX = (e.pageX - imageStage.offsetLeft - startX) * 1.5; 
-                const walkY = (e.pageY - imageStage.offsetTop - startY) * 1.5;
-                imageStage.scrollLeft = scrollLeft - walkX;
-                imageStage.scrollTop = scrollTop - walkY;
-            });
-            imageStage.addEventListener('touchstart', (e) => {
-                isDragging = true;
-                startX = e.touches[0].pageX - imageStage.offsetLeft;
-                startY = e.touches[0].pageY - imageStage.offsetTop;
-                scrollLeft = imageStage.scrollLeft;
-                scrollTop = imageStage.scrollTop;
-            });
-            imageStage.addEventListener('touchend', () => isDragging = false);
-            imageStage.addEventListener('touchmove', (e) => {
-                if (!isDragging) return;
-                const walkX = (e.touches[0].pageX - imageStage.offsetLeft - startX) * 1.5;
-                const walkY = (e.touches[0].pageY - imageStage.offsetTop - startY) * 1.5;
-                imageStage.scrollLeft = scrollLeft - walkX;
-                imageStage.scrollTop = scrollTop - walkY;
-            });
+        function updateTransform(smooth = false) {
+            if (!zoomWrapper) return;
+            if (smooth) {
+                zoomWrapper.style.transition = 'transform 0.25s cubic-bezier(0.1, 0.57, 0.1, 1)';
+            } else {
+                zoomWrapper.style.transition = 'none';
+            }
+            clampPan();
+            zoomWrapper.style.transform = `translate3d(${currentX}px, ${currentY}px, 0px) scale(${currentScale})`;
         }
-        attachDragEvents();
+
+        function clampPan() {
+            if (!imageStage || !readerImg) return;
+            const stageRect = imageStage.getBoundingClientRect();
+            const imgWidth = readerImg.offsetWidth * currentScale;
+            const imgHeight = readerImg.offsetHeight * currentScale;
+
+            if (imgWidth <= stageRect.width) {
+                currentX = 0;
+            } else {
+                const maxX = (imgWidth - stageRect.width) / 2;
+                currentX = Math.max(-maxX, Math.min(maxX, currentX));
+            }
+
+            if (imgHeight <= stageRect.height) {
+                currentY = 0;
+            } else {
+                const maxY = (imgHeight - stageRect.height) / 2;
+                currentY = Math.max(-maxY, Math.min(maxY, currentY));
+            }
+        }
 
         function adjustZoom(amount) {
-            zoomLevel = Math.max(0.5, Math.min(4.0, zoomLevel + amount));
-            zoomWrapper.style.transform = `scale(${zoomLevel})`;
+            const oldScale = currentScale;
+            currentScale = Math.max(1.0, Math.min(5.0, currentScale + amount));
+            if (currentScale === 1.0) {
+                currentX = 0;
+                currentY = 0;
+            } else if (oldScale === 1.0 && currentScale > 1.0) {
+                const stageRect = imageStage.getBoundingClientRect();
+                const imgHeight = readerImg.offsetHeight * currentScale;
+                if (imgHeight > stageRect.height) {
+                    currentY = (imgHeight - stageRect.height) / 2;
+                }
+            }
+            updateTransform(true);
         }
+
         function resetZoom() {
-            zoomLevel = 1.0;
-            zoomWrapper.style.transform = 'scale(1)';
-            imageStage.scrollLeft = 0; 
-            imageStage.scrollTop = 0;
+            currentScale = 1.0;
+            currentX = 0;
+            currentY = 0;
+            updateTransform(true);
         }
+
+        function attachDragAndPinchEvents() {
+            if (!imageStage) return;
+
+            imageStage.addEventListener('mousedown', (e) => {
+                if (currentScale <= 1.0) return;
+                isPanning = true;
+                startTouchX = e.clientX - currentX;
+                startTouchY = e.clientY - currentY;
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isPanning) return;
+                e.preventDefault();
+                currentX = e.clientX - startTouchX;
+                currentY = e.clientY - startTouchY;
+                updateTransform(false);
+            });
+
+            window.addEventListener('mouseup', () => { isPanning = false; updateTransform(true); });
+
+            imageStage.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = e.deltaY < 0 ? 0.25 : -0.25;
+                adjustZoom(delta);
+            }, { passive: false });
+
+            imageStage.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    if (currentScale > 1.0) {
+                        isPanning = true;
+                        startTouchX = e.touches[0].clientX - currentX;
+                        startTouchY = e.touches[0].clientY - currentY;
+                    }
+                } else if (e.touches.length === 2) {
+                    isPanning = false;
+                    initialPinchDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    initialScaleOnPinch = currentScale;
+                }
+            }, { passive: true });
+
+            imageStage.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1 && isPanning) {
+                    currentX = e.touches[0].clientX - startTouchX;
+                    currentY = e.touches[0].clientY - startTouchY;
+                    updateTransform(false);
+                } else if (e.touches.length === 2) {
+                    const currentDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    if (initialPinchDist > 0) {
+                        const newScale = initialScaleOnPinch * (currentDist / initialPinchDist);
+                        currentScale = Math.max(1.0, Math.min(5.0, newScale));
+                        updateTransform(false);
+                    }
+                }
+            }, { passive: true });
+
+            imageStage.addEventListener('touchend', (e) => {
+                if (e.touches.length < 2) initialPinchDist = 0;
+                if (e.touches.length === 0) isPanning = false;
+                updateTransform(true);
+            });
+        }
+        attachDragAndPinchEvents();
 
         const pageDescriptions = {
             1: "صفحہ 1: ماہِ صفر کی اہمیت، حقیقتِ صدقہ اور بزرگوں کی احتیاطی تعلیمات۔",
@@ -728,7 +784,8 @@
             document.getElementById('pageDescription').innerText = pageDescriptions[pageNum];
         }
 
-        // Night Mode / Dark Mode Toggle
+        readerImg.onload = () => { resetZoom(); };
+
         function toggleDarkMode() {
             const html = document.documentElement;
             const body = document.body;
@@ -747,7 +804,6 @@
             }
         }
 
-        // Smart Mode (Focus Mode) Toggle
         function toggleSmartMode() {
             const body = document.body;
             body.classList.toggle('smart-mode');
@@ -757,7 +813,6 @@
             }
         }
 
-        // Calendar Visibility Toggle
         function toggleCalendar() {
             const grid = document.getElementById('safarCalendarGrid');
             const btn = document.getElementById('calToggleBtn');
@@ -772,7 +827,6 @@
             }
         }
 
-        // Custom Confirmation Modal Logic
         let confirmAction = null;
         function showCustomConfirm(title, message, onConfirm) {
             document.getElementById('confirmModalTitle').innerText = title;
@@ -792,7 +846,6 @@
     </script>
 
     <script>
-        // Database representing all Duas and short tasbihs with correct targets (Istighfar: 100, Ayat Karima: 100, Bismillah: 313, Ya Latif: 2000)
         const itemsData = {
             duas: [
                 { id: 'dua78', name: 'دعا نمبر 78 (تاکیدی)', text: 'بِسْمِ اللہِ الرَّحْمٰنِ الرَّحِیْمِ۔۔۔ اَللّٰھُمَّ اِنِّیْ اَعُوْذُ بِنُوْرِ قُدْسِکَ۔۔۔', defaultTarget: 3, sourcePage: 4 },
@@ -980,12 +1033,10 @@
             });
         }
 
-        // Dynamically populate the select option in Smart Mode with both categories
         function populateSmartWazifaSelector() {
             const selectEl = document.getElementById('smartWazifaSelect');
             selectEl.innerHTML = '';
 
-            // Group 1: Compulsory Duas
             const g1 = document.createElement('optgroup');
             g1.label = "لازمی دعائیں";
             itemsData.duas.forEach((item, index) => {
@@ -996,7 +1047,6 @@
             });
             selectEl.appendChild(g1);
 
-            // Group 2: Optional Tasbihat
             const g2 = document.createElement('optgroup');
             g2.label = "اختیاری تسبیحات";
             itemsData.tasbihat.forEach((item, index) => {
@@ -1008,13 +1058,11 @@
             selectEl.appendChild(g2);
         }
 
-        // Handle smart select changes directly
         function handleSmartWazifaChange(val) {
             const parts = val.split('_');
             currentCategory = parts[0];
             activeItemIdx = parseInt(parts[1]);
 
-            // Sync visual states
             const activeClass = "py-1.5 text-[10px] font-extrabold rounded-lg transition-all bg-[#1b4d3e] text-white shadow cursor-pointer";
             const inactiveClass = "py-1.5 text-[10px] font-extrabold rounded-lg transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer";
             document.getElementById('catTab1').className = currentCategory === 'duas' ? activeClass : inactiveClass;
@@ -1038,7 +1086,6 @@
             document.getElementById('wazifaArabic').innerText = activeWazifa.text;
             document.getElementById('counterOutput').innerText = String(currentCount).padStart(3, '0');
 
-            // Set the smart mode selector state synchronously
             document.getElementById('smartWazifaSelect').value = `${currentCategory}_${activeItemIdx}`;
 
             const percent = Math.min((currentCount / activeTarget) * 100, 100);
@@ -1126,11 +1173,11 @@
 
         document.getElementById('tapBtn').addEventListener('click', (e) => { e.preventDefault(); performIncrement(); });
         window.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); performIncrement(); } });
-        setInterval(checkIslamicDayFlip, 60000); // Check every minute
+        setInterval(checkIslamicDayFlip, 60000);
         
         window.onload = () => {
             initDatabase();
-            switchImagePage(4); // Default to page 4 containing Duas
+            switchImagePage(4);
         };
     </script>
 </body>
