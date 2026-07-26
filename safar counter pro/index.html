@@ -167,8 +167,8 @@
         body.smart-mode #exitSmartModeBtn {
             display: flex;
             position: fixed;
-            top: 10px;
-            left: 10px;
+            top: 6px;
+            left: 6px;
             z-index: 1000;
         }
     </style>
@@ -289,8 +289,8 @@
     </header>
 
     <!-- Global Exit Smart Mode Button -->
-    <button id="exitSmartModeBtn" onclick="toggleSmartMode()" class="bg-red-600 text-white px-4 py-2 rounded-xl font-bold shadow-2xl border-2 border-white items-center gap-2 hover:bg-red-700 transition cursor-pointer">
-        <span>❌ سمارٹ موڈ بند کریں</span>
+    <button id="exitSmartModeBtn" onclick="toggleSmartMode()" class="bg-red-600/90 hover:bg-red-700 text-white px-2 py-1 rounded-lg text-[10px] font-bold shadow-md border border-white/80 items-center gap-1 transition cursor-pointer backdrop-blur-sm">
+        <span>❌ خروج</span>
     </button>
 
     <!-- Main Grid Container -->
@@ -396,11 +396,14 @@
                             </div>
                             
                             <div class="flex items-center gap-1">
-                                <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-700 flex items-center gap-1">
+                                <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded-full border border-slate-100 dark:border-slate-700 flex items-center gap-0.5">
                                     ہدف: <span id="activeTarget" class="text-emerald-800 dark:text-emerald-400 font-extrabold text-[10px]">0</span>
                                 </div>
                                 <button onclick="editTarget()" class="text-[9px] bg-emerald-100 dark:bg-emerald-900/50 hover:bg-emerald-200 text-emerald-950 dark:text-emerald-200 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-700 transition cursor-pointer" title="ہدف تبدیل کریں">
                                     ✍️ ترمیم
+                                </button>
+                                <button onclick="adjustCounter(-1)" class="text-[9px] bg-red-100 dark:bg-red-900/40 hover:bg-red-200 text-red-800 dark:text-red-300 px-1.5 py-0.5 rounded border border-red-300 dark:border-red-700/60 transition cursor-pointer" title="نفی کریں (1-)">
+                                    ➖ نفی
                                 </button>
                             </div>
                         </div>
