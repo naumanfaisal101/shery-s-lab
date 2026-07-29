@@ -62,49 +62,78 @@
 
         /* --- SMART MODE CSS (Mobile Adaptive Dynamic Screen Split) --- */
         body.smart-mode {
-            overflow: hidden; /* Prevent scrolling the body */
+            overflow: hidden !important;
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100dvh !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
         }
         body.smart-mode header,
         body.smart-mode footer,
         body.smart-mode #calendarSection,
         body.smart-mode #wazifaSection,
-        body.smart-mode #fineTuneControls {
-            display: none !important;
+        body.smart-mode #fineTuneControls,
+        body.smart-mode #infoSection,
+        body.smart-mode #imageHeaderTitle,
+        body.smart-mode #imageSubHeader,
+        body.smart-mode #wazifaArabicContainer,
+        body.smart-mode #progressBarContainer {
+            display: none !important; /* Hide secondary headers, sub-bars, & footers to free vertical space */
         }
         body.smart-mode main {
             display: flex !important;
             flex-direction: column !important;
             padding: 0 !important;
             gap: 0 !important;
-            height: 100vh !important;
-            height: 100dvh !important; /* Dynamic Viewport for Mobile Chrome address bars */
+            position: absolute !important;
+            inset: 0 !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            height: 100dvh !important;
+            width: 100vw !important;
             max-width: 100% !important;
+            overflow: hidden !important;
         }
         body.smart-mode #imageSection {
-            flex: 1 1 auto !important;
+            flex: 1 1 0% !important;
             border-radius: 0;
             border: none;
-            height: 62vh !important; 
-            height: 62dvh !important; /* Responsive 62% for wazaif image reader */
+            height: 0 !important;
             min-height: 0 !important;
             margin: 0;
             border-bottom: 2px solid #c5a059;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+        }
+        body.smart-mode #imageStage {
+            flex: 1 1 0% !important;
+            min-height: 0 !important;
+            height: 100% !important;
+            overflow: hidden !important;
         }
         body.smart-mode #counterSection {
             flex: 0 0 auto !important;
             border-radius: 0;
             border: none;
-            height: 38vh !important; 
-            height: 38dvh !important; /* 38% height allocated to ensure ALL mobile controls fit */
-            min-height: 220px !important; 
+            height: 32% !important;
+            max-height: 32% !important;
+            min-height: 140px !important;
             display: flex !important;
             flex-direction: row !important;
             align-items: center !important;
             justify-content: space-between !important;
-            padding: 8px 12px !important;
-            overflow: hidden;
+            padding: 4px 8px calc(6px + env(safe-area-inset-bottom, 4px)) 8px !important;
+            overflow: hidden !important;
             background-color: #11221c !important; /* Dark background for smart bar */
             color: #ffffff !important;
+            box-sizing: border-box !important;
         }
         
         /* Smart Horizontal layout adjustment inside the counter section */
@@ -114,7 +143,7 @@
             justify-content: space-between !important;
             height: 100% !important;
             width: 100% !important;
-            gap: 12px !important;
+            gap: 6px !important;
         }
         
         /* Left Handed Class for Mirroring Layout in Smart mode */
@@ -129,7 +158,7 @@
             align-items: center !important;
             justify-content: space-between !important;
             height: 100% !important;
-            padding: 2px 0 !important;
+            padding: 1px 0 2px 0 !important;
         }
         body.smart-mode .smart-right-col {
             flex: 1 !important;
@@ -137,30 +166,26 @@
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            padding: 2px 0 !important;
+            padding: 1px 0 !important;
         }
         body.smart-mode .smart-right-col #tapBtn {
             height: 100% !important;
             width: 100% !important;
             margin: 0 !important;
-            padding: 0 8px !important;
+            padding: 0 4px !important;
             flex-direction: column !important;
-            gap: 2px;
-            border-radius: 1rem !important;
+            gap: 1px;
+            border-radius: 0.75rem !important;
         }
         
-        /* Compact layout sizing for smart-mode widgets */
+        /* Compact layout sizing for smart-mode widgets to prevent vertical clipping */
         body.smart-mode .counter-circle-wrapper {
-            width: 6.2rem !important;
-            height: 6.2rem !important;
-            border-width: 3px !important;
+            width: 3.6rem !important;
+            height: 3.6rem !important;
+            border-width: 2px !important;
         }
         body.smart-mode #counterOutput {
-            font-size: 1.75rem !important;
-        }
-        body.smart-mode #wazifaArabicContainer,
-        body.smart-mode #progressBarContainer {
-            display: none !important; /* Hide extra layout items to protect screen estate */
+            font-size: 1.2rem !important;
         }
         
         /* Exit Smart Mode Button */
@@ -301,19 +326,26 @@
         <section id="imageSection" class="lg:col-span-7 bg-white dark:bg-darkCard rounded-2xl shadow-md border-2 border-emerald-100 dark:border-emerald-900/50 overflow-hidden flex flex-col h-[420px] lg:h-[800px] transition-colors">
             
             <div class="bg-gradient-to-r from-[#143a2f] to-[#1b4d3e] dark:from-[#0a1a15] dark:to-[#0f2e25] p-2 text-white flex flex-col sm:flex-row justify-between items-center gap-2 border-b border-[#c5a059]/40">
-                <div class="flex items-center gap-2">
+                <div id="imageHeaderTitle" class="flex items-center gap-2">
                     <span class="text-amber-400">📖</span>
                     <h2 class="text-xs font-bold font-sans">اصل تعلیمی کارڈز (زوم ایبل)</h2>
                 </div>
-                <div class="flex flex-wrap gap-1 justify-center">
+                <div class="flex flex-wrap gap-1 justify-center items-center">
                     <button onclick="switchImagePage(1)" id="imgTab1" class="px-2 py-1 text-[10px] font-bold rounded bg-emerald-800 text-emerald-100 transition-all cursor-pointer">صفحہ 1</button>
                     <button onclick="switchImagePage(2)" id="imgTab2" class="px-2 py-1 text-[10px] font-bold rounded bg-emerald-800 text-emerald-100 transition-all cursor-pointer">صفحہ 2</button>
                     <button onclick="switchImagePage(3)" id="imgTab3" class="px-2 py-1 text-[10px] font-bold rounded bg-emerald-800 text-emerald-100 transition-all cursor-pointer">صفحہ 3</button>
                     <button onclick="switchImagePage(4)" id="imgTab4" class="px-2 py-1 text-[10px] font-bold rounded bg-[#c5a059] text-emerald-950 transition-all cursor-pointer">صفحہ 4</button>
+                    
+                    <!-- Smart Mode Inline Zoom Controls -->
+                    <div class="hidden body.smart-mode:flex items-center gap-1 mr-1 border-r border-emerald-700/60 pr-1">
+                        <button onclick="adjustZoom(0.2)" class="px-1.5 py-0.5 text-[10px] bg-emerald-700 hover:bg-emerald-600 rounded text-white font-bold">➕</button>
+                        <button onclick="adjustZoom(-0.2)" class="px-1.5 py-0.5 text-[10px] bg-emerald-700 hover:bg-emerald-600 rounded text-white font-bold">➖</button>
+                        <button onclick="resetZoom()" class="px-1.5 py-0.5 text-[9px] bg-amber-500 text-amber-950 font-bold rounded">اصلی</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-slate-50 dark:bg-[#152b22] border-b border-slate-100 dark:border-emerald-900/30 p-1.5 flex justify-between items-center px-3">
+            <div id="imageSubHeader" class="bg-slate-50 dark:bg-[#152b22] border-b border-slate-100 dark:border-emerald-900/30 p-1.5 flex justify-between items-center px-3">
                 <div class="flex items-center gap-1.5">
                     <button onclick="adjustZoom(0.15)" class="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900 text-[#1b4d3e] dark:text-emerald-200 font-bold text-sm hover:bg-emerald-200 transition flex items-center justify-center cursor-pointer">➕</button>
                     <button onclick="adjustZoom(-0.15)" class="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900 text-[#1b4d3e] dark:text-emerald-200 font-bold text-sm hover:bg-emerald-200 transition flex items-center justify-center cursor-pointer">➖</button>
@@ -422,11 +454,11 @@
                         </div>
 
                         <!-- External container for Sound and Vibration buttons -->
-                        <div class="flex justify-center gap-1 z-10 w-full sm:flex-row flex-row items-center">
-                            <button onclick="toggleAudioMute()" id="soundToggle" class="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-1 text-[9px] font-bold cursor-pointer transition">
+                        <div class="flex justify-center gap-1.5 z-10 w-full sm:flex-row flex-row items-center mb-1">
+                            <button onclick="toggleAudioMute()" id="soundToggle" class="px-2 py-1 rounded-lg bg-emerald-950/80 dark:bg-slate-800 hover:bg-slate-700 shadow-sm border border-emerald-700/60 flex items-center gap-1 text-[9px] font-bold cursor-pointer transition text-emerald-100">
                                 <span>🔊 آواز: آن</span>
                             </button>
-                            <button onclick="toggleHaptic()" id="vibeToggle" class="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-1 text-[9px] font-bold cursor-pointer transition">
+                            <button onclick="toggleHaptic()" id="vibeToggle" class="px-2 py-1 rounded-lg bg-emerald-950/80 dark:bg-slate-800 hover:bg-slate-700 shadow-sm border border-emerald-700/60 flex items-center gap-1 text-[9px] font-bold cursor-pointer transition text-emerald-100">
                                 <span>📳 وائبریشن: آن</span>
                             </button>
                         </div>
