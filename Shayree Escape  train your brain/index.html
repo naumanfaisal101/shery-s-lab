@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shayree Escape: Little Lion's Tap Puzzle</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Multi-Language Support -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Noto+Sans+Arabic:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+SC:wght@400;600;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        
+        body {
+            font-family: 'Outfit', 'Noto Sans Arabic', 'Noto Sans Devanagari', 'Noto Sans SC', sans-serif;
+            background: #120d18;
+            color: #f3e8ee;
+            overflow: hidden;
+        }
+
+        .font-cinzel {
+            font-family: 'Cinzel', 'Noto Sans Arabic', 'Noto Sans Devanagari', 'Noto Sans SC', serif;
+        }
+
+        .parchment-bg {
+            background-color: #1a1222;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(212, 163, 89, 0.08) 0%, transparent 80%),
+                radial-gradient(circle at 10% 20%, rgba(147, 51, 234, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+        }
+
+        .canvas-container {
+            background: rgba(30, 20, 42, 0.85);
+            border: 2px solid rgba(212, 163, 89, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #d4a359 0%, #b8860b 100%);
+            color: #1a1222;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(212, 163, 89, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 163, 89, 0.5);
+        }
+
+        .btn-gold:active {
+            transform: translateY(1px);
+        }
+
+        .glass-card {
+            background: rgba(26, 18, 34, 0.95);
+            border: 1px solid rgba(212, 163, 89, 0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(16px);
+        }
+
+        .lang-btn, .mode-btn {
+            border: 1px solid rgba(212, 163, 89, 0.3);
+            background: rgba(45, 27, 61, 0.6);
+            transition: all 0.2s ease;
+        }
+
+        .lang-btn.active-lang, .mode-btn.active-mode {
+            background: linear-gradient(135deg, #d4a359 0%, #b8860b 100%);
+            color: #1a1222;
+            font-weight: bold;
+            border-color: #fef3c7;
+            box-shadow: 0 0 10px rgba(212, 163, 89, 0.6);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .badge-player-0 { background: #f59e0b; color: #1a1222; }
+        .badge-player-1 { background: #10b981; color: #1a1222; }
+        .badge-player-2 { background: #06b6d4; color: #1a1222; }
+        .badge-player-3 { background: #ec4899; color: #ffffff; }
+    </style>
+</head>
+<body class="parchment-bg h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-4 select-none overflow-hidden">
+
+    <!-- TOP HUD -->
+    <header class="w-full max-w-xl flex flex-col gap-2 bg-purple-950/50 p-2.5 sm:p-3 rounded-2xl border border-amber-500/20 backdrop-blur-md z-10">
+        <!-- Top Status Row -->
+        <div class="flex justify-between items-center gap-2">
+            <!-- Stage Display -->
+            <div class="bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-xl text-center">
+                <span id="label-stage" class="text-[10px] text-amber-200/60 uppercase tracking-widest block font-cinzel">Stage</span>
+                <span id="stage-display" class="text-sm sm:text-base font-bold text-amber-400 font-cinzel">1 / 20</span>
+            </div>
+
+            <!-- Active Player Banner in Multiplayer -->
+            <div id="active-player-badge" class="px-3 py-1 rounded-xl text-xs font-bold font-cinzel shadow-md transition-all flex items-center gap-1.5 badge-player-0">
+                👤 <span id="txt-player-name">Player 1</span>
+            </div>
+
+            <!-- Timer Display -->
+            <div class="bg-black/40 border border-amber-500/20 px-2.5 py-1 rounded-xl flex items-center gap-1">
+                <span class="text-xs">⏱️</span>
+                <span id="timer-display" class="text-sm font-mono font-bold text-amber-300">00:00.0</span>
+            </div>
+
+            <!-- Coins Display -->
+            <div class="bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-xl flex items-center gap-1">
+                <span class="text-xs">🪙</span>
+                <span id="coins-display" class="text-sm font-bold text-amber-300">0</span>
+            </div>
+
+            <!-- Lives / Hearts -->
+            <div class="flex items-center gap-0.5 bg-black/40 px-2 py-1 rounded-xl border border-red-500/20">
+                <span id="heart-1" class="text-red-500 text-sm sm:text-base">❤️</span>
+                <span id="heart-2" class="text-red-500 text-sm sm:text-base">❤️</span>
+                <span id="heart-3" class="text-red-500 text-sm sm:text-base">❤️</span>
+            </div>
+        </div>
+
+        <!-- Title & Subtitle Row -->
+        <div class="flex justify-between items-center px-1">
+            <div>
+                <h1 id="txt-game-title" class="text-base sm:text-lg font-bold font-cinzel text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200">
+                    Shayree Escape
+                </h1>
+                <p id="stage-subtitle" class="text-[11px] text-purple-300/70 italic">Stage 1: First Flight</p>
+            </div>
+            <div class="text-right">
+                <span id="txt-mode-label" class="text-[10px] text-purple-300/60 uppercase block">Mode</span>
+                <span id="txt-current-mode" class="text-xs font-bold text-amber-300">1 Player</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN GAME CANVAS WRAPPER -->
+    <main class="relative w-full max-w-xl flex-1 flex flex-col justify-center items-center my-1.5">
+        <div id="canvas-holder" class="canvas-container relative w-full aspect-square max-h-[65vh] sm:max-h-[70vh] rounded-3xl flex justify-center items-center overflow-hidden">
+            <canvas id="gameCanvas" class="w-full h-full block rounded-3xl cursor-pointer"></canvas>
+            
+            <!-- Dynamic Poetic Fragment Display Banner -->
+            <div id="verse-banner" class="absolute bottom-3 left-3 right-3 bg-purple-950/90 border border-amber-500/40 px-3 py-1.5 rounded-xl text-center backdrop-blur-md transition-opacity duration-500 opacity-0 pointer-events-none">
+                <p id="verse-text" class="text-xs sm:text-sm italic text-amber-200 font-cinzel">"Every feather flies free!"</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- BOTTOM CONTROLS -->
+    <footer class="w-full max-w-xl flex justify-between items-center gap-1.5 bg-purple-950/50 p-2 sm:p-2.5 rounded-2xl border border-amber-500/20 backdrop-blur-md z-10">
+        <button id="btn-reset" class="flex-1 py-2 px-1.5 bg-purple-900/50 hover:bg-purple-800/60 border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition">
+            <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span id="txt-reset">Reset</span>
+        </button>
+
+        <button id="btn-hint" class="flex-1 py-2 px-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-xl text-xs font-semibold text-amber-300 flex items-center justify-center gap-1 transition">
+            <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            <span id="txt-hint">Hint</span> (<span id="hint-count">3</span>)
+        </button>
+
+        <button id="btn-scores" class="flex-1 py-2 px-1.5 bg-purple-900/50 hover:bg-purple-800/60 border border-purple-500/30 rounded-xl text-xs font-semibold text-amber-200 flex items-center justify-center gap-1 transition">
+            🏆 <span id="txt-ranks">Ranks</span>
+        </button>
+
+        <button id="btn-lang" class="py-2 px-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 text-amber-200 transition">
+            🌐 <span id="txt-lang-code">EN</span>
+        </button>
+
+        <button id="btn-sound" class="py-2 px-2.5 bg-purple-900/50 hover:bg-purple-800/60 border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center justify-center transition">
+            <span id="sound-icon">🔊</span>
+        </button>
+
+        <button id="btn-info" class="py-2 px-2.5 bg-purple-900/50 hover:bg-purple-800/60 border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center justify-center transition">
+            ❓
+        </button>
+    </footer>
+
+    <!-- INTRO / SETUP MODAL WITH MULTIPLAYER & LANGUAGE SELECTOR -->
+    <div id="modal-intro" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md">
+        <div class="glass-card max-w-md w-full p-4 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-500/40 max-h-[92vh] overflow-y-auto">
+            
+            <!-- Language Picker Banner -->
+            <div class="mb-3 bg-purple-950/70 p-2 rounded-2xl border border-amber-500/20">
+                <span id="txt-select-lang" class="text-[11px] font-semibold text-amber-300 uppercase tracking-wide block mb-1.5">Select Language</span>
+                <div class="grid grid-cols-4 gap-1 text-[11px]">
+                    <button class="lang-btn py-1 px-1 rounded-xl flex flex-col items-center justify-center" onclick="setLanguage('en')">
+                        <span>🇬🇧 EN</span>
+                    </button>
+                    <button class="lang-btn py-1 px-1 rounded-xl flex flex-col items-center justify-center" onclick="setLanguage('ur')">
+                        <span>🇵🇰 اردو</span>
+                    </button>
+                    <button class="lang-btn py-1 px-1 rounded-xl flex flex-col items-center justify-center" onclick="setLanguage('hi')">
+                        <span>🇮🇳 हिंदी</span>
+                    </button>
+                    <button class="lang-btn py-1 px-1 rounded-xl flex flex-col items-center justify-center" onclick="setLanguage('zh')">
+                        <span>🇨🇳 中文</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Player Mode Selector (1P, 2P, 3P, 4P) -->
+            <div class="mb-4 bg-purple-950/70 p-2.5 rounded-2xl border border-amber-500/30">
+                <span id="txt-select-players" class="text-[11px] font-semibold text-amber-300 uppercase tracking-wide block mb-2">Select Number of Players</span>
+                <div class="grid grid-cols-4 gap-1.5 text-xs font-bold">
+                    <button class="mode-btn py-2 px-1 rounded-xl flex items-center justify-center gap-1 active-mode" onclick="setPlayerCount(1)">
+                        <span>👤 1P</span>
+                    </button>
+                    <button class="mode-btn py-2 px-1 rounded-xl flex items-center justify-center gap-1" onclick="setPlayerCount(2)">
+                        <span>👥 2P</span>
+                    </button>
+                    <button class="mode-btn py-2 px-1 rounded-xl flex items-center justify-center gap-1" onclick="setPlayerCount(3)">
+                        <span>👥 3P</span>
+                    </button>
+                    <button class="mode-btn py-2 px-1 rounded-xl flex items-center justify-center gap-1" onclick="setPlayerCount(4)">
+                        <span>👥 4P</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-2 text-2xl">
+                🦁
+            </div>
+            <h2 id="txt-intro-title" class="text-xl sm:text-2xl font-extrabold font-cinzel text-amber-300 mb-1">Shayree Escape</h2>
+            <p id="txt-intro-desc" class="text-xs text-purple-200/90 mb-4 leading-relaxed">
+                Help Shayree (the brave little lion) clear all the paths! Tap the arrows to help them escape as fast as you can to earn coins and prove who has the sharpest brain!
+            </p>
+
+            <div class="bg-purple-950/60 p-3 rounded-2xl text-left border border-purple-500/20 mb-4 text-xs space-y-1.5 text-purple-200/90">
+                <p><strong id="txt-goal-title">🎯 Goal:</strong> <span id="txt-goal-desc">Clear all feathers across 20 stages.</span></p>
+                <p><strong id="txt-timer-title">⏱️ Speed & Coins:</strong> <span id="txt-timer-desc">Faster time earns higher Brain Speed Index & bonus Coins!</span></p>
+                <p><strong id="txt-multiplayer-title">👥 Multiplayer:</strong> <span id="txt-multiplayer-desc">Players take turns clearing stages to compete for 1st place!</span></p>
+            </div>
+
+            <button id="btn-start" class="btn-gold w-full py-3 rounded-2xl text-sm uppercase tracking-wider font-bold">
+                <span id="txt-start-btn">Start Game ➔</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- WIN STAGE MODAL -->
+    <div id="modal-win" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md">
+        <div class="glass-card max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-500/50">
+            <div class="w-14 h-14 bg-amber-500/20 border border-amber-400/50 rounded-full flex items-center justify-center mx-auto mb-2 text-3xl">
+                📜
+            </div>
+            <h3 id="txt-win-title" class="text-lg font-cinzel text-amber-300 mb-1">Stage Completed!</h3>
+            <p id="win-couplet" class="text-xs italic text-amber-100 font-cinzel my-2 p-2.5 bg-purple-950/80 rounded-xl border border-amber-500/20">
+                "Every feather flies free in the sky!"
+            </p>
+
+            <!-- Stats Summary -->
+            <div class="grid grid-cols-3 gap-2 bg-purple-950/60 p-3 rounded-2xl border border-amber-500/20 my-3 text-xs">
+                <div class="text-center">
+                    <span id="label-stat-time" class="text-[10px] text-purple-300/70 uppercase block">Time</span>
+                    <span id="stat-time" class="font-mono font-bold text-amber-300 text-sm">00:00</span>
+                </div>
+                <div class="text-center">
+                    <span id="label-stat-speed" class="text-[10px] text-purple-300/70 uppercase block">Brain Speed</span>
+                    <span id="stat-speed" class="font-bold text-amber-300 text-sm">950</span>
+                </div>
+                <div class="text-center">
+                    <span id="label-stat-coins" class="text-[10px] text-purple-300/70 uppercase block">Coins Earned</span>
+                    <span id="stat-coins" class="font-bold text-amber-300 text-sm">+150 🪙</span>
+                </div>
+            </div>
+
+            <!-- Next Player Notice for Multiplayer -->
+            <div id="next-player-notice" class="mb-3 p-2 rounded-xl bg-amber-500/20 border border-amber-500/30 text-xs font-semibold text-amber-200 hidden">
+                📢 <span id="txt-next-turn-notice">Next Turn: Player 2</span>
+            </div>
+
+            <button id="btn-next-stage" class="btn-gold w-full py-3 rounded-2xl text-sm uppercase tracking-wider font-bold">
+                <span id="txt-next-btn">Next Stage ➔</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- GAME OVER MODAL -->
+    <div id="modal-loss" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+        <div class="glass-card max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-red-500/40">
+            <div class="w-14 h-14 bg-red-500/20 border border-red-500/40 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl">
+                💔
+            </div>
+            <h3 id="txt-loss-title" class="text-xl font-cinzel text-red-400 mb-1">Out of Hearts!</h3>
+            <p id="txt-loss-desc" class="text-xs text-purple-200/90 mb-4">
+                Feathers bumped too many times. Take a moment and try again!
+            </p>
+
+            <button id="btn-retry" class="btn-gold w-full py-3 rounded-2xl text-sm uppercase tracking-wider font-bold">
+                <span id="txt-retry-btn">Retry Stage 🔄</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- LEADERBOARD & FINALE WINNER MODAL -->
+    <div id="modal-leaderboard" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md">
+        <div class="glass-card max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-400 max-h-[92vh] overflow-y-auto">
+            <div class="w-16 h-16 bg-amber-400/20 border-2 border-amber-400 rounded-full flex items-center justify-center mx-auto mb-2 text-3xl">
+                👑
+            </div>
+            <h2 id="txt-finale-title" class="text-xl sm:text-2xl font-extrabold font-cinzel text-amber-300 mb-1">Leaderboard & Winner</h2>
+            <p id="txt-finale-desc" class="text-xs text-purple-200 mb-3">
+                Final scores and brain speed rankings across all stages!
+            </p>
+
+            <!-- Leaderboard Table -->
+            <div class="bg-purple-950/70 border border-amber-500/30 rounded-2xl overflow-hidden mb-4">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-amber-500/20 text-amber-300 font-cinzel">
+                        <tr>
+                            <th class="p-2 text-center">Rank</th>
+                            <th class="p-2">Player</th>
+                            <th class="p-2 text-center">Coins</th>
+                            <th class="p-2 text-center">Speed</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body" class="divide-y divide-purple-900/50">
+                        <!-- Dynamic rows injected here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <button id="btn-restart-game" class="btn-gold w-full py-3 rounded-2xl text-sm uppercase tracking-wider font-bold">
+                <span id="txt-restart-btn">Play Again 🔄</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /* MULTI-LANGUAGE TRANSLATION DICTIONARY */
+        const TRANSLATIONS = {
+            en: {
+                gameTitle: "Shayree Escape",
+                stageLabel: "Stage",
+                resetBtn: "Reset",
+                hintBtn: "Hint",
+                ranksBtn: "Ranks",
+                introTitle: "Shayree Escape 🦁",
+                introDesc: "Help Shayree (the brave little lion cub) clear all the paths! Tap the arrows to help them fly free off the board as fast as you can to earn coins and prove who has the fastest brain!",
+                goalTitle: "🎯 Goal:",
+                goalDesc: "Help little lion Shayree clear all arrows across 20 stages.",
+                timerTitle: "⏱️ Speed & Coins:",
+                timerDesc: "Faster time earns higher Brain Speed Index & bonus Coins!",
+                multiplayerTitle: "👥 Multiplayer:",
+                multiplayerDesc: "Players take turns clearing stages to compete for 1st place!",
+                selectPlayers: "Select Number of Players:",
+                startBtn: "Start Game ➔",
+                winTitle: "Stage Completed!",
+                nextStageBtn: "Next Stage ➔",
+                lossTitle: "Out of Hearts!",
+                lossDesc: "Arrows bumped too many times. Take a moment and try again!",
+                retryBtn: "Retry Stage 🔄",
+                finaleTitle: "Leaderboard & Winner!",
+                finaleDesc: "Final scores and brain speed rankings across all stages!",
+                playAgainBtn: "Play Again 🔄",
+                selectLang: "Select Language:",
+                statTime: "Time",
+                statSpeed: "Brain Speed",
+                statCoins: "Coins Earned",
+                nextTurnNotice: "Next Turn: ",
+                playerLabel: "Player ",
+                modeLabel: "Mode",
+                modeSingle: "1 Player",
+                modeMulti: " Players"
+            },
+            ur: {
+                gameTitle: "شیری ایسکیپ",
+                stageLabel: "اسٹیج",
+                resetBtn: "دوبارہ",
+                hintBtn: "اشارہ",
+                ranksBtn: "اسکور بورڈ",
+                introTitle: "شیری ایسکیپ 🦁 (چھوٹا شیر)",
+                introDesc: "شیری (بہادر چھوٹے شیر) کے لیے تمام راستے صاف کریں! تمام تیروں پر کلک کر کے انہیں بورڈ سے باہر نکالیں، سکے جیتیں اور اپنے تیز ذہن کا ثبوت دیں!",
+                goalTitle: "🎯 مقصد:",
+                goalDesc: "شیری کے لیے 20 اسٹیجز میں تمام تیروں کو آزاد کریں۔",
+                timerTitle: "⏱️ رفتار اور سکے:",
+                timerDesc: "کم وقت میں اسٹیج مکمل کرنے پر زیادہ سکے اور برین اسپیڈ ملتی ہے!",
+                multiplayerTitle: "👥 ملٹی پلیئر:",
+                multiplayerDesc: "1 سے 4 کھلاڑی باری باری کھیل کر مقابلے میں پہلی پوزیشن حاصل کر سکتے ہیں!",
+                selectPlayers: "کھلاڑیوں کی تعداد منتخب کریں:",
+                startBtn: "کھیل شروع کریں ➔",
+                winTitle: "اسٹیج مکمل!",
+                nextStageBtn: "اگلا اسٹیج ➔",
+                lossTitle: "دل ختم ہو گئے!",
+                lossDesc: "تیر بار بار ٹکرا گئے۔ سوچ سمجھ کر دوبارہ کوشش کریں!",
+                retryBtn: "دوبارہ کوشش 🔄",
+                finaleTitle: "نتائج اور فاتح!",
+                finaleDesc: "تمام اسٹیجز کے سکور اور ذہن کی رفتار کی فائنل درجہ بندی!",
+                playAgainBtn: "دوبارہ کھیلیں 🔄",
+                selectLang: "زبان منتخب کریں:",
+                statTime: "وقت",
+                statSpeed: "ذہن کی رفتار",
+                statCoins: "حاصل کردہ سکے",
+                nextTurnNotice: "اگلی باری: ",
+                playerLabel: "کھلاڑی ",
+                modeLabel: "موڈ",
+                modeSingle: "1 کھلاڑی",
+                modeMulti: " کھلاڑی"
+            },
+            hi: {
+                gameTitle: "शेरी एस्केप",
+                stageLabel: "स्टेज",
+                resetBtn: "रिसेट",
+                hintBtn: "संकेत",
+                ranksBtn: "स्कोरकार्ड",
+                introTitle: "शेरी एस्केप 🦁 (नन्हा शेर)",
+                introDesc: "शेरी (बहादुर नन्हे शेर) के लिए सभी रास्ते साफ़ करें! तीरों को टैप करके बाहर निकालें, सिक्के कमाएं और अपने तेज़ दिमाग का प्रदर्शन करें!",
+                goalTitle: "🎯 लक्ष्य:",
+                goalDesc: "20 स्टेज में नन्हे शेर शेरी के सभी तीर साफ़ करें।",
+                timerTitle: "⏱️ गति और सिक्के:",
+                timerDesc: "कम समय में स्टेज पूरा करने पर ज़्यादा सिक्के और ब्रेन स्पीड मिलती है!",
+                multiplayerTitle: "👥 मल्टीप्लेयर:",
+                multiplayerDesc: "1 से 4 खिलाड़ी बारी-बारी से खेलकर पहली पोजीशन के लिए मुकाबला कर सकते हैं!",
+                selectPlayers: "खिलाड़ियों की संख्या चुनें:",
+                startBtn: "खेल शुरू करें ➔",
+                winTitle: "स्टेज पूरा हुआ!",
+                nextStageBtn: "अगला स्टेज ➔",
+                lossTitle: "दिल खत्म हो गए!",
+                lossDesc: "तीर बार-बार टकरा गए। सोच-समझकर दोबारा कोशिश करें!",
+                retryBtn: "फिर कोशिश करें 🔄",
+                finaleTitle: "परिणाम और विजेता!",
+                finaleDesc: "सभी स्टेज का स्कोर और दिमाग की गति की फाइनल रैंकिंग!",
+                playAgainBtn: "फिर से खेलें 🔄",
+                selectLang: "भाषा चुनें:",
+                statTime: "समय",
+                statSpeed: "दिमाग की गति",
+                statCoins: "प्राप्त सिक्के",
+                nextTurnNotice: "अगली बारी: ",
+                playerLabel: "खिलाड़ी ",
+                modeLabel: "मोड",
+                modeSingle: "1 खिलाड़ी",
+                modeMulti: " खिलाड़ी"
+            },
+            zh: {
+                gameTitle: "小狮逃脱 (Shayree Escape)",
+                stageLabel: "关卡",
+                resetBtn: "重置",
+                hintBtn: "提示",
+                ranksBtn: "排行榜",
+                introTitle: "小狮逃脱 🦁 (Shayree Escape)",
+                introDesc: "帮助勇敢的小狮子 Shayree 清理所有通道！快速点击箭头让它们逃离棋盘，赢取金币并展现你最强大脑！",
+                goalTitle: "🎯 目标：",
+                goalDesc: "帮小狮子 Shayree 通关 20 个关卡，清空所有箭头。",
+                timerTitle: "⏱️ 速度与金币：",
+                timerDesc: "通关越快，获得的大脑速度指数和奖励金币越高！",
+                multiplayerTitle: "👥 多人模式：",
+                multiplayerDesc: "1 至 4 名玩家轮流挑战，角逐冠军宝座！",
+                selectPlayers: "选择玩家人数：",
+                startBtn: "开始游戏 ➔",
+                winTitle: "关卡完成！",
+                nextStageBtn: "下一关 ➔",
+                lossTitle: "生命用尽！",
+                lossDesc: "箭头碰撞次数过多。冷静一下，再试一次！",
+                retryBtn: "重新开始 🔄",
+                finaleTitle: "排行榜与最终赢家！",
+                finaleDesc: "所有关卡的最终得分与大脑速度排名！",
+                playAgainBtn: "再玩一次 🔄",
+                selectLang: "选择语言：",
+                statTime: "用时",
+                statSpeed: "大脑速度",
+                statCoins: "获得金币",
+                nextTurnNotice: "下一位玩家：",
+                playerLabel: "玩家 ",
+                modeLabel: "模式",
+                modeSingle: "单人模式",
+                modeMulti: " 人模式"
+            }
+        };
+
+        const STAGE_TEXTS = {
+            en: {
+                subtitles: [
+                    "Stage 1: Shayree's First Roar", "Stage 2: Crossing Paths", "Stage 3: The Clear Horizon",
+                    "Stage 4: Lion's Maze", "Stage 5: Stone Obstacles", "Stage 6: The Secret Path",
+                    "Stage 7: Echoing Echoes", "Stage 8: Woven Lines", "Stage 9: Ancient Trail",
+                    "Stage 10: Master of the Jungle", "Stage 11: Twin Stones", "Stage 12: Diagonal Leap",
+                    "Stage 13: Four Corners", "Stage 14: Outer Ring", "Stage 15: Central Shrine",
+                    "Stage 16: Lion Heart Keep", "Stage 17: Five Jewels", "Stage 18: Grand Citadel",
+                    "Stage 19: Whispering Winds", "Stage 20: King of the Jungle"
+                ],
+                couplets: [
+                    '"Shayree leaps into freedom!"', '"Brave steps clear the way for Shayree!"',
+                    '"Courage leads to victory!"', '"Step by step, little lion moves ahead!"',
+                    '"Wisdom guides the brave lion cub!"', '"Shayree finds the open path!"',
+                    '"Clear the trail for the little lion!"', '"Freedom shines in every turn!"',
+                    '"The brave lion cub fears no obstacle!"', '"You helped Shayree conquer the maze!"',
+                    '"Two stones cannot stop little Shayree!"', '"Leap through the sky with courage!"',
+                    '"Four corners open wide to victory!"', '"Shayree shines bright like a star!"',
+                    '"Peace and power in every move!"', '"The brave lion cub reaches home!"',
+                    '"Five jewels sparkle for Shayree!"', '"The grand citadel is unlocked!"',
+                    '"Brave winds whisper victory!"', '"Hail the King! You are a puzzle master!"'
+                ]
+            },
+            ur: {
+                subtitles: [
+                    "اسٹیج 1: شیری کی پہلی دہاڑ", "اسٹیج 2: کٹتے راستے", "اسٹیج 3: صاف افق",
+                    "اسٹیج 4: شیری کی بھول بھلیاں", "اسٹیج 5: پتھر کی رکاوٹ", "اسٹیج 6: جادوئی راستہ",
+                    "اسٹیج 7: گونجتے راستے", "اسٹیج 8: الجھے دھاگے", "اسٹیج 9: پرانی راہ",
+                    "اسٹیج 10: جنگل کا شہزادہ", "اسٹیج 11: دو پتھر", "اسٹیج 12: ترچھی چھلانگ",
+                    "اسٹیج 13: چار کونے", "اسٹیج 14: باہر کا دائرہ", "اسٹیج 15: اندرونی چوک",
+                    "اسٹیج 16: شیر دل قلعہ", "اسٹیج 17: پانچ موتی", "اسٹیج 18: بڑا قلعہ",
+                    "اسٹیج 19: ہواؤں کی سرگوشی", "اسٹیج 20: جنگل کا بادشاہ شیری"
+                ],
+                couplets: [
+                    '"شیری بہادری سے آگے بڑھتا ہے!"', '"بہادر شیری کے لیے ہر راستہ کھل گیا!"',
+                    '"شیری کی ہمت سے ہر مشکل آسان!"', '"ایک ایک کر کے راستہ صاف کریں!"',
+                    '"عقل سے چھوٹے شیر کو صحیح راستہ ملتا ہے!"', '"شیری نے اپنا آزاد راستہ ڈھونڈ لیا!"',
+                    '"چھوٹے شیر کی اڑان کے لیے راستہ صاف کریں!"', '"شیری کے ہر قدم میں کامیابی ہے!"',
+                    '"بہادر شیری کسی رکاوٹ سے نہیں ڈرتا!"', '"آپ نے شیری کو فتح دلا دی!"',
+                    '"دو پتھر چھوٹے شیر کو نہیں روک سکتے!"', '"ہمت کے ساتھ آسمان کو فتح کریں!"',
+                    '"چاروں کونے شیری کے لیے کھل گئے!"', '"شیری ستارے کی طرح چمک رہا ہے!"',
+                    '"ہر چال میں طاقت اور عقل ہے!"', '"بہادر شیری اپنی منزل پر پہنچ گیا!"',
+                    '"پانچ موتی شیری کے لیے چمک رہے ہیں!"', '"بڑا قلعہ فتح ہو گیا!"',
+                    '"ہوائیں شیری کی فتح کا گیت گا رہی ہیں!"', '"مبارک ہو! آپ اور شیری چیمپیئن بن گئے!"'
+                ]
+            },
+            hi: {
+                subtitles: [
+                    "स्टेज 1: शेरी की पहली दहाड़", "स्टेज 2: काटते रास्ते", "स्टेज 3: साफ क्षितिज",
+                    "स्टेज 4: शेरी की भूलभुलैया", "स्टेज 5: पत्थर की रुकावट", "स्टेज 6: जादुई रास्ता",
+                    "स्टेज 7: गूंजते रास्ते", "स्टेज 8: उलझे धागे", "स्टेज 9: पुरानी राह",
+                    "स्टेज 10: जंगल का राजकुमार", "स्टेज 11: दो पत्थर", "स्टेज 12: तिरछी छलांग",
+                    "स्टेज 13: चार कोने", "स्टेज 14: बाहरी घेरा", "स्टेज 15: मुख्य चौक",
+                    "स्टेज 16: शेर-दिल किला", "स्टेज 17: पांच मोती", "स्टेज 18: विशाल किला",
+                    "स्टेज 19: बहती हवाएं", "स्टेज 20: जंगल का राजा शेरी"
+                ],
+                couplets: [
+                    '"शेरी बहादुरी से आगे बढ़ता है!"', '"बहादुर शेरी के लिए हर रास्ता खुल गया!"',
+                    '"शेरी की हिम्मत से हर मुश्किल आसान!"', '"एक-एक करके रास्ता साफ़ करें!"',
+                    '"समझदारी से नन्हे शेर को सही रास्ता मिलता है!"', '"शेरी ने अपना रास्ता ढूंढ लिया!"',
+                    '"नन्हे शेर के लिए रास्ता साफ़ करें!"', '"शेरी के हर कदम में कामयाबी है!"',
+                    '"बहादुर शेरी किसी रुकावट से नहीं डरता!"', '"आपने शेरी को जीत दिला दी!"',
+                    '"दो पत्थर नन्हे शेर को नहीं रोक सकते!"', '"हिम्मत के साथ जीत हासिल करें!"',
+                    '"चारों कोने शेरी के लिए खुल गए!"', '"शेरी सितारे की तरह चमक रहा है!"',
+                    '"हर चाल में ताकत और समझदारी है!"', '"बहादुर शेरी अपनी मंज़िल पर पहुँच गया!"',
+                    '"पाँच मोती शेरी के लिए चमक रहे हैं!"', '"विशाल किला फ़तह हो गया!"',
+                    '"हवाएं शेरी की जीत का गीत गा रही हैं!"', '"बधाई हो! आप और शेरी विजेता हैं!"'
+                ]
+            },
+            zh: {
+                subtitles: [
+                    "第 1 关：小狮 Shayree 的第一声咆哮", "第 2 关：交叉之路", "第 3 关：晴朗地平线",
+                    "第 4 关：狮子迷宫", "第 5 关：岩石障碍", "第 6 关：秘密通道",
+                    "第 7 关：回音之路", "第 8 关：织线交错", "第 9 关：古老小径",
+                    "第 10 关：森林王子", "第 11 关：双重墨石", "第 12 关：斜向跳跃",
+                    "第 13 关：四方天地", "第 14 关：外围环形", "第 15 关：中央圣殿",
+                    "第 16 关：狮心城堡", "第 17 关：五彩宝石", "第 18 关：宏伟城堡",
+                    "第 19 关：低语微风", "第 20 关：森林之王 Shayree"
+                ],
+                couplets: [
+                    '"小狮 Shayree 勇敢向前奔跑！"', '"勇敢的步伐为 Shayree 开辟道路！"',
+                    '"勇气带来最终的胜利！"', '"一步一步，小狮子在不断成长！"',
+                    '"智慧指引着勇敢的小狮子！"', '"Shayree 找到了畅通无阻的通道！"',
+                    '"为小狮子清理前方的道路吧！"', '"每一个转角都充满希望！"',
+                    '"勇敢的小狮子从不畏惧任何困难！"', '"你成功帮助 Shayree 征服了迷宫！"',
+                    '"两块障碍石阻挡不住小狮 Shayree！"', '"带着勇气迈向更高的胜利！"',
+                    '"四角为小狮 Shayree 敞开怀抱！"', '"Shayree 如繁星般璀璨耀眼！"',
+                    '"每一次思考都充满智慧！"', '"勇敢的小狮子终于回到了家！"',
+                    '"五颗宝石为 Shayree 闪耀！"', '"宏伟的城堡已被你成功解锁！"',
+                    '"胜利的风在深情吟唱！"', '"太棒了！你和 Shayree 成为真正的解谜之王！"'
+                ]
+            }
+        };
+
+        let currentLang = 'en';
+        let playerCount = 1;
+
+        function setLanguage(lang) {
+            if (!TRANSLATIONS[lang]) return;
+            currentLang = lang;
+
+            const t = TRANSLATIONS[lang];
+            
+            document.getElementById('txt-game-title').textContent = t.gameTitle;
+            document.getElementById('label-stage').textContent = t.stageLabel;
+            document.getElementById('txt-reset').textContent = t.resetBtn;
+            document.getElementById('txt-hint').textContent = t.hintBtn;
+            document.getElementById('txt-ranks').textContent = t.ranksBtn;
+            document.getElementById('txt-lang-code').textContent = lang.toUpperCase();
+
+            document.getElementById('txt-select-lang').textContent = t.selectLang;
+            document.getElementById('txt-select-players').textContent = t.selectPlayers;
+            document.getElementById('txt-intro-title').textContent = t.introTitle;
+            document.getElementById('txt-intro-desc').textContent = t.introDesc;
+            document.getElementById('txt-goal-title').textContent = t.goalTitle;
+            document.getElementById('txt-goal-desc').textContent = t.goalDesc;
+            document.getElementById('txt-timer-title').textContent = t.timerTitle;
+            document.getElementById('txt-timer-desc').textContent = t.timerDesc;
+            document.getElementById('txt-multiplayer-title').textContent = t.multiplayerTitle;
+            document.getElementById('txt-multiplayer-desc').textContent = t.multiplayerDesc;
+            document.getElementById('txt-start-btn').textContent = t.startBtn;
+
+            document.getElementById('txt-win-title').textContent = t.winTitle;
+            document.getElementById('txt-next-btn').textContent = t.nextStageBtn;
+
+            document.getElementById('label-stat-time').textContent = t.statTime;
+            document.getElementById('label-stat-speed').textContent = t.statSpeed;
+            document.getElementById('label-stat-coins').textContent = t.statCoins;
+
+            document.getElementById('txt-loss-title').textContent = t.lossTitle;
+            document.getElementById('txt-loss-desc').textContent = t.lossDesc;
+            document.getElementById('txt-retry-btn').textContent = t.retryBtn;
+
+            document.getElementById('txt-finale-title').textContent = t.finaleTitle;
+            document.getElementById('txt-finale-desc').textContent = t.finaleDesc;
+            document.getElementById('txt-restart-btn').textContent = t.playAgainBtn;
+            document.getElementById('txt-mode-label').textContent = t.modeLabel;
+
+            const buttons = document.querySelectorAll('.lang-btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('onclick') === `setLanguage('${lang}')`) {
+                    btn.classList.add('active-lang');
+                } else {
+                    btn.classList.remove('active-lang');
+                }
+            });
+
+            if (window.gameInstance) {
+                window.gameInstance.updateUI();
+            }
+        }
+
+        function setPlayerCount(count) {
+            playerCount = count;
+            const buttons = document.querySelectorAll('.mode-btn');
+            buttons.forEach((btn, idx) => {
+                if (idx + 1 === count) {
+                    btn.classList.add('active-mode');
+                } else {
+                    btn.classList.remove('active-mode');
+                }
+            });
+
+            if (window.gameInstance) {
+                window.gameInstance.initPlayers(count);
+            }
+        }
+
+        const audio = {
+            ctx: null,
+            muted: false,
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+            playTone(freq, type, duration, gainVal = 0.1) {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e){}
+            },
+            playGlide() {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.2);
+                } catch(e){}
+            },
+            playError() {
+                this.playTone(150, 'sawtooth', 0.25, 0.2);
+            },
+            playCoin() {
+                this.playTone(987.77, 'sine', 0.15, 0.15);
+            },
+            playWin() {
+                if (this.muted || !this.ctx) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, i) => {
+                    setTimeout(() => this.playTone(freq, 'triangle', 0.25, 0.15), i * 100);
+                });
+            },
+            playHint() {
+                this.playTone(880, 'sine', 0.3, 0.15);
+            }
+        };
+
+        const DIR = { UP: 0, RIGHT: 1, DOWN: 2, LEFT: 3 };
+
+        const STAGES = [
+            // Stage 1
+            { grid: 5, quills: [{r: 2, c: 1, dir: DIR.LEFT}, {r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 3, dir: DIR.RIGHT}], stones: [] },
+            // Stage 2
+            { grid: 5, quills: [{r: 1, c: 2, dir: DIR.UP}, {r: 2, c: 1, dir: DIR.LEFT}, {r: 2, c: 3, dir: DIR.RIGHT}, {r: 3, c: 2, dir: DIR.DOWN}], stones: [] },
+            // Stage 3
+            { grid: 6, quills: [{r: 1, c: 1, dir: DIR.UP}, {r: 4, c: 1, dir: DIR.UP}, {r: 4, c: 4, dir: DIR.LEFT}, {r: 1, c: 4, dir: DIR.DOWN}, {r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 3, dir: DIR.RIGHT}], stones: [] },
+            // Stage 4
+            { grid: 6, quills: [{r: 1, c: 2, dir: DIR.UP}, {r: 2, c: 2, dir: DIR.UP}, {r: 3, c: 2, dir: DIR.UP}, {r: 3, c: 3, dir: DIR.LEFT}, {r: 2, c: 3, dir: DIR.DOWN}, {r: 2, c: 4, dir: DIR.RIGHT}, {r: 4, c: 3, dir: DIR.DOWN}, {r: 3, c: 1, dir: DIR.LEFT}], stones: [] },
+            // Stage 5
+            { grid: 6, quills: [{r: 1, c: 2, dir: DIR.UP}, {r: 2, c: 1, dir: DIR.LEFT}, {r: 2, c: 3, dir: DIR.RIGHT}, {r: 3, c: 2, dir: DIR.DOWN}, {r: 2, c: 4, dir: DIR.UP}, {r: 4, c: 2, dir: DIR.LEFT}], stones: [{r: 2, c: 2}] },
+            // Stage 6
+            { grid: 7, quills: [{r: 1, c: 3, dir: DIR.UP}, {r: 1, c: 5, dir: DIR.UP}, {r: 3, c: 1, dir: DIR.LEFT}, {r: 3, c: 5, dir: DIR.RIGHT}, {r: 5, c: 3, dir: DIR.DOWN}, {r: 1, c: 1, dir: DIR.RIGHT}, {r: 3, c: 3, dir: DIR.RIGHT}, {r: 5, c: 1, dir: DIR.UP}, {r: 5, c: 5, dir: DIR.LEFT}], stones: [{r: 3, c: 2}] },
+            // Stage 7
+            { grid: 7, quills: [{r: 1, c: 1, dir: DIR.UP}, {r: 1, c: 5, dir: DIR.UP}, {r: 5, c: 1, dir: DIR.DOWN}, {r: 5, c: 5, dir: DIR.DOWN}, {r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 4, dir: DIR.LEFT}, {r: 4, c: 4, dir: DIR.UP}, {r: 4, c: 2, dir: DIR.RIGHT}, {r: 3, c: 3, dir: DIR.RIGHT}], stones: [{r: 0, c: 3}, {r: 6, c: 3}] },
+            // Stage 8
+            { grid: 7, quills: [{r: 1, c: 5, dir: DIR.UP}, {r: 5, c: 1, dir: DIR.DOWN}, {r: 1, c: 2, dir: DIR.RIGHT}, {r: 2, c: 1, dir: DIR.DOWN}, {r: 2, c: 3, dir: DIR.LEFT}, {r: 3, c: 2, dir: DIR.UP}, {r: 3, c: 4, dir: DIR.RIGHT}, {r: 4, c: 3, dir: DIR.DOWN}, {r: 4, c: 5, dir: DIR.LEFT}, {r: 5, c: 4, dir: DIR.UP}], stones: [{r: 3, c: 3}] },
+            // Stage 9
+            { grid: 8, quills: [{r: 1, c: 3, dir: DIR.UP}, {r: 1, c: 6, dir: DIR.UP}, {r: 1, c: 1, dir: DIR.RIGHT}, {r: 3, c: 1, dir: DIR.UP}, {r: 3, c: 3, dir: DIR.UP}, {r: 3, c: 6, dir: DIR.RIGHT}, {r: 6, c: 1, dir: DIR.RIGHT}, {r: 6, c: 3, dir: DIR.UP}, {r: 6, c: 6, dir: DIR.DOWN}, {r: 4, c: 2, dir: DIR.LEFT}, {r: 2, c: 5, dir: DIR.UP}, {r: 5, c: 4, dir: DIR.DOWN}], stones: [{r: 2, c: 2}, {r: 5, c: 5}] },
+            // Stage 10
+            { grid: 8, quills: [{r: 1, c: 3, dir: DIR.UP}, {r: 3, c: 6, dir: DIR.RIGHT}, {r: 6, c: 4, dir: DIR.DOWN}, {r: 4, c: 1, dir: DIR.LEFT}, {r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 5, dir: DIR.LEFT}, {r: 5, c: 5, dir: DIR.UP}, {r: 5, c: 2, dir: DIR.RIGHT}, {r: 3, c: 3, dir: DIR.UP}, {r: 4, c: 4, dir: DIR.DOWN}], stones: [{r: 0, c: 0}, {r: 0, c: 7}, {r: 7, c: 0}, {r: 7, c: 7}] },
+            // Stage 11
+            { grid: 8, quills: [{r: 1, c: 1, dir: DIR.UP}, {r: 1, c: 6, dir: DIR.RIGHT}, {r: 6, c: 6, dir: DIR.DOWN}, {r: 6, c: 1, dir: DIR.LEFT}, {r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 5, dir: DIR.RIGHT}, {r: 5, c: 5, dir: DIR.DOWN}, {r: 5, c: 2, dir: DIR.LEFT}], stones: [{r: 3, c: 3}, {r: 4, c: 4}] },
+            // Stage 12
+            { grid: 8, quills: [{r: 0, c: 2, dir: DIR.UP}, {r: 2, c: 7, dir: DIR.RIGHT}, {r: 7, c: 5, dir: DIR.DOWN}, {r: 5, c: 0, dir: DIR.LEFT}, {r: 1, c: 2, dir: DIR.UP}, {r: 2, c: 6, dir: DIR.RIGHT}, {r: 6, c: 5, dir: DIR.DOWN}, {r: 5, c: 1, dir: DIR.LEFT}, {r: 3, c: 3, dir: DIR.UP}, {r: 4, c: 4, dir: DIR.DOWN}], stones: [{r: 2, c: 4}, {r: 5, c: 3}] },
+            // Stage 13
+            { grid: 9, quills: [{r: 2, c: 4, dir: DIR.UP}, {r: 4, c: 6, dir: DIR.RIGHT}, {r: 6, c: 4, dir: DIR.DOWN}, {r: 4, c: 2, dir: DIR.LEFT}, {r: 3, c: 4, dir: DIR.UP}, {r: 4, c: 5, dir: DIR.RIGHT}, {r: 5, c: 4, dir: DIR.DOWN}, {r: 4, c: 3, dir: DIR.LEFT}], stones: [{r: 1, c: 1}, {r: 1, c: 7}, {r: 7, c: 1}, {r: 7, c: 7}] },
+            // Stage 14
+            { grid: 9, quills: [{r: 0, c: 4, dir: DIR.UP}, {r: 4, c: 8, dir: DIR.RIGHT}, {r: 8, c: 4, dir: DIR.DOWN}, {r: 4, c: 0, dir: DIR.LEFT}, {r: 1, c: 4, dir: DIR.UP}, {r: 4, c: 7, dir: DIR.RIGHT}, {r: 7, c: 4, dir: DIR.DOWN}, {r: 4, c: 1, dir: DIR.LEFT}, {r: 3, c: 3, dir: DIR.UP}, {r: 3, c: 5, dir: DIR.RIGHT}, {r: 5, c: 5, dir: DIR.DOWN}, {r: 5, c: 3, dir: DIR.LEFT}], stones: [{r: 2, c: 2}, {r: 2, c: 6}, {r: 6, c: 2}, {r: 6, c: 6}] },
+            // Stage 15
+            { grid: 9, quills: [{r: 1, c: 2, dir: DIR.UP}, {r: 2, c: 7, dir: DIR.RIGHT}, {r: 7, c: 6, dir: DIR.DOWN}, {r: 6, c: 1, dir: DIR.LEFT}, {r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 6, dir: DIR.RIGHT}, {r: 6, c: 6, dir: DIR.DOWN}, {r: 6, c: 2, dir: DIR.LEFT}, {r: 4, c: 4, dir: DIR.UP}], stones: [{r: 3, c: 3}, {r: 3, c: 5}, {r: 5, c: 3}, {r: 5, c: 5}] },
+            // Stage 16
+            { grid: 9, quills: [{r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 6, dir: DIR.RIGHT}, {r: 6, c: 6, dir: DIR.DOWN}, {r: 6, c: 2, dir: DIR.LEFT}, {r: 3, c: 3, dir: DIR.UP}, {r: 3, c: 5, dir: DIR.RIGHT}, {r: 5, c: 5, dir: DIR.DOWN}, {r: 5, c: 3, dir: DIR.LEFT}, {r: 4, c: 3, dir: DIR.UP}, {r: 4, c: 5, dir: DIR.DOWN}], stones: [{r: 1, c: 4}, {r: 4, c: 1}, {r: 4, c: 7}, {r: 7, c: 4}] },
+            // Stage 17
+            { grid: 9, quills: [{r: 1, c: 3, dir: DIR.UP}, {r: 3, c: 7, dir: DIR.RIGHT}, {r: 7, c: 5, dir: DIR.DOWN}, {r: 5, c: 1, dir: DIR.LEFT}, {r: 2, c: 3, dir: DIR.UP}, {r: 3, c: 6, dir: DIR.RIGHT}, {r: 6, c: 5, dir: DIR.DOWN}, {r: 5, c: 2, dir: DIR.LEFT}, {r: 3, c: 3, dir: DIR.UP}, {r: 3, c: 5, dir: DIR.RIGHT}, {r: 5, c: 5, dir: DIR.DOWN}, {r: 5, c: 3, dir: DIR.LEFT}], stones: [{r: 0, c: 0}, {r: 0, c: 8}, {r: 8, c: 0}, {r: 8, c: 8}, {r: 4, c: 4}] },
+            // Stage 18
+            { grid: 10, quills: [{r: 0, c: 4, dir: DIR.UP}, {r: 4, c: 9, dir: DIR.RIGHT}, {r: 9, c: 5, dir: DIR.DOWN}, {r: 5, c: 0, dir: DIR.LEFT}, {r: 1, c: 4, dir: DIR.UP}, {r: 4, c: 8, dir: DIR.RIGHT}, {r: 8, c: 5, dir: DIR.DOWN}, {r: 5, c: 1, dir: DIR.LEFT}, {r: 3, c: 4, dir: DIR.UP}, {r: 4, c: 6, dir: DIR.RIGHT}, {r: 6, c: 5, dir: DIR.DOWN}, {r: 5, c: 3, dir: DIR.LEFT}], stones: [{r: 2, c: 2}, {r: 2, c: 7}, {r: 7, c: 2}, {r: 7, c: 7}] },
+            // Stage 19
+            { grid: 10, quills: [{r: 0, c: 3, dir: DIR.UP}, {r: 3, c: 9, dir: DIR.RIGHT}, {r: 9, c: 6, dir: DIR.DOWN}, {r: 6, c: 0, dir: DIR.LEFT}, {r: 2, c: 3, dir: DIR.UP}, {r: 3, c: 7, dir: DIR.RIGHT}, {r: 7, c: 6, dir: DIR.DOWN}, {r: 6, c: 2, dir: DIR.LEFT}, {r: 1, c: 5, dir: DIR.UP}, {r: 5, c: 8, dir: DIR.RIGHT}, {r: 8, c: 4, dir: DIR.DOWN}, {r: 4, c: 1, dir: DIR.LEFT}, {r: 3, c: 3, dir: DIR.UP}, {r: 6, c: 6, dir: DIR.DOWN}], stones: [{r: 1, c: 1}, {r: 1, c: 8}, {r: 8, c: 1}, {r: 8, c: 8}, {r: 4, c: 4}, {r: 5, c: 5}] },
+            // Stage 20
+            { grid: 10, quills: [{r: 1, c: 4, dir: DIR.UP}, {r: 4, c: 8, dir: DIR.RIGHT}, {r: 8, c: 5, dir: DIR.DOWN}, {r: 5, c: 1, dir: DIR.LEFT}, {r: 2, c: 4, dir: DIR.UP}, {r: 4, c: 7, dir: DIR.RIGHT}, {r: 7, c: 5, dir: DIR.DOWN}, {r: 5, c: 2, dir: DIR.LEFT}, {r: 1, c: 5, dir: DIR.UP}, {r: 5, c: 8, dir: DIR.RIGHT}, {r: 8, c: 4, dir: DIR.DOWN}, {r: 4, c: 1, dir: DIR.LEFT}, {r: 2, c: 5, dir: DIR.UP}, {r: 5, c: 7, dir: DIR.RIGHT}, {r: 7, c: 4, dir: DIR.DOWN}, {r: 4, c: 2, dir: DIR.LEFT}], stones: [{r: 0, c: 0}, {r: 0, c: 9}, {r: 9, c: 0}, {r: 9, c: 9}, {r: 3, c: 3}, {r: 3, c: 6}, {r: 6, c: 3}, {r: 6, c: 6}] }
+        ];
+
+        class GameEngine {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.currentStageIndex = 0;
+                this.lives = 3;
+                this.hintsLeft = 3;
+                this.quills = [];
+                this.stones = [];
+                this.gridSize = 6;
+                this.cellSize = 0;
+                this.offsetX = 0;
+                this.offsetY = 0;
+                this.animatingQuills = [];
+                this.particles = [];
+                this.shakeAmount = 0;
+                this.highlightedQuillId = null;
+
+                // Timer & Multiplayer state
+                this.players = [];
+                this.activePlayerIndex = 0;
+                this.stageStartTime = 0;
+                this.stageTimerInterval = null;
+                this.elapsedSeconds = 0;
+                this.mistakesInStage = 0;
+
+                this.initPlayers(1);
+                this.bindEvents();
+                this.resizeCanvas();
+            }
+
+            initPlayers(count) {
+                this.players = [];
+                for (let i = 0; i < count; i++) {
+                    this.players.push({
+                        id: i,
+                        name: `Player ${i + 1}`,
+                        coins: 0,
+                        totalTime: 0,
+                        totalSpeedRating: 0,
+                        completedStages: 0
+                    });
+                }
+                this.activePlayerIndex = 0;
+                this.updateUI();
+            }
+
+            startTimer() {
+                this.stopTimer();
+                this.stageStartTime = Date.now();
+                this.elapsedSeconds = 0;
+                this.stageTimerInterval = setInterval(() => {
+                    this.elapsedSeconds = (Date.now() - this.stageStartTime) / 1000;
+                    this.renderTimer();
+                }, 100);
+            }
+
+            stopTimer() {
+                if (this.stageTimerInterval) {
+                    clearInterval(this.stageTimerInterval);
+                    this.stageTimerInterval = null;
+                }
+            }
+
+            renderTimer() {
+                const mins = Math.floor(this.elapsedSeconds / 60);
+                const secs = Math.floor(this.elapsedSeconds % 60);
+                const ms = Math.floor((this.elapsedSeconds % 1) * 10);
+                const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${ms}`;
+                document.getElementById('timer-display').textContent = formatted;
+            }
+
+            resizeCanvas() {
+                const holder = document.getElementById('canvas-holder');
+                if (!holder) return;
+                const rect = holder.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                
+                this.canvas.width = rect.width * dpr;
+                this.canvas.height = rect.height * dpr;
+                this.ctx.scale(dpr, dpr);
+
+                this.displayWidth = rect.width;
+                this.displayHeight = rect.height;
+                this.recalculateDimensions();
+            }
+
+            recalculateDimensions() {
+                const padding = 20;
+                const availableSize = Math.min(this.displayWidth, this.displayHeight) - (padding * 2);
+                this.cellSize = availableSize / this.gridSize;
+                this.offsetX = (this.displayWidth - (this.cellSize * this.gridSize)) / 2;
+                this.offsetY = (this.displayHeight - (this.cellSize * this.gridSize)) / 2;
+            }
+
+            loadStage(index) {
+                if (index < 0 || index >= STAGES.length) return;
+                this.currentStageIndex = index;
+                const stageData = STAGES[index];
+                this.gridSize = stageData.grid;
+                this.lives = 3;
+                this.mistakesInStage = 0;
+                this.highlightedQuillId = null;
+                this.animatingQuills = [];
+                this.particles = [];
+
+                this.quills = stageData.quills.map((q, id) => ({
+                    id: id,
+                    r: q.r,
+                    c: q.c,
+                    dir: q.dir,
+                    escaping: false,
+                    x: 0,
+                    y: 0,
+                    vx: 0,
+                    vy: 0,
+                    color: this.getQuillColor(id)
+                }));
+
+                this.stones = stageData.stones.map(s => ({r: s.r, c: s.c}));
+
+                this.updateUI();
+                this.recalculateDimensions();
+                this.hideBanner();
+                this.startTimer();
+            }
+
+            getQuillColor(id) {
+                const colors = ['#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#10b981', '#3b82f6'];
+                return colors[id % colors.length];
+            }
+
+            updateUI() {
+                document.getElementById('stage-display').textContent = `${this.currentStageIndex + 1} / ${STAGES.length}`;
+                
+                const stageTexts = STAGE_TEXTS[currentLang] || STAGE_TEXTS.en;
+                document.getElementById('stage-subtitle').textContent = stageTexts.subtitles[this.currentStageIndex];
+                document.getElementById('hint-count').textContent = this.hintsLeft;
+
+                const curPlayer = this.players[this.activePlayerIndex] || this.players[0];
+                const t = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+                document.getElementById('txt-player-name').textContent = `${t.playerLabel}${curPlayer.id + 1}`;
+                document.getElementById('coins-display').textContent = curPlayer.coins;
+
+                // Update active player badge styling
+                const badge = document.getElementById('active-player-badge');
+                badge.className = `px-3 py-1 rounded-xl text-xs font-bold font-cinzel shadow-md transition-all flex items-center gap-1.5 badge-player-${curPlayer.id}`;
+
+                // Update Mode label
+                const modeTxt = playerCount === 1 ? t.modeSingle : `${playerCount}${t.modeMulti}`;
+                document.getElementById('txt-current-mode').textContent = modeTxt;
+
+                for (let i = 1; i <= 3; i++) {
+                    const heartEl = document.getElementById(`heart-${i}`);
+                    if (heartEl) {
+                        if (i <= this.lives) {
+                            heartEl.style.opacity = '1';
+                            heartEl.style.transform = 'scale(1)';
+                        } else {
+                            heartEl.style.opacity = '0.2';
+                            heartEl.style.transform = 'scale(0.8)';
+                        }
+                    }
+                }
+            }
+
+            bindEvents() {
+                window.addEventListener('resize', () => {
+                    this.resizeCanvas();
+                });
+
+                const handleTap = (e) => {
+                    audio.init();
+                    const rect = this.canvas.getBoundingClientRect();
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                    const touchX = clientX - rect.left;
+                    const touchY = clientY - rect.top;
+
+                    this.processTap(touchX, touchY);
+                };
+
+                this.canvas.addEventListener('click', handleTap);
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handleTap(e);
+                }, { passive: false });
+            }
+
+            processTap(x, y) {
+                for (let q of this.quills) {
+                    if (q.escaping) continue;
+
+                    const qX = this.offsetX + q.c * this.cellSize + this.cellSize / 2;
+                    const qY = this.offsetY + q.r * this.cellSize + this.cellSize / 2;
+
+                    const dist = Math.hypot(x - qX, y - qY);
+                    if (dist < this.cellSize * 0.45) {
+                        this.tryEscapeQuill(q);
+                        break;
+                    }
+                }
+            }
+
+            tryEscapeQuill(quill) {
+                this.highlightedQuillId = null;
+
+                const isClear = this.checkPathClear(quill);
+
+                if (isClear) {
+                    audio.playGlide();
+                    quill.escaping = true;
+                    
+                    const speed = 12;
+                    if (quill.dir === DIR.UP) quill.vy = -speed;
+                    if (quill.dir === DIR.RIGHT) quill.vx = speed;
+                    if (quill.dir === DIR.DOWN) quill.vy = speed;
+                    if (quill.dir === DIR.LEFT) quill.vx = -speed;
+
+                    quill.px = this.offsetX + quill.c * this.cellSize + this.cellSize / 2;
+                    quill.py = this.offsetY + quill.r * this.cellSize + this.cellSize / 2;
+
+                    this.animatingQuills.push(quill);
+                    
+                    // Award coins per quill
+                    const curPlayer = this.players[this.activePlayerIndex];
+                    curPlayer.coins += 10;
+                    this.updateUI();
+                    audio.playCoin();
+
+                    const coupletList = STAGE_TEXTS[currentLang].couplets;
+                    this.showBanner(coupletList[Math.floor(Math.random() * coupletList.length)]);
+                } else {
+                    audio.playError();
+                    this.shakeAmount = 10;
+                    this.mistakesInStage++;
+                    this.spawnInkSplatter(
+                        this.offsetX + quill.c * this.cellSize + this.cellSize / 2,
+                        this.offsetY + quill.r * this.cellSize + this.cellSize / 2
+                    );
+
+                    this.lives--;
+                    this.updateUI();
+
+                    if (this.lives <= 0) {
+                        this.stopTimer();
+                        setTimeout(() => {
+                            document.getElementById('modal-loss').classList.remove('hidden');
+                        }, 400);
+                    }
+                }
+            }
+
+            checkPathClear(quill) {
+                let dr = 0, dc = 0;
+                if (quill.dir === DIR.UP) dr = -1;
+                if (quill.dir === DIR.RIGHT) dc = 1;
+                if (quill.dir === DIR.DOWN) dr = 1;
+                if (quill.dir === DIR.LEFT) dc = -1;
+
+                let currR = quill.r + dr;
+                let currC = quill.c + dc;
+
+                while (currR >= 0 && currR < this.gridSize && currC >= 0 && currC < this.gridSize) {
+                    const blockedByQuill = this.quills.some(q => !q.escaping && q.r === currR && q.c === currC);
+                    if (blockedByQuill) return false;
+
+                    const blockedByStone = this.stones.some(s => s.r === currR && s.c === currC);
+                    if (blockedByStone) return false;
+
+                    currR += dr;
+                    currC += dc;
+                }
+
+                return true;
+            }
+
+            spawnInkSplatter(x, y) {
+                for (let i = 0; i < 15; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 2 + Math.random() * 4;
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        radius: 2 + Math.random() * 3,
+                        alpha: 1,
+                        color: '#ef4444'
+                    });
+                }
+            }
+
+            giveHint() {
+                if (this.hintsLeft <= 0) return;
+
+                const solvableQuill = this.quills.find(q => !q.escaping && this.checkPathClear(q));
+
+                if (solvableQuill) {
+                    this.hintsLeft--;
+                    this.highlightedQuillId = solvableQuill.id;
+                    audio.playHint();
+                    this.updateUI();
+                }
+            }
+
+            showBanner(text) {
+                const banner = document.getElementById('verse-banner');
+                const bannerText = document.getElementById('verse-text');
+                if (bannerText) bannerText.textContent = text;
+                if (banner) banner.style.opacity = '1';
+            }
+
+            hideBanner() {
+                const banner = document.getElementById('verse-banner');
+                if (banner) banner.style.opacity = '0';
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.displayWidth, this.displayHeight);
+
+                this.ctx.save();
+                if (this.shakeAmount > 0) {
+                    const dx = (Math.random() - 0.5) * this.shakeAmount;
+                    const dy = (Math.random() - 0.5) * this.shakeAmount;
+                    this.ctx.translate(dx, dy);
+                    this.shakeAmount *= 0.85;
+                    if (this.shakeAmount < 0.5) this.shakeAmount = 0;
+                }
+
+                this.drawGrid();
+                this.drawStones();
+
+                for (let q of this.quills) {
+                    if (!q.escaping) {
+                        this.drawQuill(
+                            this.offsetX + q.c * this.cellSize + this.cellSize / 2,
+                            this.offsetY + q.r * this.cellSize + this.cellSize / 2,
+                            q.dir,
+                            q.color,
+                            q.id === this.highlightedQuillId
+                        );
+                    }
+                }
+
+                for (let i = this.animatingQuills.length - 1; i >= 0; i--) {
+                    let q = this.animatingQuills[i];
+                    q.px += q.vx;
+                    q.py += q.vy;
+
+                    this.particles.push({
+                        x: q.px,
+                        y: q.py,
+                        vx: (Math.random() - 0.5) * 1,
+                        vy: (Math.random() - 0.5) * 1,
+                        radius: 2 + Math.random() * 2,
+                        alpha: 0.8,
+                        color: q.color
+                    });
+
+                    this.drawQuill(q.px, q.py, q.dir, q.color, false);
+
+                    if (
+                        q.px < -100 || q.px > this.displayWidth + 100 ||
+                        q.py < -100 || q.py > this.displayHeight + 100
+                    ) {
+                        this.animatingQuills.splice(i, 1);
+                        this.quills = this.quills.filter(item => item.id !== q.id);
+
+                        if (this.quills.length === 0) {
+                            this.handleStageComplete();
+                        }
+                    }
+                }
+
+                this.updateAndDrawParticles();
+                this.ctx.restore();
+
+                requestAnimationFrame(() => this.render());
+            }
+
+            drawGrid() {
+                this.ctx.strokeStyle = 'rgba(212, 163, 89, 0.15)';
+                this.ctx.lineWidth = 1;
+
+                for (let i = 0; i <= this.gridSize; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.offsetX + i * this.cellSize, this.offsetY);
+                    this.ctx.lineTo(this.offsetX + i * this.cellSize, this.offsetY + this.gridSize * this.cellSize);
+                    this.ctx.stroke();
+
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.offsetX, this.offsetY + i * this.cellSize);
+                    this.ctx.lineTo(this.offsetX + this.gridSize * this.cellSize, this.offsetY + i * this.cellSize);
+                    this.ctx.stroke();
+                }
+            }
+
+            drawStones() {
+                for (let s of this.stones) {
+                    const x = this.offsetX + s.c * this.cellSize + this.cellSize / 2;
+                    const y = this.offsetY + s.r * this.cellSize + this.cellSize / 2;
+                    const r = this.cellSize * 0.35;
+
+                    this.ctx.fillStyle = '#374151';
+                    this.ctx.strokeStyle = '#6b7280';
+                    this.ctx.lineWidth = 2;
+
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, r, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+
+                    this.ctx.fillStyle = '#1f2937';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x - r * 0.2, y - r * 0.2, r * 0.4, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
+
+            drawQuill(x, y, dir, color, isHighlighted) {
+                this.ctx.save();
+                this.ctx.translate(x, y);
+
+                let rotationAngle = 0;
+                if (dir === DIR.RIGHT) rotationAngle = Math.PI / 2;
+                if (dir === DIR.DOWN) rotationAngle = Math.PI;
+                if (dir === DIR.LEFT) rotationAngle = -Math.PI / 2;
+                this.ctx.rotate(rotationAngle);
+
+                const size = this.cellSize * 0.38;
+
+                if (isHighlighted) {
+                    this.ctx.strokeStyle = '#f59e0b';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, size * 1.3, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                }
+
+                this.ctx.fillStyle = color;
+                this.ctx.strokeStyle = '#fef3c7';
+                this.ctx.lineWidth = 1.5;
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, -size); 
+                this.ctx.lineTo(size * 0.6, size * 0.4);
+                this.ctx.lineTo(size * 0.2, size * 0.8);
+                this.ctx.lineTo(0, size * 0.4);
+                this.ctx.lineTo(-size * 0.2, size * 0.8);
+                this.ctx.lineTo(-size * 0.6, size * 0.4);
+                this.ctx.closePath();
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, -size * 0.7);
+                this.ctx.lineTo(0, size * 0.3);
+                this.ctx.stroke();
+
+                this.ctx.restore();
+            }
+
+            updateAndDrawParticles() {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    let p = this.particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.alpha -= 0.02;
+
+                    if (p.alpha <= 0) {
+                        this.particles.splice(i, 1);
+                        continue;
+                    }
+
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.alpha;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.globalAlpha = 1.0;
+                }
+            }
+
+            handleStageComplete() {
+                this.stopTimer();
+                audio.playWin();
+
+                const curPlayer = this.players[this.activePlayerIndex];
+                
+                // Calculate Brain Speed Rating Index
+                const speedScore = Math.max(100, Math.round(1000 - (this.elapsedSeconds * 12) - (this.mistakesInStage * 120)));
+                const bonusCoins = Math.max(50, Math.round(150 - (this.elapsedSeconds * 2) + (this.lives * 25)));
+
+                curPlayer.coins += bonusCoins;
+                curPlayer.totalTime += this.elapsedSeconds;
+                curPlayer.totalSpeedRating += speedScore;
+                curPlayer.completedStages++;
+
+                // Fill stats UI
+                const mins = Math.floor(this.elapsedSeconds / 60);
+                const secs = Math.floor(this.elapsedSeconds % 60);
+                document.getElementById('stat-time').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                document.getElementById('stat-speed').textContent = speedScore;
+                document.getElementById('stat-coins').textContent = `+${bonusCoins} 🪙`;
+
+                const t = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+                const coupletList = STAGE_TEXTS[currentLang].couplets;
+                document.getElementById('win-couplet').textContent = coupletList[this.currentStageIndex];
+
+                // Check multiplayer next turn
+                const nextPlayerNotice = document.getElementById('next-player-notice');
+                if (playerCount > 1) {
+                    const nextIndex = (this.activePlayerIndex + 1) % playerCount;
+                    const nextPlayer = this.players[nextIndex];
+                    document.getElementById('txt-next-turn-notice').textContent = `${t.nextTurnNotice}${t.playerLabel}${nextPlayer.id + 1}`;
+                    nextPlayerNotice.classList.remove('hidden');
+                } else {
+                    nextPlayerNotice.classList.add('hidden');
+                }
+
+                document.getElementById('modal-win').classList.remove('hidden');
+            }
+
+            showLeaderboard() {
+                const body = document.getElementById('leaderboard-body');
+                body.innerHTML = '';
+
+                const sorted = [...this.players].sort((a, b) => (b.coins + b.totalSpeedRating) - (a.coins + a.totalSpeedRating));
+                const ranks = ['🥇 1st', '🥈 2nd', '🥉 3rd', '4th'];
+
+                sorted.forEach((p, rankIdx) => {
+                    const row = document.createElement('tr');
+                    row.className = p.id === this.activePlayerIndex ? 'bg-amber-500/10 font-bold' : '';
+                    row.innerHTML = `
+                        <td class="p-2 text-center">${ranks[rankIdx]}</td>
+                        <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] badge-player-${p.id}">${p.name}</span></td>
+                        <td class="p-2 text-center text-amber-300 font-bold">${p.coins} 🪙</td>
+                        <td class="p-2 text-center text-amber-300 font-bold">${p.totalSpeedRating}</td>
+                    `;
+                    body.appendChild(row);
+                });
+
+                document.getElementById('modal-leaderboard').classList.remove('hidden');
+            }
+        }
+
+        window.onload = () => {
+            const game = new GameEngine();
+            window.gameInstance = game;
+            game.render();
+
+            setLanguage('en');
+
+            document.getElementById('btn-start').onclick = () => {
+                document.getElementById('modal-intro').classList.add('hidden');
+                game.loadStage(0);
+            };
+
+            document.getElementById('btn-next-stage').onclick = () => {
+                document.getElementById('modal-win').classList.add('hidden');
+
+                if (playerCount > 1) {
+                    game.activePlayerIndex = (game.activePlayerIndex + 1) % playerCount;
+                }
+
+                if (game.currentStageIndex >= STAGES.length - 1 && game.activePlayerIndex === 0) {
+                    game.showLeaderboard();
+                } else {
+                    const nextStage = game.activePlayerIndex === 0 ? game.currentStageIndex + 1 : game.currentStageIndex;
+                    game.loadStage(nextStage);
+                }
+            };
+
+            document.getElementById('btn-retry').onclick = () => {
+                document.getElementById('modal-loss').classList.add('hidden');
+                game.loadStage(game.currentStageIndex);
+            };
+
+            document.getElementById('btn-reset').onclick = () => {
+                game.loadStage(game.currentStageIndex);
+            };
+
+            document.getElementById('btn-hint').onclick = () => {
+                game.giveHint();
+            };
+
+            document.getElementById('btn-scores').onclick = () => {
+                game.showLeaderboard();
+            };
+
+            document.getElementById('btn-lang').onclick = () => {
+                document.getElementById('modal-intro').classList.remove('hidden');
+            };
+
+            document.getElementById('btn-restart-game').onclick = () => {
+                document.getElementById('modal-leaderboard').classList.add('hidden');
+                game.initPlayers(playerCount);
+                game.loadStage(0);
+            };
+
+            document.getElementById('btn-sound').onclick = () => {
+                audio.muted = !audio.muted;
+                document.getElementById('sound-icon').textContent = audio.muted ? '🔇' : '🔊';
+            };
+
+            document.getElementById('btn-info').onclick = () => {
+                document.getElementById('modal-intro').classList.remove('hidden');
+            };
+        };
+    </script>
+</body>
+</html>
