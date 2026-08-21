@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Shayree Escape: Speedy Bird Puzzle</title>
+    <title>Chicku Run: Speedy Bird Puzzle</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts for Multi-Language & Elegant Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Noto+Sans+Arabic:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+SC:wght@400;600;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -37,7 +35,7 @@
             color: #2a1f33;
         }
 
-        /* Responsive Viewport Height fix for Mobile Browsers */
+        /* Dynamic Viewport Height fix for Mobile Browsers */
         .mobile-viewport-container {
             height: 100vh;
             height: 100dvh;
@@ -88,7 +86,7 @@
         }
 
         .glass-card-night {
-            background: rgba(26, 18, 34, 0.95);
+            background: rgba(26, 18, 34, 0.92);
             border: 1px solid rgba(212, 163, 89, 0.3);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(16px);
@@ -96,7 +94,7 @@
         }
 
         .glass-card-day {
-            background: rgba(255, 252, 245, 0.96);
+            background: rgba(255, 252, 245, 0.92);
             border: 1px solid rgba(212, 163, 89, 0.5);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
             backdrop-filter: blur(16px);
@@ -136,7 +134,6 @@
         .badge-player-2 { background: #06b6d4; color: #1a1222; }
         .badge-player-3 { background: #ec4899; color: #ffffff; }
 
-        /* Ad Banner Slot Styling */
         .ad-banner-box {
             background: linear-gradient(90deg, rgba(212, 163, 89, 0.08) 0%, rgba(147, 51, 234, 0.08) 50%, rgba(212, 163, 89, 0.08) 100%);
             border: 1px dashed rgba(212, 163, 89, 0.35);
@@ -147,33 +144,34 @@
 
     <!-- TOP HUD -->
     <header id="top-hud" class="w-full max-w-xl flex flex-col gap-1.5 sm:gap-2 bg-slate-950/90 p-2 sm:p-2.5 rounded-2xl border border-amber-500/40 backdrop-blur-md z-10 transition-colors duration-300 shadow-xl text-white">
-        <div class="flex justify-between items-center gap-1 sm:gap-2">
+        <!-- Strictly Anchored 5-Column Header Grid -->
+        <div class="grid grid-cols-5 gap-1 items-center w-full">
             <!-- Stage Display -->
-            <div class="bg-amber-500/15 border border-amber-500/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl text-center">
-                <span id="label-stage" class="text-[9px] sm:text-[10px] text-amber-200 uppercase tracking-widest block font-cinzel">Stage</span>
-                <span id="stage-display" class="text-xs sm:text-sm font-bold text-amber-300 font-cinzel">1 / 100</span>
+            <div class="bg-amber-500/15 border border-amber-500/40 px-1 py-0.5 sm:px-2 sm:py-1 rounded-xl text-center flex flex-col justify-center items-center">
+                <span id="label-stage" class="text-[8px] sm:text-[9px] text-amber-200 uppercase tracking-widest block font-cinzel leading-none mb-0.5">Stage</span>
+                <span id="stage-display" class="text-[10px] sm:text-xs font-bold text-amber-300 font-cinzel leading-none">1 / 100</span>
             </div>
 
-            <!-- Active Player Banner in Multiplayer -->
-            <div id="active-player-badge" class="px-2 py-0.5 sm:px-3 sm:py-1 rounded-xl text-[11px] sm:text-xs font-bold font-cinzel shadow-md transition-all flex items-center gap-1 badge-player-0">
-                👤 <span id="txt-player-name">Player 1</span>
+            <!-- Active Player Badge -->
+            <div id="active-player-badge" class="px-1 py-1 sm:px-2 sm:py-1 rounded-xl text-[10px] sm:text-xs font-bold font-cinzel shadow-md transition-all flex items-center justify-center gap-0.5 truncate badge-player-0">
+                <span>👤</span> <span id="txt-player-name" class="truncate">Player 1</span>
             </div>
 
             <!-- Timer Display -->
-            <div class="bg-black/50 border border-amber-500/30 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl flex items-center gap-1">
-                <span class="text-[10px] sm:text-xs">⏱️</span>
-                <span id="timer-display" class="text-xs sm:text-sm font-mono font-bold text-amber-300">00:00.0</span>
+            <div class="bg-black/50 border border-amber-500/30 px-1 py-1 sm:px-2 sm:py-1 rounded-xl flex items-center justify-center gap-0.5">
+                <span class="text-[9px] sm:text-xs">⏱️</span>
+                <span id="timer-display" class="text-[10px] sm:text-xs font-mono tabular-nums font-bold text-amber-300">00:00.0</span>
             </div>
 
-            <!-- Coins Display -->
-            <div class="bg-amber-500/15 border border-amber-500/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl flex items-center gap-1">
-                <span class="text-[10px] sm:text-xs">🪙</span>
-                <span id="coins-display" class="text-xs sm:text-sm font-bold text-amber-300">0</span>
+            <!-- Coins Display (Tabular numbers prevent width expansion) -->
+            <div class="bg-amber-500/15 border border-amber-500/40 px-1 py-1 sm:px-2 sm:py-1 rounded-xl flex items-center justify-center gap-0.5">
+                <span class="text-[9px] sm:text-xs">🪙</span>
+                <span id="coins-display" class="text-[10px] sm:text-xs font-mono tabular-nums font-bold text-amber-300 truncate">0</span>
             </div>
 
-            <!-- Single Life Display (1 Life Rule) -->
-            <div class="flex items-center gap-1 bg-black/50 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-red-500/40">
-                <span id="heart-1" class="text-red-500 text-sm sm:text-base transition-all duration-300 animate-pulse">❤️</span>
+            <!-- Single Life Display (Fixed in Column 5) -->
+            <div class="flex items-center justify-center gap-0.5 bg-black/50 px-1 py-1 sm:px-2 sm:py-1 rounded-xl border border-red-500/40">
+                <span id="heart-1" class="text-red-500 text-xs sm:text-sm transition-all duration-300 animate-pulse">❤️</span>
                 <span id="txt-lives-count" class="text-[10px] sm:text-xs font-bold text-red-300">1/1</span>
             </div>
         </div>
@@ -181,13 +179,14 @@
         <div class="flex justify-between items-center px-1">
             <div>
                 <h1 id="txt-game-title" class="text-xs sm:text-base font-bold font-cinzel text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-amber-100">
-                    Shayree Escape
+                    Chicku Run
                 </h1>
                 <p id="stage-subtitle" class="text-[10px] sm:text-[11px] text-amber-200/90 italic">Stage 1: Golden Dunes</p>
             </div>
             <div class="flex items-center gap-2">
                 <div class="text-right">
-                    <span id="txt-mode-label" class="text-[9px] sm:text-[10px] text-amber-200/70 uppercase block">Mode</span>
+                    <span id="txt-dev-credit" class="text-[8px] sm:text-[9px] text-amber-300/80 uppercase block font-semibold">By Nusrat Shaheen Apps Suit</span>
+                    <span id="txt-mode-label" class="hidden">Mode</span>
                     <span id="txt-current-mode" class="text-[10px] sm:text-xs font-bold text-amber-300">1 Player</span>
                 </div>
             </div>
@@ -196,7 +195,7 @@
 
     <!-- MAIN GAME CANVAS WRAPPER -->
     <main class="relative w-full max-w-xl flex-1 flex flex-col justify-center items-center my-0.5 min-h-0">
-        <div id="canvas-holder" class="canvas-container relative w-full aspect-square max-h-[52vh] sm:max-h-[62vh] rounded-2xl sm:rounded-3xl flex justify-center items-center overflow-hidden transition-all duration-500">
+        <div id="canvas-holder" class="canvas-container relative w-full aspect-square max-h-[50vh] sm:max-h-[60vh] rounded-2xl sm:rounded-3xl flex justify-center items-center overflow-hidden transition-all duration-500">
             <canvas id="gameCanvas" class="w-full h-full block rounded-2xl sm:rounded-3xl cursor-pointer"></canvas>
             
             <div id="verse-banner" class="absolute bottom-2 left-2 right-2 bg-purple-950/90 border border-amber-500/40 px-2.5 py-1 rounded-xl text-center backdrop-blur-md transition-opacity duration-500 opacity-0 pointer-events-none">
@@ -230,7 +229,6 @@
             🏆 <span id="txt-ranks">Ranks</span>
         </button>
 
-        <!-- Day / Night Theme Toggle Button -->
         <button id="btn-theme" class="py-1.5 px-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-xl text-[10px] sm:text-xs font-semibold text-amber-200 flex items-center justify-center transition">
             <span id="theme-icon">☀️</span>
         </button>
@@ -250,13 +248,13 @@
 
     <!-- INTRO / SETUP MODAL -->
     <div id="modal-intro" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md">
-        <div id="card-intro" class="glass-card-night max-w-md w-full p-4 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-500/40 max-h-[92vh] overflow-y-auto">
+        <div id="card-intro" class="glass-card-day max-w-md w-full p-4 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-500/40 max-h-[92vh] overflow-y-auto">
             
             <!-- Language Selector -->
-            <div class="mb-3 bg-purple-950/70 p-2 rounded-2xl border border-amber-500/20">
+            <div class="mb-3 bg-purple-950/70 p-2 rounded-2xl border border-amber-500/20 text-white">
                 <span id="txt-select-lang" class="text-[11px] font-semibold text-amber-300 uppercase tracking-wide block mb-1.5">Select Language</span>
                 <div class="grid grid-cols-4 gap-1 text-[11px]">
-                    <button class="lang-btn py-1 px-1 rounded-xl flex flex-col items-center justify-center" onclick="setLanguage('en')">
+                    <button class="lang-btn py-1 px-1 rounded-xl flex flex-col items-center justify-center active-lang" onclick="setLanguage('en')">
                         <span>🇬🇧 EN</span>
                     </button>
                     <button class="lang-btn py-1 px-1 rounded-xl flex flex-col items-center justify-center" onclick="setLanguage('ur')">
@@ -272,7 +270,7 @@
             </div>
 
             <!-- Player Mode Selector -->
-            <div class="mb-4 bg-purple-950/70 p-2.5 rounded-2xl border border-amber-500/30">
+            <div class="mb-4 bg-purple-950/70 p-2.5 rounded-2xl border border-amber-500/30 text-white">
                 <span id="txt-select-players" class="text-[11px] font-semibold text-amber-300 uppercase tracking-wide block mb-2">Select Number of Players</span>
                 <div class="grid grid-cols-4 gap-1.5 text-xs font-bold">
                     <button class="mode-btn py-2 px-1 rounded-xl flex items-center justify-center gap-1 active-mode" onclick="setPlayerCount(1)">
@@ -291,14 +289,15 @@
             </div>
 
             <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-2 text-2xl">
-                🦁
+                🐥
             </div>
-            <h2 id="txt-intro-title" class="text-xl sm:text-2xl font-extrabold font-cinzel text-amber-300 mb-1">Shayree Escape</h2>
+            <h2 id="txt-intro-title" class="text-xl sm:text-2xl font-extrabold font-cinzel text-amber-600 dark:text-amber-300 mb-0.5">Chicku Run</h2>
+            <p id="txt-dev-subtitle" class="text-[10px] text-amber-500 font-semibold mb-2 uppercase tracking-wider">Developed by Nusrat Shaheen Apps Suit</p>
             <p id="txt-intro-desc" class="text-xs opacity-90 mb-4 leading-relaxed">
-                Help Shayree (the brave little lion cub) clear all the speedy runner birds! You have 1 LIFE only! If birds crash, your run ends and resets to Stage 1!
+                Help Chicku (the brave little runner bird) clear all the speedy birds! You have 1 LIFE only! If birds crash, your run ends and resets to Stage 1!
             </p>
 
-            <div class="bg-purple-950/60 p-3 rounded-2xl text-left border border-purple-500/20 mb-4 text-xs space-y-1.5 opacity-90">
+            <div class="bg-purple-950/60 p-3 rounded-2xl text-left border border-purple-500/20 mb-4 text-xs space-y-1.5 text-white opacity-90">
                 <p><strong id="txt-goal-title">🎯 100 Stages:</strong> <span id="txt-goal-desc">Conquer 100 progressively complex stages without a single crash!</span></p>
                 <p><strong id="txt-timer-title">❤️ 1 Life Rule:</strong> <span id="txt-timer-desc">One mistake resets your campaign to Stage 1!</span></p>
                 <p><strong id="txt-multiplayer-title">👥 Pass & Play:</strong> <span id="txt-multiplayer-desc">Players take turns per stage until eliminated to crown 1st place!</span></p>
@@ -312,16 +311,15 @@
 
     <!-- WIN STAGE MODAL -->
     <div id="modal-win" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-black/30 backdrop-blur-sm transition-all duration-500">
-        <div id="card-win" class="glass-card-night max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-500/50 shadow-2xl relative overflow-hidden">
-            <!-- Glowing Milestone Particles Header Accent -->
+        <div id="card-win" class="glass-card-day max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-500/50 shadow-2xl relative overflow-hidden">
             <div id="milestone-badge-glow" class="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-40 bg-amber-500/20 rounded-full blur-2xl pointer-events-none"></div>
 
             <div class="w-14 h-14 bg-amber-500/20 border border-amber-400/50 rounded-full flex items-center justify-center mx-auto mb-2 text-3xl shadow-lg animate-bounce">
                 📜
             </div>
-            <h3 id="txt-win-title" class="text-lg sm:text-xl font-cinzel text-amber-300 font-bold mb-1 drop-shadow-md">Stage Completed!</h3>
+            <h3 id="txt-win-title" class="text-lg sm:text-xl font-cinzel text-amber-600 dark:text-amber-300 font-bold mb-1 drop-shadow-md">Stage Completed!</h3>
 
-            <div class="bg-purple-950/70 p-3 rounded-2xl border border-amber-500/30 text-xs mb-3 flex justify-around">
+            <div class="bg-purple-950/70 p-3 rounded-2xl border border-amber-500/30 text-xs text-white mb-3 flex justify-around">
                 <div class="text-center">
                     <span id="label-stat-time" class="text-[10px] opacity-70 uppercase block">Time</span>
                     <span id="stat-time" class="font-mono font-bold text-amber-300 text-sm">00:00</span>
@@ -336,7 +334,7 @@
                 </div>
             </div>
 
-            <div id="next-player-notice" class="mb-3 p-2 rounded-xl bg-amber-500/20 border border-amber-500/30 text-xs font-semibold text-amber-200 hidden">
+            <div id="next-player-notice" class="mb-3 p-2 rounded-xl bg-amber-500/20 border border-amber-500/30 text-xs font-semibold text-amber-800 dark:text-amber-200 hidden">
                 📢 <span id="txt-next-turn-notice">Next Turn: Player 2</span>
             </div>
 
@@ -348,16 +346,16 @@
 
     <!-- GAME OVER / CRASH MODAL -->
     <div id="modal-loss" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-        <div id="card-loss" class="glass-card-night max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-red-500/40">
+        <div id="card-loss" class="glass-card-day max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-red-500/40">
             <div class="w-14 h-14 bg-red-500/20 border border-red-500/40 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl">
                 💥
             </div>
-            <h3 id="txt-loss-title" class="text-xl font-cinzel text-red-400 mb-1">Bird Crashed!</h3>
+            <h3 id="txt-loss-title" class="text-xl font-cinzel text-red-500 mb-1">Bird Crashed!</h3>
             <p id="txt-loss-desc" class="text-xs opacity-90 mb-3">
                 The runner birds crashed! You lost your 1 Life and must restart from Stage 1.
             </p>
 
-            <div class="bg-purple-950/70 p-3 rounded-2xl border border-red-500/30 text-xs mb-4 flex justify-around">
+            <div class="bg-purple-950/70 p-3 rounded-2xl border border-red-500/30 text-xs text-white mb-4 flex justify-around">
                 <div>
                     <span class="text-[10px] opacity-70 uppercase block">Stage Reached</span>
                     <span id="loss-stage-reached" class="font-bold text-amber-300 text-sm">Stage 1</span>
@@ -376,16 +374,16 @@
 
     <!-- LEADERBOARD MODAL -->
     <div id="modal-leaderboard" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md">
-        <div id="card-leaderboard" class="glass-card-night max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-400 max-h-[92vh] overflow-y-auto">
+        <div id="card-leaderboard" class="glass-card-day max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-400 max-h-[92vh] overflow-y-auto">
             <div class="w-16 h-16 bg-amber-400/20 border-2 border-amber-400 rounded-full flex items-center justify-center mx-auto mb-2 text-3xl">
                 👑
             </div>
-            <h2 id="txt-finale-title" class="text-xl sm:text-2xl font-extrabold font-cinzel text-amber-300 mb-1">Leaderboard & Record</h2>
+            <h2 id="txt-finale-title" class="text-xl sm:text-2xl font-extrabold font-cinzel text-amber-600 dark:text-amber-300 mb-1">Leaderboard & Record</h2>
             <p id="txt-finale-desc" class="text-xs opacity-80 mb-3">
                 Final scores and brain speed rankings saved in browser history!
             </p>
 
-            <div class="bg-purple-950/70 border border-amber-500/30 rounded-2xl overflow-hidden mb-4">
+            <div class="bg-purple-950/70 border border-amber-500/30 rounded-2xl overflow-hidden mb-4 text-white">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-amber-500/20 text-amber-300 font-cinzel">
                         <tr>
@@ -411,14 +409,14 @@
         /* MULTI-LANGUAGE TRANSLATION DICTIONARY */
         const TRANSLATIONS = {
             en: {
-                gameTitle: "Shayree Escape",
+                gameTitle: "Chicku Run",
                 stageLabel: "Stage",
                 resetBtn: "Reset",
                 hintBtn: "Hint",
                 ranksBtn: "Ranks",
-                introTitle: "Shayree Escape 🦁",
-                introDesc: "Help Shayree (the brave little lion cub) clear all the speedy runner birds! You have 1 LIFE only! If birds crash, your campaign resets to Stage 1!",
-                goalTitle: "🎯 100 Stages:",
+                introTitle: "Chicku Run 🐥",
+                introDesc: "Help Chicku (the brave little runner bird) clear all the speedy birds! You have 1 LIFE only! If birds crash, your campaign resets to Stage 1!",
+                goalTitle: "🎯 100 Unique Stages:",
                 goalDesc: "Conquer 100 progressively complex stages without a single crash!",
                 timerTitle: "❤️ 1 Life Rule:",
                 timerDesc: "One mistake resets your campaign to Stage 1!",
@@ -446,15 +444,15 @@
                 adNotice: "Play Store Commercial Space ready for Google Ads"
             },
             ur: {
-                gameTitle: "شیری ایسکیپ",
+                gameTitle: "چکُو رن",
                 stageLabel: "اسٹیج",
                 resetBtn: "دوبارہ",
                 hintBtn: "اشارہ",
                 ranksBtn: "اسکور بورڈ",
-                introTitle: "شیری ایسکیپ 🦁 (چھوٹا شیر)",
-                introDesc: "شیری (بہادر چھوٹے شیر) کی مدد کریں! آپ کے پاس صرف 1 زندگی ہے! اگر پرندہ ٹکرایا تو گیم دوبارہ اسٹیج 1 سے شروع ہو جائے گی!",
-                goalTitle: "🎯 100 اسٹیجز:",
-                goalDesc: "100 اسٹیجز میں تمام پرندوں کو بغیر ٹکرائے آزاد کریں۔",
+                introTitle: "چکُو رن 🐥 (Chicku Run)",
+                introDesc: "چکُو (بہادر چھوٹے چوزے) کی مدد کریں! آپ کے پاس صرف 1 زندگی ہے! اگر پرندہ ٹکرایا تو گیم دوبارہ اسٹیج 1 سے شروع ہو جائے گی!",
+                goalTitle: "🎯 100 منفرد اسٹیجز:",
+                goalDesc: "100 اسٹیجز میں تمام پرندوں کو بغیر ٹکرائے آزاد کریں۔ ہر اسٹیج پہلے سے زیادہ پیچیدہ ہے!",
                 timerTitle: "❤️ 1 لائف اصول:",
                 timerDesc: "ایک ٹکر سے اپ کی پیشرفت دوبارہ اسٹیج 1 پر چلی جائے گی!",
                 multiplayerTitle: "👥 پاس اینڈ پلے:",
@@ -481,19 +479,19 @@
                 adNotice: "پلے اسٹور اشتہارات کی جگہ تیار ہے"
             },
             hi: {
-                gameTitle: "शेरी एस्केप",
+                gameTitle: "चीकू रन",
                 stageLabel: "स्टेज",
                 resetBtn: "रिसेट",
                 hintBtn: "संकेत",
                 ranksBtn: "स्कोरकार्ड",
-                introTitle: "शेरी एस्केप 🦁 (नन्हा शेर)",
-                introDesc: "शेरी (बहादुर नन्हे शेर) की मदद करें! आपके पास केवल 1 जीवन है! यदि पक्षी टकराया तो खेल फिर से स्टेज 1 से शुरू होगा!",
-                goalTitle: "🎯 100 स्टेज:",
-                goalDesc: "100 कठिन स्टेज में सभी पक्षियों को बिना टकराए साफ़ करें।",
+                introTitle: "चीकू रन 🐥 (Chicku Run)",
+                introDesc: "चीकू (बहादुर नन्हे पक्षी) की मदद करें! आपके पास केवल 1 जीवन है! यदि पक्षी टकराया तो खेल फिर से स्टेज 1 से शुरू होगा!",
+                goalTitle: "🎯 100 कठिन स्टेज:",
+                goalDesc: "100 कठिन और अनोखे स्टेज में सभी पक्षियों को बिना टकराए साफ़ करें।",
                 timerTitle: "❤️ 1 लाइफ नियम:",
                 timerDesc: "एक टक्कर से आपकी प्रगति फिर से स्टेज 1 पर चली जाएगी!",
                 multiplayerTitle: "👥 पास एंड प्ले:",
-                multiplayerDesc: "खिलाड़ी बारी-बारी से खेलकर पहली पोजीशन के लिए मुकाबला करें!",
+                multiplayerDesc: "खिलाड़ी बारी-बारी से सुनकर पहली पोजीशन के लिए मुकाबला करें!",
                 selectPlayers: "खिलाड़ियों की संख्या चुनें:",
                 startBtn: "खेल शुरू करें ➔",
                 winTitle: "स्टेज पूरा हुआ!",
@@ -516,14 +514,14 @@
                 adNotice: "प्ले स्टोर विज्ञापनों के लिए जगह तैयार है"
             },
             zh: {
-                gameTitle: "小狮逃脱 (Shayree Escape)",
+                gameTitle: "Chicku 跑酷 (Chicku Run)",
                 stageLabel: "关卡",
                 resetBtn: "重置",
                 hintBtn: "提示",
                 ranksBtn: "排行榜",
-                introTitle: "小狮逃脱 🦁 (Shayree Escape)",
-                introDesc: "帮助勇敢的小狮子 Shayree！你只有 1 条生命！如果发生碰撞，游戏将重置回第 1 关！",
-                goalTitle: "🎯 100 个关卡：",
+                introTitle: "Chicku 跑酷 🐥 (Chicku Run)",
+                introDesc: "帮助勇敢的小鸟 Chicku！你只有 1 条生命！如果发生碰撞，游戏将重置回第 1 关！",
+                goalTitle: "🎯 100 个独创关卡：",
                 goalDesc: "挑战 100 个逐渐变难的关卡，不发生任何碰撞！",
                 timerTitle: "❤️ 1 命通关法则：",
                 timerDesc: "一次碰撞即可让挑战从第 1 关重新开始！",
@@ -537,7 +535,7 @@
                 lossDesc: "奔跑鸟互相发生碰撞！你失去了唯一的生命，必须从第 1 关重新开始。",
                 retryBtn: "从第 1 关重新开始 🔄",
                 finaleTitle: "排行榜与最终赢家！",
-                finaleDesc: "100 个关卡的最终得分与排名！",
+                finaleDesc: "100 个关卡 final 得分与排名！",
                 playAgainBtn: "再玩一次 🔄",
                 selectLang: "选择语言：",
                 statTime: "用时",
@@ -552,22 +550,23 @@
             }
         };
 
-        /* DYNAMIC STAGE VISUAL PALETTES */
+        /* DYNAMIC STAGE THEMES */
         const STAGE_THEMES = [
-            { name: "Golden Dunes", bgDark: "#221910", bgLight: "#fefae0", gridDark: "rgba(212, 163, 89, 0.4)", gridLight: "rgba(202, 138, 4, 0.25)", border: "#eab308", tileDark: "#2d2218", tileLight: "#fef3c7", accent: "#f59e0b" },
-            { name: "Emerald Oasis", bgDark: "#0d2417", bgLight: "#ecfdf5", gridDark: "rgba(16, 185, 129, 0.4)", gridLight: "rgba(16, 185, 129, 0.25)", border: "#10b981", tileDark: "#133321", tileLight: "#d1fae5", accent: "#34d399" },
-            { name: "Cosmic Neon", bgDark: "#210f2d", bgLight: "#fdf4ff", gridDark: "rgba(236, 72, 153, 0.4)", gridLight: "rgba(219, 39, 119, 0.25)", border: "#ec4899", tileDark: "#2c153c", tileLight: "#fae8ff", accent: "#f472b6" },
-            { name: "Royal Sapphire", bgDark: "#0a192f", bgLight: "#f0f9ff", gridDark: "rgba(6, 182, 212, 0.4)", gridLight: "rgba(14, 165, 233, 0.25)", border: "#06b6d4", tileDark: "#102442", tileLight: "#e0f2fe", accent: "#38bdf8" },
-            { name: "Crimson Dusk", bgDark: "#2b0d12", bgLight: "#fff1f2", gridDark: "rgba(239, 68, 68, 0.4)", gridLight: "rgba(225, 29, 72, 0.25)", border: "#ef4444", tileDark: "#3b131a", tileLight: "#ffe4e6", accent: "#f87171" },
-            { name: "Mystic Violet", bgDark: "#19102c", bgLight: "#f5f3ff", gridDark: "rgba(139, 92, 246, 0.4)", gridLight: "rgba(124, 58, 237, 0.25)", border: "#8b5cf6", tileDark: "#24183e", tileLight: "#ede9fe", accent: "#a78bfa" },
-            { name: "Coral Sunset", bgDark: "#2d140b", bgLight: "#fff7ed", gridDark: "rgba(249, 115, 22, 0.4)", gridLight: "rgba(234, 88, 12, 0.25)", border: "#f97316", tileDark: "#3c1c10", tileLight: "#ffedd5", accent: "#fb923c" },
-            { name: "Teal Lagoon", bgDark: "#0b2528", bgLight: "#f0fdfa", gridDark: "rgba(20, 184, 166, 0.4)", gridLight: "rgba(13, 148, 136, 0.25)", border: "#14b8a6", tileDark: "#113539", tileLight: "#ccfbf1", accent: "#2dd4bf" },
-            { name: "Obsidian Temple", bgDark: "#171717", bgLight: "#f4f4f5", gridDark: "rgba(212, 212, 216, 0.4)", gridLight: "rgba(113, 113, 122, 0.25)", border: "#a1a1aa", tileDark: "#27272a", tileLight: "#e4e4e7", accent: "#d4d4d8" },
-            { name: "Solar Flare", bgDark: "#2e1c05", bgLight: "#fefce8", gridDark: "rgba(245, 158, 11, 0.4)", gridLight: "rgba(217, 119, 6, 0.25)", border: "#f59e0b", tileDark: "#3d2608", tileLight: "#fef9c3", accent: "#fbbf24" },
-            { name: "Mystic Forest", bgDark: "#142318", bgLight: "#f0fdf4", gridDark: "rgba(34, 197, 94, 0.4)", gridLight: "rgba(22, 163, 74, 0.25)", border: "#22c55e", tileDark: "#1c3122", tileLight: "#dcfce7", accent: "#4ade80" },
-            { name: "Twilight Ruins", bgDark: "#1c1917", bgLight: "#fafaf9", gridDark: "rgba(168, 162, 158, 0.4)", gridLight: "rgba(120, 113, 108, 0.25)", border: "#d6d3d1", tileDark: "#292524", tileLight: "#f5f5f4", accent: "#e7e5e4" }
+            { name: "Golden Dunes", bgLight: "#f7f2e8", bgDark: "#1a1222", tileLight: "#eae0d0", tileDark: "#241830", gridLight: "#d4a35944", gridDark: "#8b5cf633", border: "#d4a359", accent: "#f59e0b" },
+            { name: "Emerald Oasis", bgLight: "#ecfdf5", bgDark: "#064e3b", tileLight: "#d1fae5", tileDark: "#022c22", gridLight: "#10b98144", gridDark: "#05966944", border: "#10b981", accent: "#34d399" },
+            { name: "Cosmic Neon", bgLight: "#f0f9ff", bgDark: "#0f172a", tileLight: "#e0f2fe", tileDark: "#1e293b", gridLight: "#06b6d444", gridDark: "#38bdf844", border: "#38bdf8", accent: "#06b6d4" },
+            { name: "Sunset Valley", bgLight: "#fff7ed", bgDark: "#431407", tileLight: "#ffedd5", tileDark: "#270e04", gridLight: "#f9731644", gridDark: "#ea580c44", border: "#f97316", accent: "#fb923c" },
+            { name: "Berry Bliss", bgLight: "#fdf2f8", bgDark: "#500724", tileLight: "#fce7f3", tileDark: "#300315", gridLight: "#ec489944", gridDark: "#db277744", border: "#ec4899", accent: "#f472b6" },
+            { name: "Royal Violet", bgLight: "#faf5ff", bgDark: "#2e1065", tileLight: "#f3e8ff", tileDark: "#1e0845", gridLight: "#a855f744", gridDark: "#9333ea44", border: "#a855f7", accent: "#c084fc" },
+            { name: "Ocean Breeze", bgLight: "#f0fdfa", bgDark: "#042f2e", tileLight: "#ccfbf1", tileDark: "#021d1c", gridLight: "#14b8a644", gridDark: "#0d948844", border: "#14b8a6", accent: "#2dd4bf" },
+            { name: "Amber Forest", bgLight: "#fefce8", bgDark: "#1c1917", tileLight: "#fef08a", tileDark: "#292524", gridLight: "#eab30844", gridDark: "#ca8a0444", border: "#eab308", accent: "#fde047" },
+            { name: "Mystic Crimson", bgLight: "#fef2f2", bgDark: "#450a0a", tileLight: "#fee2e2", tileDark: "#2b0404", gridLight: "#ef444444", gridDark: "#dc262644", border: "#ef4444", accent: "#f87171" },
+            { name: "Midnight Sky", bgLight: "#f8fafc", bgDark: "#020617", tileLight: "#e2e8f0", tileDark: "#0f172a", gridLight: "#64748b44", gridDark: "#47556944", border: "#38bdf8", accent: "#60a5fa" },
+            { name: "Sakura Blossom", bgLight: "#fff1f2", bgDark: "#4c0519", tileLight: "#ffe4e6", tileDark: "#2c020e", gridLight: "#fb718544", gridDark: "#e11d4844", border: "#fb7185", accent: "#fda4af" },
+            { name: "Lush Savannah", bgLight: "#f7fee7", bgDark: "#1a2e05", tileLight: "#ecfccb", tileDark: "#112002", gridLight: "#84cc1644", gridDark: "#65a30d44", border: "#84cc16", accent: "#a3e635" }
         ];
 
+        /* WEB AUDIO SYNTHESIZER ENGINE */
         const audio = {
             ctx: null,
             muted: false,
@@ -580,232 +579,297 @@
                     this.ctx.resume();
                 }
             },
-            playTone(freq, type, duration, gainVal = 0.1) {
+            playTone(freq, type = 'sine', duration = 0.1, vol = 0.2) {
                 if (this.muted || !this.ctx) return;
                 try {
                     const osc = this.ctx.createOscillator();
                     const gain = this.ctx.createGain();
                     osc.type = type;
-                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                    gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
                     osc.connect(gain);
                     gain.connect(this.ctx.destination);
                     osc.start();
                     osc.stop(this.ctx.currentTime + duration);
-                } catch(e){}
+                } catch(e) {}
             },
-            playBeepBeep() {
-                this.init();
+            playBirdChirp(birdId = 0) {
                 if (this.muted || !this.ctx) return;
                 try {
                     const now = this.ctx.currentTime;
-                    
-                    const playSingleHonk = (startTime) => {
+                    // Pitch offset ensures all 40+ birds have uniquely tuned frequencies
+                    const pitchOffset = ((birdId * 145) % 900); 
+                    const baseFreq = 850 + pitchOffset; // Dynamic frequency range
+
+                    const soundType = birdId % 6; // 6 Distinct Funny Bird Sound Types
+
+                    if (soundType === 0) {
+                        // 1. Loud Chick "Choo-Choo!" (چوں چوں!)
                         const osc1 = this.ctx.createOscillator();
-                        const osc2 = this.ctx.createOscillator();
+                        const gain1 = this.ctx.createGain();
+                        osc1.type = 'sine';
+                        osc1.frequency.setValueAtTime(baseFreq * 1.1, now);
+                        osc1.frequency.exponentialRampToValueAtTime(baseFreq * 2.2, now + 0.06);
+
+                        gain1.gain.setValueAtTime(0.5, now);
+                        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+                        osc1.connect(gain1);
+                        gain1.connect(this.ctx.destination);
+                        osc1.start(now);
+                        osc1.stop(now + 0.08);
+
+                        setTimeout(() => {
+                            if (this.muted || !this.ctx) return;
+                            const now2 = this.ctx.currentTime;
+                            const osc2 = this.ctx.createOscillator();
+                            const gain2 = this.ctx.createGain();
+                            osc2.type = 'sine';
+                            osc2.frequency.setValueAtTime(baseFreq * 1.3, now2);
+                            osc2.frequency.exponentialRampToValueAtTime(baseFreq * 2.6, now2 + 0.08);
+
+                            gain2.gain.setValueAtTime(0.5, now2);
+                            gain2.gain.exponentialRampToValueAtTime(0.001, now2 + 0.09);
+
+                            osc2.connect(gain2);
+                            gain2.connect(this.ctx.destination);
+                            osc2.start(now2);
+                            osc2.stop(now2 + 0.09);
+                        }, 60);
+
+                    } else if (soundType === 1) {
+                        // 2. Mini Rooster "Kukroo-Kroo!" (ککڑو کڑو!)
+                        const osc = this.ctx.createOscillator();
                         const gain = this.ctx.createGain();
+                        osc.type = 'sawtooth';
                         
-                        osc1.type = 'sawtooth';
-                        osc2.type = 'square';
-                        
-                        osc1.frequency.setValueAtTime(750, startTime);
-                        osc1.frequency.exponentialRampToValueAtTime(950, startTime + 0.02);
-                        osc1.frequency.exponentialRampToValueAtTime(700, startTime + 0.09);
+                        const startF = 450 + (pitchOffset * 0.5);
+                        osc.frequency.setValueAtTime(startF, now);
+                        osc.frequency.linearRampToValueAtTime(startF * 1.8, now + 0.08);
+                        osc.frequency.linearRampToValueAtTime(startF * 2.4, now + 0.16);
+                        osc.frequency.linearRampToValueAtTime(startF * 1.3, now + 0.24);
 
-                        osc2.frequency.setValueAtTime(920, startTime);
-                        osc2.frequency.exponentialRampToValueAtTime(1150, startTime + 0.02);
-                        osc2.frequency.exponentialRampToValueAtTime(850, startTime + 0.09);
+                        gain.gain.setValueAtTime(0.4, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
 
-                        gain.gain.setValueAtTime(0, startTime);
-                        gain.gain.linearRampToValueAtTime(0.3, startTime + 0.015);
-                        gain.gain.setValueAtTime(0.3, startTime + 0.07);
-                        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.1);
-
-                        osc1.connect(gain);
-                        osc2.connect(gain);
+                        osc.connect(gain);
                         gain.connect(this.ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.25);
 
-                        osc1.start(startTime);
-                        osc2.start(startTime);
-                        osc1.stop(startTime + 0.1);
-                        osc2.stop(startTime + 0.1);
-                    };
+                    } else if (soundType === 2) {
+                        // 3. Funny Quack-Cheep (کواک چوں!)
+                        const osc = this.ctx.createOscillator();
+                        const filter = this.ctx.createBiquadFilter();
+                        const gain = this.ctx.createGain();
 
-                    playSingleHonk(now);
-                    playSingleHonk(now + 0.12);
-                } catch(e){}
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(baseFreq * 0.7, now);
+                        osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.6, now + 0.1);
+
+                        filter.type = 'lowpass';
+                        filter.frequency.setValueAtTime(1200, now);
+                        filter.frequency.linearRampToValueAtTime(3200, now + 0.08);
+
+                        gain.gain.setValueAtTime(0.45, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+                        osc.connect(filter);
+                        filter.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.12);
+
+                    } else if (soundType === 3) {
+                        // 4. Squeaky Wobble "Piii-Uuu!" (پیییی وو!)
+                        const osc = this.ctx.createOscillator();
+                        const lfo = this.ctx.createOscillator();
+                        const lfoGain = this.ctx.createGain();
+                        const gain = this.ctx.createGain();
+
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(baseFreq * 1.4, now);
+
+                        lfo.type = 'triangle';
+                        lfo.frequency.setValueAtTime(25, now); // Fast wobble
+                        lfoGain.gain.setValueAtTime(350, now);
+
+                        lfo.connect(osc.frequency);
+                        gain.gain.setValueAtTime(0.45, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        lfo.start(now);
+                        osc.start(now);
+                        lfo.stop(now + 0.14);
+                        osc.stop(now + 0.14);
+
+                    } else if (soundType === 4) {
+                        // 5. Rapid Trilling Chick "Pip-Pip-Pip!" (پپ پپ پپ!)
+                        const notes = [1.2, 1.6, 2.0];
+                        notes.forEach((mult, idx) => {
+                            setTimeout(() => {
+                                if (this.muted || !this.ctx) return;
+                                const t = this.ctx.currentTime;
+                                const osc = this.ctx.createOscillator();
+                                const gain = this.ctx.createGain();
+                                osc.type = 'triangle';
+                                osc.frequency.setValueAtTime(baseFreq * mult, t);
+                                osc.frequency.exponentialRampToValueAtTime(baseFreq * mult * 1.3, t + 0.04);
+
+                                gain.gain.setValueAtTime(0.45, t);
+                                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+
+                                osc.connect(gain);
+                                gain.connect(this.ctx.destination);
+                                osc.start(t);
+                                osc.stop(t + 0.05);
+                            }, idx * 40);
+                        });
+
+                    } else {
+                        // 6. Cartoon Boing Chirp "Boing-Choo!" (بوئنگ چوں!)
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(baseFreq * 1.5, now);
+                        osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.6, now + 0.05);
+                        osc.frequency.exponentialRampToValueAtTime(baseFreq * 2.8, now + 0.14);
+
+                        gain.gain.setValueAtTime(0.5, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 0.15);
+                    }
+                } catch(e) {}
+            },
+            playCoin() {
+                if (this.muted || !this.ctx) return;
+                this.playTone(987.77, 'sine', 0.08, 0.2);
+                setTimeout(() => this.playTone(1318.51, 'sine', 0.15, 0.25), 80);
             },
             playCrash() {
                 if (this.muted || !this.ctx) return;
-                try {
-                    this.playTone(150, 'sawtooth', 0.3, 0.3);
-                    setTimeout(() => this.playTone(70, 'square', 0.25, 0.25), 60);
-                } catch(e){}
-            },
-            playCoin() {
-                this.playTone(987.77, 'sine', 0.15, 0.15);
+                this.playTone(120, 'sawtooth', 0.3, 0.4);
+                this.playTone(80, 'square', 0.35, 0.4);
             },
             playWin() {
                 if (this.muted || !this.ctx) return;
                 const notes = [523.25, 659.25, 783.99, 1046.50];
-                notes.forEach((freq, i) => {
-                    setTimeout(() => this.playTone(freq, 'triangle', 0.25, 0.15), i * 100);
+                notes.forEach((f, i) => {
+                    setTimeout(() => this.playTone(f, 'triangle', 0.2, 0.25), i * 90);
                 });
             },
             playCelebrationFanfare() {
                 if (this.muted || !this.ctx) return;
-                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
-                notes.forEach((freq, i) => {
-                    setTimeout(() => this.playTone(freq, 'sawtooth', 0.35, 0.22), i * 120);
+                const fanfare = [523.25, 523.25, 523.25, 659.25, 783.99, 1046.50];
+                const times = [0, 120, 240, 360, 500, 700];
+                fanfare.forEach((f, i) => {
+                    setTimeout(() => this.playTone(f, 'triangle', i === 5 ? 0.5 : 0.15, 0.3), times[i]);
                 });
-                setTimeout(() => {
-                    this.playTone(1046.50, 'triangle', 0.6, 0.3);
-                    this.playTone(1567.98, 'triangle', 0.6, 0.3);
-                }, notes.length * 120);
             },
             playHint() {
-                this.playTone(880, 'sine', 0.3, 0.15);
+                if (this.muted || !this.ctx) return;
+                this.playTone(440, 'sine', 0.1, 0.2);
+                setTimeout(() => this.playTone(880, 'sine', 0.15, 0.2), 100);
             }
         };
 
         const DIR = { UP: 0, RIGHT: 1, DOWN: 2, LEFT: 3 };
 
-        function isStageSolvable(gridSize, quills, stones) {
-            let active = quills.map(q => ({r: q.r, c: q.c, dir: q.dir, dead: false}));
-            let stoneMap = Array.from({length: gridSize}, () => Array(gridSize).fill(false));
-            stones.forEach(s => {
-                if (s.r >= 0 && s.r < gridSize && s.c >= 0 && s.c < gridSize) {
-                    stoneMap[s.r][s.c] = true;
-                }
-            });
-
-            let removedCount = 0;
-            let progress = true;
-
-            while (progress) {
-                progress = false;
-                for (let q of active) {
-                    if (q.dead) continue;
-
-                    let dr = 0, dc = 0;
-                    if (q.dir === DIR.UP) dr = -1;
-                    else if (q.dir === DIR.RIGHT) dc = 1;
-                    else if (q.dir === DIR.DOWN) dr = 1;
-                    else if (q.dir === DIR.LEFT) dc = -1;
-
-                    let currR = q.r + dr;
-                    let currC = q.c + dc;
-                    let blocked = false;
-
-                    while (currR >= 0 && currR < gridSize && currC >= 0 && currC < gridSize) {
-                        if (stoneMap[currR][currC]) {
-                            blocked = true;
-                            break;
-                        }
-                        if (active.some(other => !other.dead && other.r === currR && other.c === currC)) {
-                            blocked = true;
-                            break;
-                        }
-                        currR += dr;
-                        currC += dc;
-                    }
-
-                    if (!blocked) {
-                        q.dead = true;
-                        removedCount++;
-                        progress = true;
-                    }
-                }
-            }
-
-            return removedCount === quills.length;
-        }
-
+        /* REVERSE CONSTRUCTIVE GUARANTEED SOLVABLE PUZZLE GENERATOR */
         function generateStageData(stageIdx) {
-            let attemptSeed = 0;
-            
-            while (attemptSeed < 200) {
-                let seed = (stageIdx + 1) * 15485863 + attemptSeed * 37;
+            let attempt = 0;
+
+            while (attempt < 100) {
+                let seed = (stageIdx + 1) * 2654435761 + attempt * 997;
                 function pseudoRandom() {
-                    seed = (seed * 9301 + 49297) % 233280;
-                    return seed / 233280;
+                    seed = (seed * 1664525 + 1013904223) % 4294967296;
+                    return seed / 4294967296;
                 }
 
+                // Grid size scaling
                 let grid = 5;
                 if (stageIdx >= 10) grid = 6;
                 if (stageIdx >= 25) grid = 7;
                 if (stageIdx >= 45) grid = 8;
-                if (stageIdx >= 65) grid = 9;
-                if (stageIdx >= 85) grid = 10;
+                if (stageIdx >= 70) grid = 9;
 
-                const numBirds = Math.min(22, 3 + Math.floor(stageIdx * 0.18) + Math.floor(grid * 0.4));
-                const numStones = stageIdx < 4 ? 0 : Math.min(8, Math.floor(stageIdx * 0.08));
+                // Bird count scales progressively from 4 up to 26
+                const numBirds = Math.min(26, 4 + Math.floor(stageIdx * 0.22) + Math.floor(grid * 0.35));
+                const numStones = stageIdx < 5 ? 0 : Math.min(6, Math.floor(stageIdx * 0.07));
 
-                let stones = [];
                 let occupied = Array.from({length: grid}, () => Array(grid).fill(false));
+                let stones = [];
 
+                // Place stones on internal grid cells
                 let stoneAttempts = 0;
-                while (stones.length < numStones && stoneAttempts < 100) {
+                while (stones.length < numStones && stoneAttempts < 80) {
                     stoneAttempts++;
-                    let r = Math.floor(pseudoRandom() * (grid - 2)) + 1;
-                    let c = Math.floor(pseudoRandom() * (grid - 2)) + 1;
+                    let r = Math.floor(1 + pseudoRandom() * (grid - 2));
+                    let c = Math.floor(1 + pseudoRandom() * (grid - 2));
                     if (!occupied[r][c]) {
                         occupied[r][c] = true;
                         stones.push({r, c});
                     }
                 }
 
-                let placementSequence = [];
-                let birdAttempts = 0;
+                // Reverse Placement: Place birds in reverse order of their exit sequence
+                let quills = [];
+                let reversePlacementAttempts = 0;
 
-                while (placementSequence.length < numBirds && birdAttempts < 300) {
-                    birdAttempts++;
+                while (quills.length < numBirds && reversePlacementAttempts < 300) {
+                    reversePlacementAttempts++;
+
+                    let r = Math.floor(pseudoRandom() * grid);
+                    let c = Math.floor(pseudoRandom() * grid);
                     let dir = Math.floor(pseudoRandom() * 4);
-                    let startR = 0, startC = 0;
-                    let rayCells = [];
 
-                    if (dir === DIR.UP) {
-                        startC = Math.floor(pseudoRandom() * grid);
-                        for (let r = grid - 1; r >= 0; r--) rayCells.push({r, c: startC});
-                    } else if (dir === DIR.DOWN) {
-                        startC = Math.floor(pseudoRandom() * grid);
-                        for (let r = 0; r < grid; r++) rayCells.push({r, c: startC});
-                    } else if (dir === DIR.LEFT) {
-                        startR = Math.floor(pseudoRandom() * grid);
-                        for (let c = grid - 1; c >= 0; c--) rayCells.push({r: startR, c});
-                    } else if (dir === DIR.RIGHT) {
-                        startR = Math.floor(pseudoRandom() * grid);
-                        for (let c = 0; c < grid; c++) rayCells.push({r: startR, c});
+                    if (occupied[r][c]) continue;
+
+                    let dr = 0, dc = 0;
+                    if (dir === DIR.UP) dr = -1;
+                    else if (dir === DIR.RIGHT) dc = 1;
+                    else if (dir === DIR.DOWN) dr = 1;
+                    else if (dir === DIR.LEFT) dc = -1;
+
+                    let rayR = r + dr;
+                    let rayC = c + dc;
+                    let pathClear = true;
+
+                    while (rayR >= 0 && rayR < grid && rayC >= 0 && rayC < grid) {
+                        if (occupied[rayR][rayC]) {
+                            pathClear = false;
+                            break;
+                        }
+                        rayR += dr;
+                        rayC += dc;
                     }
 
-                    let validCell = null;
-                    for (let cell of rayCells) {
-                        if (occupied[cell.r][cell.c]) break;
-                        validCell = cell;
-                        if (pseudoRandom() > 0.4) break;
-                    }
-
-                    if (validCell) {
-                        occupied[validCell.r][validCell.c] = true;
-                        placementSequence.push({r: validCell.r, c: validCell.c, dir});
+                    if (pathClear) {
+                        occupied[r][c] = true;
+                        quills.unshift({r, c, dir});
                     }
                 }
 
-                let quills = placementSequence.reverse();
-
-                if (quills.length > 0 && isStageSolvable(grid, quills, stones)) {
+                if (quills.length >= Math.max(4, numBirds - 2)) {
                     return { grid, quills, stones };
                 }
 
-                attemptSeed++;
+                attempt++;
             }
 
             return {
                 grid: 5,
                 quills: [
-                    {r: 2, c: 0, dir: DIR.LEFT},
-                    {r: 2, c: 4, dir: DIR.RIGHT},
+                    {r: 1, c: 0, dir: DIR.LEFT},
+                    {r: 3, c: 4, dir: DIR.RIGHT},
                     {r: 0, c: 2, dir: DIR.UP},
                     {r: 4, c: 2, dir: DIR.DOWN}
                 ],
@@ -815,7 +879,7 @@
 
         let currentLang = 'en';
         let playerCount = 1;
-        let isNightMode = false; // Default set to Day Mode
+        let isNightMode = false;
 
         function toggleTheme() {
             isNightMode = !isNightMode;
@@ -823,14 +887,13 @@
             const themeIcon = document.getElementById('theme-icon');
 
             if (isNightMode) {
-                body.className = "night-theme parchment-bg-night h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-4 select-none overflow-hidden";
+                body.className = "night-theme parchment-bg-night mobile-viewport-container w-screen flex flex-col justify-between items-center p-1.5 sm:p-3 select-none overflow-hidden";
                 themeIcon.textContent = "🌙";
             } else {
-                body.className = "day-theme parchment-bg-day h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-4 select-none overflow-hidden";
+                body.className = "day-theme parchment-bg-day mobile-viewport-container w-screen flex flex-col justify-between items-center p-1.5 sm:p-3 select-none overflow-hidden";
                 themeIcon.textContent = "☀️";
             }
 
-            // Update Glass Card themes
             const cards = ['card-intro', 'card-win', 'card-loss', 'card-leaderboard'];
             cards.forEach(id => {
                 const el = document.getElementById(id);
@@ -887,7 +950,10 @@
             document.getElementById('txt-finale-title').textContent = t.finaleTitle;
             document.getElementById('txt-finale-desc').textContent = t.finaleDesc;
             document.getElementById('txt-restart-btn').textContent = t.playAgainBtn;
-            document.getElementById('txt-mode-label').textContent = t.modeLabel;
+            
+            const modeLabelEl = document.getElementById('txt-mode-label');
+            if (modeLabelEl) modeLabelEl.textContent = t.modeLabel;
+            
             document.getElementById('txt-ad-notice').textContent = t.adNotice;
 
             const buttons = document.querySelectorAll('.lang-btn');
@@ -1008,8 +1074,8 @@
 
             recalculateDimensions() {
                 const padding = 18;
-                const availableSize = Math.min(this.displayWidth, this.displayHeight) - (padding * 2);
-                this.cellSize = availableSize / this.gridSize;
+                const availableSize = Math.max(10, Math.min(this.displayWidth || 300, this.displayHeight || 300) - (padding * 2));
+                this.cellSize = Math.max(1, availableSize / this.gridSize);
                 this.offsetX = (this.displayWidth - (this.cellSize * this.gridSize)) / 2;
                 this.offsetY = (this.displayHeight - (this.cellSize * this.gridSize)) / 2;
             }
@@ -1160,8 +1226,9 @@
                 this.highlightedQuillId = null;
                 const pathCheck = this.checkPathBlocker(quill);
 
+                audio.playBirdChirp(quill.id);
+
                 if (pathCheck.isClear) {
-                    audio.playBeepBeep();
                     quill.escaping = true;
                     
                     const speed = 16;
@@ -1180,7 +1247,6 @@
                     this.updateUI();
                     audio.playCoin();
                 } else {
-                    audio.playBeepBeep();
                     quill.crashing = true;
                     
                     const speed = 14;
@@ -1273,7 +1339,6 @@
                                 audio.playCoin();
                                 audio.playTone(850 + Math.random() * 400, 'triangle', 0.25, 0.22);
 
-                                // Expanding Shockwave Ring
                                 this.particles.push({
                                     x: rx, y: ry,
                                     vx: 0, vy: 0,
@@ -1284,7 +1349,6 @@
                                     type: 'ring'
                                 });
 
-                                // Starburst Explosion
                                 for (let i = 0; i < 50; i++) {
                                     const angle = Math.random() * Math.PI * 2;
                                     const speed = 2.5 + Math.random() * 11;
@@ -1320,13 +1384,11 @@
             render() {
                 this.ctx.clearRect(0, 0, this.displayWidth, this.displayHeight);
 
-                // Dynamic Canvas Stage Background
                 const theme = this.getStageTheme();
                 const baseBg = isNightMode ? theme.bgDark : theme.bgLight;
                 this.ctx.fillStyle = baseBg;
                 this.ctx.fillRect(0, 0, this.displayWidth, this.displayHeight);
 
-                // Stage Aura Radial Gradient
                 const cx = this.displayWidth / 2;
                 const cy = this.displayHeight / 2;
                 const radius = Math.max(this.displayWidth, this.displayHeight) * 0.7;
@@ -1494,7 +1556,7 @@
                 for (let s of this.stones) {
                     const x = this.offsetX + s.c * this.cellSize + this.cellSize / 2;
                     const y = this.offsetY + s.r * this.cellSize + this.cellSize / 2;
-                    const r = this.cellSize * 0.35;
+                    const r = Math.max(1, Math.abs(this.cellSize * 0.35));
 
                     this.ctx.fillStyle = '#374151';
                     this.ctx.strokeStyle = '#6b7280';
@@ -1507,7 +1569,7 @@
 
                     this.ctx.fillStyle = '#1f2937';
                     this.ctx.beginPath();
-                    this.ctx.arc(x - r * 0.2, y - r * 0.2, r * 0.4, 0, Math.PI * 2);
+                    this.ctx.arc(x - r * 0.2, y - r * 0.2, Math.max(0.1, r * 0.4), 0, Math.PI * 2);
                     this.ctx.fill();
                 }
             }
@@ -1526,13 +1588,13 @@
                     this.ctx.rotate(Math.PI / 2);
                 }
 
-                const s = this.cellSize * 0.38;
+                const s = Math.max(1, Math.abs(this.cellSize * 0.38));
 
                 if (isHighlighted) {
                     this.ctx.strokeStyle = '#fbbf24';
                     this.ctx.lineWidth = 3.5;
                     this.ctx.beginPath();
-                    this.ctx.arc(0, 0, s * 1.35, 0, Math.PI * 2);
+                    this.ctx.arc(0, 0, Math.max(0.1, s * 1.35), 0, Math.PI * 2);
                     this.ctx.stroke();
                 }
 
@@ -1540,7 +1602,6 @@
                 const legColor = '#f97316';
                 const beakColor = '#facc15';
 
-                // Tail feathers
                 this.ctx.fillStyle = mainColor;
                 this.ctx.strokeStyle = '#1e1b4b';
                 this.ctx.lineWidth = 1.8;
@@ -1569,7 +1630,6 @@
                 this.ctx.fill();
                 this.ctx.stroke();
 
-                // Legs & 3-clawed feet
                 this.ctx.strokeStyle = legColor;
                 this.ctx.lineWidth = Math.max(3, s * 0.12);
                 this.ctx.lineCap = 'round';
@@ -1606,26 +1666,24 @@
                 this.ctx.lineTo(leg2X2 - s * 0.15, leg2Y2 + s * 0.1);
                 this.ctx.stroke();
 
-                // Body & Wing
                 this.ctx.fillStyle = mainColor;
                 this.ctx.beginPath();
-                this.ctx.ellipse(0, 0, s * 0.45, s * 0.3, 0, 0, Math.PI * 2);
+                this.ctx.ellipse(0, 0, Math.max(0.1, s * 0.45), Math.max(0.1, s * 0.3), 0, 0, Math.PI * 2);
                 this.ctx.fill();
                 this.ctx.stroke();
 
                 this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
                 this.ctx.beginPath();
-                this.ctx.ellipse(s * 0.05, s * 0.08, s * 0.28, s * 0.18, 0, 0, Math.PI * 2);
+                this.ctx.ellipse(s * 0.05, s * 0.08, Math.max(0.1, s * 0.28), Math.max(0.1, s * 0.18), 0, 0, Math.PI * 2);
                 this.ctx.fill();
 
                 this.ctx.fillStyle = mainColor;
                 this.ctx.beginPath();
-                this.ctx.ellipse(-s * 0.05, -s * 0.05, s * 0.22, s * 0.12, -0.3, 0, Math.PI * 2);
+                this.ctx.ellipse(-s * 0.05, -s * 0.05, Math.max(0.1, s * 0.22), Math.max(0.1, s * 0.12), -0.3, 0, Math.PI * 2);
                 this.ctx.fill();
                 this.ctx.strokeStyle = 'rgba(0,0,0,0.3)';
                 this.ctx.stroke();
 
-                // Neck & Head
                 this.ctx.fillStyle = mainColor;
                 this.ctx.strokeStyle = '#1e1b4b';
                 this.ctx.beginPath();
@@ -1638,11 +1696,10 @@
                 this.ctx.stroke();
 
                 this.ctx.beginPath();
-                this.ctx.arc(s * 0.25, -s * 0.6, s * 0.28, 0, Math.PI * 2);
+                this.ctx.arc(s * 0.25, -s * 0.6, Math.max(0.1, s * 0.28), 0, Math.PI * 2);
                 this.ctx.fill();
                 this.ctx.stroke();
 
-                // Crown Crest
                 this.ctx.fillStyle = '#4338ca';
                 this.ctx.beginPath();
                 this.ctx.moveTo(s * 0.15, -s * 0.85);
@@ -1653,10 +1710,9 @@
                 this.ctx.fill();
                 this.ctx.stroke();
 
-                // Cartoon Eye
                 this.ctx.fillStyle = '#ffffff';
                 this.ctx.beginPath();
-                this.ctx.arc(s * 0.32, -s * 0.65, s * 0.11, 0, Math.PI * 2);
+                this.ctx.arc(s * 0.32, -s * 0.65, Math.max(0.1, s * 0.11), 0, Math.PI * 2);
                 this.ctx.fill();
                 this.ctx.strokeStyle = '#000000';
                 this.ctx.lineWidth = 1.2;
@@ -1664,15 +1720,14 @@
 
                 this.ctx.fillStyle = '#0f172a';
                 this.ctx.beginPath();
-                this.ctx.arc(s * 0.35, -s * 0.65, s * 0.06, 0, Math.PI * 2);
+                this.ctx.arc(s * 0.35, -s * 0.65, Math.max(0.1, s * 0.06), 0, Math.PI * 2);
                 this.ctx.fill();
 
                 this.ctx.fillStyle = '#ffffff';
                 this.ctx.beginPath();
-                this.ctx.arc(s * 0.33, -s * 0.68, s * 0.025, 0, Math.PI * 2);
+                this.ctx.arc(s * 0.33, -s * 0.68, Math.max(0.1, s * 0.025), 0, Math.PI * 2);
                 this.ctx.fill();
 
-                // Beak
                 this.ctx.fillStyle = beakColor;
                 this.ctx.strokeStyle = '#d97706';
                 this.ctx.lineWidth = 1.5;
@@ -1701,34 +1756,35 @@
                         p.alpha -= 0.025;
                     }
 
-                    if (p.alpha <= 0) {
+                    if (p.alpha <= 0 || p.radius < 0) {
                         this.particles.splice(i, 1);
                         continue;
                     }
 
                     this.ctx.save();
-                    this.ctx.globalAlpha = p.alpha;
+                    this.ctx.globalAlpha = Math.max(0, p.alpha);
 
                     if (p.type === 'ring') {
                         this.ctx.strokeStyle = p.color;
                         this.ctx.lineWidth = 3;
                         this.ctx.beginPath();
-                        this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        this.ctx.arc(p.x, p.y, Math.max(0.1, p.radius), 0, Math.PI * 2);
                         this.ctx.stroke();
                     } else if (p.type === 'star') {
+                        const r = Math.max(0.1, p.radius);
                         this.ctx.fillStyle = p.color;
                         this.ctx.translate(p.x, p.y);
                         this.ctx.beginPath();
                         for (let j = 0; j < 5; j++) {
-                            this.ctx.lineTo(Math.cos((18 + j * 72) * Math.PI / 180) * p.radius, -Math.sin((18 + j * 72) * Math.PI / 180) * p.radius);
-                            this.ctx.lineTo(Math.cos((54 + j * 72) * Math.PI / 180) * (p.radius / 2), -Math.sin((54 + j * 72) * Math.PI / 180) * (p.radius / 2));
+                            this.ctx.lineTo(Math.cos((18 + j * 72) * Math.PI / 180) * r, -Math.sin((18 + j * 72) * Math.PI / 180) * r);
+                            this.ctx.lineTo(Math.cos((54 + j * 72) * Math.PI / 180) * (r / 2), -Math.sin((54 + j * 72) * Math.PI / 180) * (r / 2));
                         }
                         this.ctx.closePath();
                         this.ctx.fill();
                     } else {
                         this.ctx.fillStyle = p.color;
                         this.ctx.beginPath();
-                        this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        this.ctx.arc(p.x, p.y, Math.max(0.1, p.radius), 0, Math.PI * 2);
                         this.ctx.fill();
                     }
                     this.ctx.restore();
@@ -1806,7 +1862,7 @@
                     nextNotice.classList.add('hidden');
                 }
 
-                const delayMs = isMilestone ? 3200 : 600;
+                const delayMs = isMilestone ? 2800 : 600;
                 setTimeout(() => {
                     document.getElementById('modal-win').classList.remove('hidden');
                     if (isMilestone) {
@@ -1945,7 +2001,7 @@
                 document.getElementById('modal-leaderboard').classList.remove('hidden');
             }
 
-            // Start main render loop
+            // Start animation loop
             window.gameInstance.render();
         };
     </script>
