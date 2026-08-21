@@ -24,7 +24,7 @@
         body {
             font-family: 'Outfit', 'Noto Sans Arabic', 'Noto Sans Devanagari', 'Noto Sans SC', sans-serif;
             transition: background-color 0.4s ease, color 0.4s ease;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         body.night-theme {
@@ -35,6 +35,12 @@
         body.day-theme {
             background: #f4efe6;
             color: #2a1f33;
+        }
+
+        /* Responsive Viewport Height fix for Mobile Browsers */
+        .mobile-viewport-container {
+            height: 100vh;
+            height: 100dvh;
         }
 
         .font-cinzel {
@@ -137,107 +143,107 @@
         }
     </style>
 </head>
-<body id="game-body" class="day-theme parchment-bg-day h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-4 select-none overflow-hidden">
+<body id="game-body" class="day-theme parchment-bg-day mobile-viewport-container w-screen flex flex-col justify-between items-center p-1.5 sm:p-3 select-none overflow-hidden">
 
     <!-- TOP HUD -->
-    <header id="top-hud" class="w-full max-w-xl flex flex-col gap-2 bg-slate-950/90 p-2.5 sm:p-3 rounded-2xl border border-amber-500/40 backdrop-blur-md z-10 transition-colors duration-300 shadow-xl text-white">
-        <div class="flex justify-between items-center gap-2">
+    <header id="top-hud" class="w-full max-w-xl flex flex-col gap-1.5 sm:gap-2 bg-slate-950/90 p-2 sm:p-2.5 rounded-2xl border border-amber-500/40 backdrop-blur-md z-10 transition-colors duration-300 shadow-xl text-white">
+        <div class="flex justify-between items-center gap-1 sm:gap-2">
             <!-- Stage Display -->
-            <div class="bg-amber-500/15 border border-amber-500/40 px-2.5 py-1 rounded-xl text-center">
-                <span id="label-stage" class="text-[10px] text-amber-200 uppercase tracking-widest block font-cinzel">Stage</span>
-                <span id="stage-display" class="text-sm sm:text-base font-bold text-amber-300 font-cinzel">1 / 100</span>
+            <div class="bg-amber-500/15 border border-amber-500/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl text-center">
+                <span id="label-stage" class="text-[9px] sm:text-[10px] text-amber-200 uppercase tracking-widest block font-cinzel">Stage</span>
+                <span id="stage-display" class="text-xs sm:text-sm font-bold text-amber-300 font-cinzel">1 / 100</span>
             </div>
 
             <!-- Active Player Banner in Multiplayer -->
-            <div id="active-player-badge" class="px-3 py-1 rounded-xl text-xs font-bold font-cinzel shadow-md transition-all flex items-center gap-1.5 badge-player-0">
+            <div id="active-player-badge" class="px-2 py-0.5 sm:px-3 sm:py-1 rounded-xl text-[11px] sm:text-xs font-bold font-cinzel shadow-md transition-all flex items-center gap-1 badge-player-0">
                 👤 <span id="txt-player-name">Player 1</span>
             </div>
 
             <!-- Timer Display -->
-            <div class="bg-black/50 border border-amber-500/30 px-2.5 py-1 rounded-xl flex items-center gap-1">
-                <span class="text-xs">⏱️</span>
-                <span id="timer-display" class="text-sm font-mono font-bold text-amber-300">00:00.0</span>
+            <div class="bg-black/50 border border-amber-500/30 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl flex items-center gap-1">
+                <span class="text-[10px] sm:text-xs">⏱️</span>
+                <span id="timer-display" class="text-xs sm:text-sm font-mono font-bold text-amber-300">00:00.0</span>
             </div>
 
             <!-- Coins Display -->
-            <div class="bg-amber-500/15 border border-amber-500/40 px-2.5 py-1 rounded-xl flex items-center gap-1">
-                <span class="text-xs">🪙</span>
-                <span id="coins-display" class="text-sm font-bold text-amber-300">0</span>
+            <div class="bg-amber-500/15 border border-amber-500/40 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl flex items-center gap-1">
+                <span class="text-[10px] sm:text-xs">🪙</span>
+                <span id="coins-display" class="text-xs sm:text-sm font-bold text-amber-300">0</span>
             </div>
 
             <!-- Single Life Display (1 Life Rule) -->
-            <div class="flex items-center gap-1 bg-black/50 px-2.5 py-1 rounded-xl border border-red-500/40">
-                <span id="heart-1" class="text-red-500 text-base transition-all duration-300 animate-pulse">❤️</span>
-                <span id="txt-lives-count" class="text-xs font-bold text-red-300">1/1</span>
+            <div class="flex items-center gap-1 bg-black/50 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-red-500/40">
+                <span id="heart-1" class="text-red-500 text-sm sm:text-base transition-all duration-300 animate-pulse">❤️</span>
+                <span id="txt-lives-count" class="text-[10px] sm:text-xs font-bold text-red-300">1/1</span>
             </div>
         </div>
 
         <div class="flex justify-between items-center px-1">
             <div>
-                <h1 id="txt-game-title" class="text-base sm:text-lg font-bold font-cinzel text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-amber-100">
+                <h1 id="txt-game-title" class="text-xs sm:text-base font-bold font-cinzel text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-amber-100">
                     Shayree Escape
                 </h1>
-                <p id="stage-subtitle" class="text-[11px] text-amber-200/90 italic">Stage 1: Golden Dunes</p>
+                <p id="stage-subtitle" class="text-[10px] sm:text-[11px] text-amber-200/90 italic">Stage 1: Golden Dunes</p>
             </div>
             <div class="flex items-center gap-2">
                 <div class="text-right">
-                    <span id="txt-mode-label" class="text-[10px] text-amber-200/70 uppercase block">Mode</span>
-                    <span id="txt-current-mode" class="text-xs font-bold text-amber-300">1 Player</span>
+                    <span id="txt-mode-label" class="text-[9px] sm:text-[10px] text-amber-200/70 uppercase block">Mode</span>
+                    <span id="txt-current-mode" class="text-[10px] sm:text-xs font-bold text-amber-300">1 Player</span>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- MAIN GAME CANVAS WRAPPER -->
-    <main class="relative w-full max-w-xl flex-1 flex flex-col justify-center items-center my-1">
-        <div id="canvas-holder" class="canvas-container relative w-full aspect-square max-h-[60vh] sm:max-h-[65vh] rounded-3xl flex justify-center items-center overflow-hidden transition-all duration-500">
-            <canvas id="gameCanvas" class="w-full h-full block rounded-3xl cursor-pointer"></canvas>
+    <main class="relative w-full max-w-xl flex-1 flex flex-col justify-center items-center my-0.5 min-h-0">
+        <div id="canvas-holder" class="canvas-container relative w-full aspect-square max-h-[52vh] sm:max-h-[62vh] rounded-2xl sm:rounded-3xl flex justify-center items-center overflow-hidden transition-all duration-500">
+            <canvas id="gameCanvas" class="w-full h-full block rounded-2xl sm:rounded-3xl cursor-pointer"></canvas>
             
-            <div id="verse-banner" class="absolute bottom-3 left-3 right-3 bg-purple-950/90 border border-amber-500/40 px-3 py-1.5 rounded-xl text-center backdrop-blur-md transition-opacity duration-500 opacity-0 pointer-events-none">
-                <p id="verse-text" class="text-xs sm:text-sm italic text-amber-200 font-cinzel">"Run fast and escape!"</p>
+            <div id="verse-banner" class="absolute bottom-2 left-2 right-2 bg-purple-950/90 border border-amber-500/40 px-2.5 py-1 rounded-xl text-center backdrop-blur-md transition-opacity duration-500 opacity-0 pointer-events-none">
+                <p id="verse-text" class="text-xs italic text-amber-200 font-cinzel">"Run fast and escape!"</p>
             </div>
         </div>
     </main>
 
     <!-- PLAY STORE / WEB COMMERCIAL AD BANNER PLACEHOLDER -->
-    <div id="ad-banner-container" class="w-full max-w-xl my-1 flex justify-center items-center">
-        <div class="ad-banner-box w-full py-1.5 px-3 rounded-xl flex justify-between items-center backdrop-blur-sm">
-            <span class="text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">AD</span>
-            <span id="txt-ad-notice" class="text-[11px] opacity-75 font-medium truncate mx-2">Play Store Commercial Space ready for Google Ads</span>
-            <span class="text-[10px] opacity-50">📢</span>
+    <div id="ad-banner-container" class="w-full max-w-xl my-0.5 flex justify-center items-center">
+        <div class="ad-banner-box w-full py-1 px-2.5 rounded-xl flex justify-between items-center backdrop-blur-sm">
+            <span class="text-[8px] sm:text-[9px] uppercase tracking-widest px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">AD</span>
+            <span id="txt-ad-notice" class="text-[10px] sm:text-[11px] opacity-75 font-medium truncate mx-2">Play Store Commercial Space ready for Google Ads</span>
+            <span class="text-[9px] sm:text-[10px] opacity-50">📢</span>
         </div>
     </div>
 
     <!-- BOTTOM CONTROLS -->
-    <footer id="bottom-footer" class="w-full max-w-xl flex justify-between items-center gap-1 sm:gap-1.5 bg-slate-950/90 p-2 sm:p-2.5 rounded-2xl border border-amber-500/40 backdrop-blur-md z-10 shadow-xl text-white">
-        <button id="btn-reset" class="flex-1 py-2 px-1 bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 rounded-xl text-xs font-semibold text-amber-200 flex items-center justify-center gap-1 transition">
-            <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+    <footer id="bottom-footer" class="w-full max-w-xl flex justify-between items-center gap-1 bg-slate-950/90 p-1.5 sm:p-2 rounded-2xl border border-amber-500/40 backdrop-blur-md z-10 shadow-xl text-white">
+        <button id="btn-reset" class="flex-1 py-1.5 px-1 bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 rounded-xl text-[10px] sm:text-xs font-semibold text-amber-200 flex items-center justify-center gap-0.5 transition">
+            <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             <span id="txt-reset">Reset</span>
         </button>
 
-        <button id="btn-hint" class="flex-1 py-2 px-1 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 rounded-xl text-xs font-semibold text-amber-300 flex items-center justify-center gap-1 transition">
-            <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        <button id="btn-hint" class="flex-1 py-1.5 px-1 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 rounded-xl text-[10px] sm:text-xs font-semibold text-amber-300 flex items-center justify-center gap-0.5 transition">
+            <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
             <span id="txt-hint">Hint</span> (<span id="hint-count">3</span>)
         </button>
 
-        <button id="btn-scores" class="flex-1 py-2 px-1 bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 rounded-xl text-xs font-semibold text-amber-200 flex items-center justify-center gap-1 transition">
+        <button id="btn-scores" class="flex-1 py-1.5 px-1 bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 rounded-xl text-[10px] sm:text-xs font-semibold text-amber-200 flex items-center justify-center gap-0.5 transition">
             🏆 <span id="txt-ranks">Ranks</span>
         </button>
 
         <!-- Day / Night Theme Toggle Button -->
-        <button id="btn-theme" class="py-2 px-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-xl text-xs font-semibold text-amber-200 flex items-center justify-center transition">
+        <button id="btn-theme" class="py-1.5 px-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-xl text-[10px] sm:text-xs font-semibold text-amber-200 flex items-center justify-center transition">
             <span id="theme-icon">☀️</span>
         </button>
 
-        <button id="btn-lang" class="py-2 px-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 text-amber-200 transition">
+        <button id="btn-lang" class="py-1.5 px-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-xl text-[10px] sm:text-xs font-semibold flex items-center justify-center gap-0.5 text-amber-200 transition">
             🌐 <span id="txt-lang-code">EN</span>
         </button>
 
-        <button id="btn-sound" class="py-2 px-2 bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 rounded-xl text-xs font-semibold text-amber-200 flex items-center justify-center transition">
+        <button id="btn-sound" class="py-1.5 px-1.5 bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 rounded-xl text-[10px] sm:text-xs font-semibold text-amber-200 flex items-center justify-center transition">
             <span id="sound-icon">🔊</span>
         </button>
 
-        <button id="btn-info" class="py-2 px-2 bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 rounded-xl text-xs font-semibold text-amber-200 flex items-center justify-center transition">
+        <button id="btn-info" class="py-1.5 px-1.5 bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 rounded-xl text-[10px] sm:text-xs font-semibold text-amber-200 flex items-center justify-center transition">
             ❓
         </button>
     </footer>
