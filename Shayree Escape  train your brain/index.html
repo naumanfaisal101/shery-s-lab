@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shayree Escape: Little Lion's Tap Puzzle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Shayree Escape: Speedy Bird Puzzle</title>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts for Multi-Language Support -->
+    <!-- Google Fonts for Multi-Language & Elegant Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Noto+Sans+Arabic:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+SC:wght@400;600;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -20,16 +23,25 @@
         
         body {
             font-family: 'Outfit', 'Noto Sans Arabic', 'Noto Sans Devanagari', 'Noto Sans SC', sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            overflow: hidden;
+        }
+
+        body.night-theme {
             background: #120d18;
             color: #f3e8ee;
-            overflow: hidden;
+        }
+
+        body.day-theme {
+            background: #f4efe6;
+            color: #2a1f33;
         }
 
         .font-cinzel {
             font-family: 'Cinzel', 'Noto Sans Arabic', 'Noto Sans Devanagari', 'Noto Sans SC', serif;
         }
 
-        .parchment-bg {
+        .parchment-bg-night {
             background-color: #1a1222;
             background-image: 
                 radial-gradient(circle at 50% 50%, rgba(212, 163, 89, 0.08) 0%, transparent 80%),
@@ -37,11 +49,19 @@
                 radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
         }
 
+        .parchment-bg-day {
+            background-color: #f7f2e8;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(212, 163, 89, 0.15) 0%, transparent 80%),
+                radial-gradient(circle at 10% 20%, rgba(251, 191, 36, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(244, 114, 182, 0.12) 0%, transparent 50%);
+        }
+
         .canvas-container {
-            background: rgba(30, 20, 42, 0.85);
-            border: 2px solid rgba(212, 163, 89, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(212, 163, 89, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 0 30px rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
         }
 
         .btn-gold {
@@ -61,11 +81,20 @@
             transform: translateY(1px);
         }
 
-        .glass-card {
+        .glass-card-night {
             background: rgba(26, 18, 34, 0.95);
             border: 1px solid rgba(212, 163, 89, 0.3);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(16px);
+            color: #f3e8ee;
+        }
+
+        .glass-card-day {
+            background: rgba(255, 252, 245, 0.96);
+            border: 1px solid rgba(212, 163, 89, 0.5);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(16px);
+            color: #2a1f33;
         }
 
         .lang-btn, .mode-btn {
@@ -74,9 +103,14 @@
             transition: all 0.2s ease;
         }
 
+        body.day-theme .lang-btn, body.day-theme .mode-btn {
+            background: rgba(235, 220, 195, 0.6);
+            color: #2a1f33;
+        }
+
         .lang-btn.active-lang, .mode-btn.active-mode {
             background: linear-gradient(135deg, #d4a359 0%, #b8860b 100%);
-            color: #1a1222;
+            color: #1a1222 !important;
             font-weight: bold;
             border-color: #fef3c7;
             box-shadow: 0 0 10px rgba(212, 163, 89, 0.6);
@@ -95,18 +129,23 @@
         .badge-player-1 { background: #10b981; color: #1a1222; }
         .badge-player-2 { background: #06b6d4; color: #1a1222; }
         .badge-player-3 { background: #ec4899; color: #ffffff; }
+
+        /* Ad Banner Slot Styling */
+        .ad-banner-box {
+            background: linear-gradient(90deg, rgba(212, 163, 89, 0.08) 0%, rgba(147, 51, 234, 0.08) 50%, rgba(212, 163, 89, 0.08) 100%);
+            border: 1px dashed rgba(212, 163, 89, 0.35);
+        }
     </style>
 </head>
-<body class="parchment-bg h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-4 select-none overflow-hidden">
+<body id="game-body" class="day-theme parchment-bg-day h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-4 select-none overflow-hidden">
 
     <!-- TOP HUD -->
-    <header class="w-full max-w-xl flex flex-col gap-2 bg-purple-950/50 p-2.5 sm:p-3 rounded-2xl border border-amber-500/20 backdrop-blur-md z-10">
-        <!-- Top Status Row -->
+    <header id="top-hud" class="w-full max-w-xl flex flex-col gap-2 bg-slate-950/90 p-2.5 sm:p-3 rounded-2xl border border-amber-500/40 backdrop-blur-md z-10 transition-colors duration-300 shadow-xl text-white">
         <div class="flex justify-between items-center gap-2">
             <!-- Stage Display -->
-            <div class="bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-xl text-center">
-                <span id="label-stage" class="text-[10px] text-amber-200/60 uppercase tracking-widest block font-cinzel">Stage</span>
-                <span id="stage-display" class="text-sm sm:text-base font-bold text-amber-400 font-cinzel">1 / 20</span>
+            <div class="bg-amber-500/15 border border-amber-500/40 px-2.5 py-1 rounded-xl text-center">
+                <span id="label-stage" class="text-[10px] text-amber-200 uppercase tracking-widest block font-cinzel">Stage</span>
+                <span id="stage-display" class="text-sm sm:text-base font-bold text-amber-300 font-cinzel">1 / 100</span>
             </div>
 
             <!-- Active Player Banner in Multiplayer -->
@@ -115,86 +154,99 @@
             </div>
 
             <!-- Timer Display -->
-            <div class="bg-black/40 border border-amber-500/20 px-2.5 py-1 rounded-xl flex items-center gap-1">
+            <div class="bg-black/50 border border-amber-500/30 px-2.5 py-1 rounded-xl flex items-center gap-1">
                 <span class="text-xs">⏱️</span>
                 <span id="timer-display" class="text-sm font-mono font-bold text-amber-300">00:00.0</span>
             </div>
 
             <!-- Coins Display -->
-            <div class="bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-xl flex items-center gap-1">
+            <div class="bg-amber-500/15 border border-amber-500/40 px-2.5 py-1 rounded-xl flex items-center gap-1">
                 <span class="text-xs">🪙</span>
                 <span id="coins-display" class="text-sm font-bold text-amber-300">0</span>
             </div>
 
-            <!-- Lives / Hearts -->
-            <div class="flex items-center gap-0.5 bg-black/40 px-2 py-1 rounded-xl border border-red-500/20">
-                <span id="heart-1" class="text-red-500 text-sm sm:text-base">❤️</span>
-                <span id="heart-2" class="text-red-500 text-sm sm:text-base">❤️</span>
-                <span id="heart-3" class="text-red-500 text-sm sm:text-base">❤️</span>
+            <!-- Single Life Display (1 Life Rule) -->
+            <div class="flex items-center gap-1 bg-black/50 px-2.5 py-1 rounded-xl border border-red-500/40">
+                <span id="heart-1" class="text-red-500 text-base transition-all duration-300 animate-pulse">❤️</span>
+                <span id="txt-lives-count" class="text-xs font-bold text-red-300">1/1</span>
             </div>
         </div>
 
-        <!-- Title & Subtitle Row -->
         <div class="flex justify-between items-center px-1">
             <div>
-                <h1 id="txt-game-title" class="text-base sm:text-lg font-bold font-cinzel text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200">
+                <h1 id="txt-game-title" class="text-base sm:text-lg font-bold font-cinzel text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-amber-100">
                     Shayree Escape
                 </h1>
-                <p id="stage-subtitle" class="text-[11px] text-purple-300/70 italic">Stage 1: First Flight</p>
+                <p id="stage-subtitle" class="text-[11px] text-amber-200/90 italic">Stage 1: Golden Dunes</p>
             </div>
-            <div class="text-right">
-                <span id="txt-mode-label" class="text-[10px] text-purple-300/60 uppercase block">Mode</span>
-                <span id="txt-current-mode" class="text-xs font-bold text-amber-300">1 Player</span>
+            <div class="flex items-center gap-2">
+                <div class="text-right">
+                    <span id="txt-mode-label" class="text-[10px] text-amber-200/70 uppercase block">Mode</span>
+                    <span id="txt-current-mode" class="text-xs font-bold text-amber-300">1 Player</span>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- MAIN GAME CANVAS WRAPPER -->
-    <main class="relative w-full max-w-xl flex-1 flex flex-col justify-center items-center my-1.5">
-        <div id="canvas-holder" class="canvas-container relative w-full aspect-square max-h-[65vh] sm:max-h-[70vh] rounded-3xl flex justify-center items-center overflow-hidden">
+    <main class="relative w-full max-w-xl flex-1 flex flex-col justify-center items-center my-1">
+        <div id="canvas-holder" class="canvas-container relative w-full aspect-square max-h-[60vh] sm:max-h-[65vh] rounded-3xl flex justify-center items-center overflow-hidden transition-all duration-500">
             <canvas id="gameCanvas" class="w-full h-full block rounded-3xl cursor-pointer"></canvas>
             
-            <!-- Dynamic Poetic Fragment Display Banner -->
             <div id="verse-banner" class="absolute bottom-3 left-3 right-3 bg-purple-950/90 border border-amber-500/40 px-3 py-1.5 rounded-xl text-center backdrop-blur-md transition-opacity duration-500 opacity-0 pointer-events-none">
-                <p id="verse-text" class="text-xs sm:text-sm italic text-amber-200 font-cinzel">"Every feather flies free!"</p>
+                <p id="verse-text" class="text-xs sm:text-sm italic text-amber-200 font-cinzel">"Run fast and escape!"</p>
             </div>
         </div>
     </main>
 
+    <!-- PLAY STORE / WEB COMMERCIAL AD BANNER PLACEHOLDER -->
+    <div id="ad-banner-container" class="w-full max-w-xl my-1 flex justify-center items-center">
+        <div class="ad-banner-box w-full py-1.5 px-3 rounded-xl flex justify-between items-center backdrop-blur-sm">
+            <span class="text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">AD</span>
+            <span id="txt-ad-notice" class="text-[11px] opacity-75 font-medium truncate mx-2">Play Store Commercial Space ready for Google Ads</span>
+            <span class="text-[10px] opacity-50">📢</span>
+        </div>
+    </div>
+
     <!-- BOTTOM CONTROLS -->
-    <footer class="w-full max-w-xl flex justify-between items-center gap-1.5 bg-purple-950/50 p-2 sm:p-2.5 rounded-2xl border border-amber-500/20 backdrop-blur-md z-10">
-        <button id="btn-reset" class="flex-1 py-2 px-1.5 bg-purple-900/50 hover:bg-purple-800/60 border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition">
+    <footer id="bottom-footer" class="w-full max-w-xl flex justify-between items-center gap-1 sm:gap-1.5 bg-slate-950/90 p-2 sm:p-2.5 rounded-2xl border border-amber-500/40 backdrop-blur-md z-10 shadow-xl text-white">
+        <button id="btn-reset" class="flex-1 py-2 px-1 bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 rounded-xl text-xs font-semibold text-amber-200 flex items-center justify-center gap-1 transition">
             <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             <span id="txt-reset">Reset</span>
         </button>
 
-        <button id="btn-hint" class="flex-1 py-2 px-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-xl text-xs font-semibold text-amber-300 flex items-center justify-center gap-1 transition">
+        <button id="btn-hint" class="flex-1 py-2 px-1 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 rounded-xl text-xs font-semibold text-amber-300 flex items-center justify-center gap-1 transition">
             <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
             <span id="txt-hint">Hint</span> (<span id="hint-count">3</span>)
         </button>
 
-        <button id="btn-scores" class="flex-1 py-2 px-1.5 bg-purple-900/50 hover:bg-purple-800/60 border border-purple-500/30 rounded-xl text-xs font-semibold text-amber-200 flex items-center justify-center gap-1 transition">
+        <button id="btn-scores" class="flex-1 py-2 px-1 bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 rounded-xl text-xs font-semibold text-amber-200 flex items-center justify-center gap-1 transition">
             🏆 <span id="txt-ranks">Ranks</span>
         </button>
 
-        <button id="btn-lang" class="py-2 px-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 text-amber-200 transition">
+        <!-- Day / Night Theme Toggle Button -->
+        <button id="btn-theme" class="py-2 px-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-xl text-xs font-semibold text-amber-200 flex items-center justify-center transition">
+            <span id="theme-icon">☀️</span>
+        </button>
+
+        <button id="btn-lang" class="py-2 px-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 text-amber-200 transition">
             🌐 <span id="txt-lang-code">EN</span>
         </button>
 
-        <button id="btn-sound" class="py-2 px-2.5 bg-purple-900/50 hover:bg-purple-800/60 border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center justify-center transition">
+        <button id="btn-sound" class="py-2 px-2 bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 rounded-xl text-xs font-semibold text-amber-200 flex items-center justify-center transition">
             <span id="sound-icon">🔊</span>
         </button>
 
-        <button id="btn-info" class="py-2 px-2.5 bg-purple-900/50 hover:bg-purple-800/60 border border-purple-500/30 rounded-xl text-xs font-semibold flex items-center justify-center transition">
+        <button id="btn-info" class="py-2 px-2 bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 rounded-xl text-xs font-semibold text-amber-200 flex items-center justify-center transition">
             ❓
         </button>
     </footer>
 
-    <!-- INTRO / SETUP MODAL WITH MULTIPLAYER & LANGUAGE SELECTOR -->
+    <!-- INTRO / SETUP MODAL -->
     <div id="modal-intro" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md">
-        <div class="glass-card max-w-md w-full p-4 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-500/40 max-h-[92vh] overflow-y-auto">
+        <div id="card-intro" class="glass-card-night max-w-md w-full p-4 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-500/40 max-h-[92vh] overflow-y-auto">
             
-            <!-- Language Picker Banner -->
+            <!-- Language Selector -->
             <div class="mb-3 bg-purple-950/70 p-2 rounded-2xl border border-amber-500/20">
                 <span id="txt-select-lang" class="text-[11px] font-semibold text-amber-300 uppercase tracking-wide block mb-1.5">Select Language</span>
                 <div class="grid grid-cols-4 gap-1 text-[11px]">
@@ -213,7 +265,7 @@
                 </div>
             </div>
 
-            <!-- Player Mode Selector (1P, 2P, 3P, 4P) -->
+            <!-- Player Mode Selector -->
             <div class="mb-4 bg-purple-950/70 p-2.5 rounded-2xl border border-amber-500/30">
                 <span id="txt-select-players" class="text-[11px] font-semibold text-amber-300 uppercase tracking-wide block mb-2">Select Number of Players</span>
                 <div class="grid grid-cols-4 gap-1.5 text-xs font-bold">
@@ -236,14 +288,14 @@
                 🦁
             </div>
             <h2 id="txt-intro-title" class="text-xl sm:text-2xl font-extrabold font-cinzel text-amber-300 mb-1">Shayree Escape</h2>
-            <p id="txt-intro-desc" class="text-xs text-purple-200/90 mb-4 leading-relaxed">
-                Help Shayree (the brave little lion) clear all the paths! Tap the arrows to help them escape as fast as you can to earn coins and prove who has the sharpest brain!
+            <p id="txt-intro-desc" class="text-xs opacity-90 mb-4 leading-relaxed">
+                Help Shayree (the brave little lion cub) clear all the speedy runner birds! You have 1 LIFE only! If birds crash, your run ends and resets to Stage 1!
             </p>
 
-            <div class="bg-purple-950/60 p-3 rounded-2xl text-left border border-purple-500/20 mb-4 text-xs space-y-1.5 text-purple-200/90">
-                <p><strong id="txt-goal-title">🎯 Goal:</strong> <span id="txt-goal-desc">Clear all feathers across 20 stages.</span></p>
-                <p><strong id="txt-timer-title">⏱️ Speed & Coins:</strong> <span id="txt-timer-desc">Faster time earns higher Brain Speed Index & bonus Coins!</span></p>
-                <p><strong id="txt-multiplayer-title">👥 Multiplayer:</strong> <span id="txt-multiplayer-desc">Players take turns clearing stages to compete for 1st place!</span></p>
+            <div class="bg-purple-950/60 p-3 rounded-2xl text-left border border-purple-500/20 mb-4 text-xs space-y-1.5 opacity-90">
+                <p><strong id="txt-goal-title">🎯 100 Stages:</strong> <span id="txt-goal-desc">Conquer 100 progressively complex stages without a single crash!</span></p>
+                <p><strong id="txt-timer-title">❤️ 1 Life Rule:</strong> <span id="txt-timer-desc">One mistake resets your campaign to Stage 1!</span></p>
+                <p><strong id="txt-multiplayer-title">👥 Pass & Play:</strong> <span id="txt-multiplayer-desc">Players take turns per stage until eliminated to crown 1st place!</span></p>
             </div>
 
             <button id="btn-start" class="btn-gold w-full py-3 rounded-2xl text-sm uppercase tracking-wider font-bold">
@@ -253,33 +305,31 @@
     </div>
 
     <!-- WIN STAGE MODAL -->
-    <div id="modal-win" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md">
-        <div class="glass-card max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-500/50">
-            <div class="w-14 h-14 bg-amber-500/20 border border-amber-400/50 rounded-full flex items-center justify-center mx-auto mb-2 text-3xl">
+    <div id="modal-win" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-black/30 backdrop-blur-sm transition-all duration-500">
+        <div id="card-win" class="glass-card-night max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-500/50 shadow-2xl relative overflow-hidden">
+            <!-- Glowing Milestone Particles Header Accent -->
+            <div id="milestone-badge-glow" class="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-40 bg-amber-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div class="w-14 h-14 bg-amber-500/20 border border-amber-400/50 rounded-full flex items-center justify-center mx-auto mb-2 text-3xl shadow-lg animate-bounce">
                 📜
             </div>
-            <h3 id="txt-win-title" class="text-lg font-cinzel text-amber-300 mb-1">Stage Completed!</h3>
-            <p id="win-couplet" class="text-xs italic text-amber-100 font-cinzel my-2 p-2.5 bg-purple-950/80 rounded-xl border border-amber-500/20">
-                "Every feather flies free in the sky!"
-            </p>
+            <h3 id="txt-win-title" class="text-lg sm:text-xl font-cinzel text-amber-300 font-bold mb-1 drop-shadow-md">Stage Completed!</h3>
 
-            <!-- Stats Summary -->
-            <div class="grid grid-cols-3 gap-2 bg-purple-950/60 p-3 rounded-2xl border border-amber-500/20 my-3 text-xs">
+            <div class="bg-purple-950/70 p-3 rounded-2xl border border-amber-500/30 text-xs mb-3 flex justify-around">
                 <div class="text-center">
-                    <span id="label-stat-time" class="text-[10px] text-purple-300/70 uppercase block">Time</span>
+                    <span id="label-stat-time" class="text-[10px] opacity-70 uppercase block">Time</span>
                     <span id="stat-time" class="font-mono font-bold text-amber-300 text-sm">00:00</span>
                 </div>
                 <div class="text-center">
-                    <span id="label-stat-speed" class="text-[10px] text-purple-300/70 uppercase block">Brain Speed</span>
+                    <span id="label-stat-speed" class="text-[10px] opacity-70 uppercase block">Brain Speed</span>
                     <span id="stat-speed" class="font-bold text-amber-300 text-sm">950</span>
                 </div>
                 <div class="text-center">
-                    <span id="label-stat-coins" class="text-[10px] text-purple-300/70 uppercase block">Coins Earned</span>
+                    <span id="label-stat-coins" class="text-[10px] opacity-70 uppercase block">Coins Earned</span>
                     <span id="stat-coins" class="font-bold text-amber-300 text-sm">+150 🪙</span>
                 </div>
             </div>
 
-            <!-- Next Player Notice for Multiplayer -->
             <div id="next-player-notice" class="mb-3 p-2 rounded-xl bg-amber-500/20 border border-amber-500/30 text-xs font-semibold text-amber-200 hidden">
                 📢 <span id="txt-next-turn-notice">Next Turn: Player 2</span>
             </div>
@@ -290,47 +340,57 @@
         </div>
     </div>
 
-    <!-- GAME OVER MODAL -->
+    <!-- GAME OVER / CRASH MODAL -->
     <div id="modal-loss" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-        <div class="glass-card max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-red-500/40">
+        <div id="card-loss" class="glass-card-night max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-red-500/40">
             <div class="w-14 h-14 bg-red-500/20 border border-red-500/40 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl">
-                💔
+                💥
             </div>
-            <h3 id="txt-loss-title" class="text-xl font-cinzel text-red-400 mb-1">Out of Hearts!</h3>
-            <p id="txt-loss-desc" class="text-xs text-purple-200/90 mb-4">
-                Feathers bumped too many times. Take a moment and try again!
+            <h3 id="txt-loss-title" class="text-xl font-cinzel text-red-400 mb-1">Bird Crashed!</h3>
+            <p id="txt-loss-desc" class="text-xs opacity-90 mb-3">
+                The runner birds crashed! You lost your 1 Life and must restart from Stage 1.
             </p>
 
+            <div class="bg-purple-950/70 p-3 rounded-2xl border border-red-500/30 text-xs mb-4 flex justify-around">
+                <div>
+                    <span class="text-[10px] opacity-70 uppercase block">Stage Reached</span>
+                    <span id="loss-stage-reached" class="font-bold text-amber-300 text-sm">Stage 1</span>
+                </div>
+                <div>
+                    <span class="text-[10px] opacity-70 uppercase block">Total Coins</span>
+                    <span id="loss-total-coins" class="font-bold text-amber-300 text-sm">0 🪙</span>
+                </div>
+            </div>
+
             <button id="btn-retry" class="btn-gold w-full py-3 rounded-2xl text-sm uppercase tracking-wider font-bold">
-                <span id="txt-retry-btn">Retry Stage 🔄</span>
+                <span id="txt-retry-btn">Restart from Stage 1 🔄</span>
             </button>
         </div>
     </div>
 
-    <!-- LEADERBOARD & FINALE WINNER MODAL -->
+    <!-- LEADERBOARD MODAL -->
     <div id="modal-leaderboard" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md">
-        <div class="glass-card max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-400 max-h-[92vh] overflow-y-auto">
+        <div id="card-leaderboard" class="glass-card-night max-w-md w-full p-5 sm:p-6 rounded-3xl text-center animate-fade-in border border-amber-400 max-h-[92vh] overflow-y-auto">
             <div class="w-16 h-16 bg-amber-400/20 border-2 border-amber-400 rounded-full flex items-center justify-center mx-auto mb-2 text-3xl">
                 👑
             </div>
-            <h2 id="txt-finale-title" class="text-xl sm:text-2xl font-extrabold font-cinzel text-amber-300 mb-1">Leaderboard & Winner</h2>
-            <p id="txt-finale-desc" class="text-xs text-purple-200 mb-3">
-                Final scores and brain speed rankings across all stages!
+            <h2 id="txt-finale-title" class="text-xl sm:text-2xl font-extrabold font-cinzel text-amber-300 mb-1">Leaderboard & Record</h2>
+            <p id="txt-finale-desc" class="text-xs opacity-80 mb-3">
+                Final scores and brain speed rankings saved in browser history!
             </p>
 
-            <!-- Leaderboard Table -->
             <div class="bg-purple-950/70 border border-amber-500/30 rounded-2xl overflow-hidden mb-4">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-amber-500/20 text-amber-300 font-cinzel">
                         <tr>
                             <th class="p-2 text-center">Rank</th>
                             <th class="p-2">Player</th>
+                            <th class="p-2 text-center">Stage</th>
                             <th class="p-2 text-center">Coins</th>
-                            <th class="p-2 text-center">Speed</th>
                         </tr>
                     </thead>
                     <tbody id="leaderboard-body" class="divide-y divide-purple-900/50">
-                        <!-- Dynamic rows injected here -->
+                        <!-- Dynamic rows -->
                     </tbody>
                 </table>
             </div>
@@ -351,21 +411,21 @@
                 hintBtn: "Hint",
                 ranksBtn: "Ranks",
                 introTitle: "Shayree Escape 🦁",
-                introDesc: "Help Shayree (the brave little lion cub) clear all the paths! Tap the arrows to help them fly free off the board as fast as you can to earn coins and prove who has the fastest brain!",
-                goalTitle: "🎯 Goal:",
-                goalDesc: "Help little lion Shayree clear all arrows across 20 stages.",
-                timerTitle: "⏱️ Speed & Coins:",
-                timerDesc: "Faster time earns higher Brain Speed Index & bonus Coins!",
-                multiplayerTitle: "👥 Multiplayer:",
-                multiplayerDesc: "Players take turns clearing stages to compete for 1st place!",
+                introDesc: "Help Shayree (the brave little lion cub) clear all the speedy runner birds! You have 1 LIFE only! If birds crash, your campaign resets to Stage 1!",
+                goalTitle: "🎯 100 Stages:",
+                goalDesc: "Conquer 100 progressively complex stages without a single crash!",
+                timerTitle: "❤️ 1 Life Rule:",
+                timerDesc: "One mistake resets your campaign to Stage 1!",
+                multiplayerTitle: "👥 Pass & Play:",
+                multiplayerDesc: "Players take turns per stage until eliminated to crown 1st place!",
                 selectPlayers: "Select Number of Players:",
                 startBtn: "Start Game ➔",
                 winTitle: "Stage Completed!",
                 nextStageBtn: "Next Stage ➔",
-                lossTitle: "Out of Hearts!",
-                lossDesc: "Arrows bumped too many times. Take a moment and try again!",
-                retryBtn: "Retry Stage 🔄",
-                finaleTitle: "Leaderboard & Winner!",
+                lossTitle: "Bird Crashed!",
+                lossDesc: "Runner birds crashed! You lost your 1 Life and must restart from Stage 1.",
+                retryBtn: "Restart from Stage 1 🔄",
+                finaleTitle: "Leaderboard & Record!",
                 finaleDesc: "Final scores and brain speed rankings across all stages!",
                 playAgainBtn: "Play Again 🔄",
                 selectLang: "Select Language:",
@@ -376,7 +436,8 @@
                 playerLabel: "Player ",
                 modeLabel: "Mode",
                 modeSingle: "1 Player",
-                modeMulti: " Players"
+                modeMulti: " Players",
+                adNotice: "Play Store Commercial Space ready for Google Ads"
             },
             ur: {
                 gameTitle: "شیری ایسکیپ",
@@ -385,22 +446,22 @@
                 hintBtn: "اشارہ",
                 ranksBtn: "اسکور بورڈ",
                 introTitle: "شیری ایسکیپ 🦁 (چھوٹا شیر)",
-                introDesc: "شیری (بہادر چھوٹے شیر) کے لیے تمام راستے صاف کریں! تمام تیروں پر کلک کر کے انہیں بورڈ سے باہر نکالیں، سکے جیتیں اور اپنے تیز ذہن کا ثبوت دیں!",
-                goalTitle: "🎯 مقصد:",
-                goalDesc: "شیری کے لیے 20 اسٹیجز میں تمام تیروں کو آزاد کریں۔",
-                timerTitle: "⏱️ رفتار اور سکے:",
-                timerDesc: "کم وقت میں اسٹیج مکمل کرنے پر زیادہ سکے اور برین اسپیڈ ملتی ہے!",
-                multiplayerTitle: "👥 ملٹی پلیئر:",
-                multiplayerDesc: "1 سے 4 کھلاڑی باری باری کھیل کر مقابلے میں پہلی پوزیشن حاصل کر سکتے ہیں!",
+                introDesc: "شیری (بہادر چھوٹے شیر) کی مدد کریں! آپ کے پاس صرف 1 زندگی ہے! اگر پرندہ ٹکرایا تو گیم دوبارہ اسٹیج 1 سے شروع ہو جائے گی!",
+                goalTitle: "🎯 100 اسٹیجز:",
+                goalDesc: "100 اسٹیجز میں تمام پرندوں کو بغیر ٹکرائے آزاد کریں۔",
+                timerTitle: "❤️ 1 لائف اصول:",
+                timerDesc: "ایک ٹکر سے اپ کی پیشرفت دوبارہ اسٹیج 1 پر چلی جائے گی!",
+                multiplayerTitle: "👥 پاس اینڈ پلے:",
+                multiplayerDesc: "کھلاڑی باری باری کھیل کر مقابلے میں پہلی پوزیشن حاصل کریں!",
                 selectPlayers: "کھلاڑیوں کی تعداد منتخب کریں:",
                 startBtn: "کھیل شروع کریں ➔",
                 winTitle: "اسٹیج مکمل!",
                 nextStageBtn: "اگلا اسٹیج ➔",
-                lossTitle: "دل ختم ہو گئے!",
-                lossDesc: "تیر بار بار ٹکرا گئے۔ سوچ سمجھ کر دوبارہ کوشش کریں!",
-                retryBtn: "دوبارہ کوشش 🔄",
+                lossTitle: "پرندہ کریش ہو گیا!",
+                lossDesc: "پرندے اپس میں ٹکرا گئے۔ آپ کی 1 زندگی ختم ہو گئی اور گیم دوبارہ اسٹیج 1 سے شروع ہو گی۔",
+                retryBtn: "اسٹیج 1 سے دوبارہ 🔄",
                 finaleTitle: "نتائج اور فاتح!",
-                finaleDesc: "تمام اسٹیجز کے سکور اور ذہن کی رفتار کی فائنل درجہ بندی!",
+                finaleDesc: "تمام 100 اسٹیجز کے فائنل سکور اور درجہ بندی!",
                 playAgainBtn: "دوبارہ کھیلیں 🔄",
                 selectLang: "زبان منتخب کریں:",
                 statTime: "وقت",
@@ -410,7 +471,8 @@
                 playerLabel: "کھلاڑی ",
                 modeLabel: "موڈ",
                 modeSingle: "1 کھلاڑی",
-                modeMulti: " کھلاڑی"
+                modeMulti: " کھلاڑی",
+                adNotice: "پلے اسٹور اشتہارات کی جگہ تیار ہے"
             },
             hi: {
                 gameTitle: "शेरी एस्केप",
@@ -419,22 +481,22 @@
                 hintBtn: "संकेत",
                 ranksBtn: "स्कोरकार्ड",
                 introTitle: "शेरी एस्केप 🦁 (नन्हा शेर)",
-                introDesc: "शेरी (बहादुर नन्हे शेर) के लिए सभी रास्ते साफ़ करें! तीरों को टैप करके बाहर निकालें, सिक्के कमाएं और अपने तेज़ दिमाग का प्रदर्शन करें!",
-                goalTitle: "🎯 लक्ष्य:",
-                goalDesc: "20 स्टेज में नन्हे शेर शेरी के सभी तीर साफ़ करें।",
-                timerTitle: "⏱️ गति और सिक्के:",
-                timerDesc: "कम समय में स्टेज पूरा करने पर ज़्यादा सिक्के और ब्रेन स्पीड मिलती है!",
-                multiplayerTitle: "👥 मल्टीप्लेयर:",
-                multiplayerDesc: "1 से 4 खिलाड़ी बारी-बारी से खेलकर पहली पोजीशन के लिए मुकाबला कर सकते हैं!",
+                introDesc: "शेरी (बहादुर नन्हे शेर) की मदद करें! आपके पास केवल 1 जीवन है! यदि पक्षी टकराया तो खेल फिर से स्टेज 1 से शुरू होगा!",
+                goalTitle: "🎯 100 स्टेज:",
+                goalDesc: "100 कठिन स्टेज में सभी पक्षियों को बिना टकराए साफ़ करें।",
+                timerTitle: "❤️ 1 लाइफ नियम:",
+                timerDesc: "एक टक्कर से आपकी प्रगति फिर से स्टेज 1 पर चली जाएगी!",
+                multiplayerTitle: "👥 पास एंड प्ले:",
+                multiplayerDesc: "खिलाड़ी बारी-बारी से खेलकर पहली पोजीशन के लिए मुकाबला करें!",
                 selectPlayers: "खिलाड़ियों की संख्या चुनें:",
                 startBtn: "खेल शुरू करें ➔",
                 winTitle: "स्टेज पूरा हुआ!",
                 nextStageBtn: "अगला स्टेज ➔",
-                lossTitle: "दिल खत्म हो गए!",
-                lossDesc: "तीर बार-बार टकरा गए। सोच-समझकर दोबारा कोशिश करें!",
-                retryBtn: "फिर कोशिश करें 🔄",
+                lossTitle: "पक्षी क्रैश हो गया!",
+                lossDesc: "पक्षियों में टक्कर हो गई! आपका 1 जीवन समाप्त हो गया और गेम स्टेज 1 से शुरू होगा।",
+                retryBtn: "स्टेज 1 से फिर शुरू करें 🔄",
                 finaleTitle: "परिणाम और विजेता!",
-                finaleDesc: "सभी स्टेज का स्कोर और दिमाग की गति की फाइनल रैंकिंग!",
+                finaleDesc: "सभी 100 स्टेज का स्कोर और फाइनल रैंकिंग!",
                 playAgainBtn: "फिर से खेलें 🔄",
                 selectLang: "भाषा चुनें:",
                 statTime: "समय",
@@ -444,7 +506,8 @@
                 playerLabel: "खिलाड़ी ",
                 modeLabel: "मोड",
                 modeSingle: "1 खिलाड़ी",
-                modeMulti: " खिलाड़ी"
+                modeMulti: " खिलाड़ी",
+                adNotice: "प्ले स्टोर विज्ञापनों के लिए जगह तैयार है"
             },
             zh: {
                 gameTitle: "小狮逃脱 (Shayree Escape)",
@@ -453,22 +516,22 @@
                 hintBtn: "提示",
                 ranksBtn: "排行榜",
                 introTitle: "小狮逃脱 🦁 (Shayree Escape)",
-                introDesc: "帮助勇敢的小狮子 Shayree 清理所有通道！快速点击箭头让它们逃离棋盘，赢取金币并展现你最强大脑！",
-                goalTitle: "🎯 目标：",
-                goalDesc: "帮小狮子 Shayree 通关 20 个关卡，清空所有箭头。",
-                timerTitle: "⏱️ 速度与金币：",
-                timerDesc: "通关越快，获得的大脑速度指数和奖励金币越高！",
-                multiplayerTitle: "👥 多人模式：",
-                multiplayerDesc: "1 至 4 名玩家轮流挑战，角逐冠军宝座！",
+                introDesc: "帮助勇敢的小狮子 Shayree！你只有 1 条生命！如果发生碰撞，游戏将重置回第 1 关！",
+                goalTitle: "🎯 100 个关卡：",
+                goalDesc: "挑战 100 个逐渐变难的关卡，不发生任何碰撞！",
+                timerTitle: "❤️ 1 命通关法则：",
+                timerDesc: "一次碰撞即可让挑战从第 1 关重新开始！",
+                multiplayerTitle: "👥 轮流对战：",
+                multiplayerDesc: "玩家轮流挑战关卡，争夺第一名！",
                 selectPlayers: "选择玩家人数：",
                 startBtn: "开始游戏 ➔",
                 winTitle: "关卡完成！",
                 nextStageBtn: "下一关 ➔",
-                lossTitle: "生命用尽！",
-                lossDesc: "箭头碰撞次数过多。冷静一下，再试一次！",
-                retryBtn: "重新开始 🔄",
+                lossTitle: "小鸟发生碰撞！",
+                lossDesc: "奔跑鸟互相发生碰撞！你失去了唯一的生命，必须从第 1 关重新开始。",
+                retryBtn: "从第 1 关重新开始 🔄",
                 finaleTitle: "排行榜与最终赢家！",
-                finaleDesc: "所有关卡的最终得分与大脑速度排名！",
+                finaleDesc: "100 个关卡的最终得分与排名！",
                 playAgainBtn: "再玩一次 🔄",
                 selectLang: "选择语言：",
                 statTime: "用时",
@@ -478,107 +541,306 @@
                 playerLabel: "玩家 ",
                 modeLabel: "模式",
                 modeSingle: "单人模式",
-                modeMulti: " 人模式"
+                modeMulti: " 人模式",
+                adNotice: "应用商店广告位已准备就绪"
             }
         };
 
-        const STAGE_TEXTS = {
-            en: {
-                subtitles: [
-                    "Stage 1: Shayree's First Roar", "Stage 2: Crossing Paths", "Stage 3: The Clear Horizon",
-                    "Stage 4: Lion's Maze", "Stage 5: Stone Obstacles", "Stage 6: The Secret Path",
-                    "Stage 7: Echoing Echoes", "Stage 8: Woven Lines", "Stage 9: Ancient Trail",
-                    "Stage 10: Master of the Jungle", "Stage 11: Twin Stones", "Stage 12: Diagonal Leap",
-                    "Stage 13: Four Corners", "Stage 14: Outer Ring", "Stage 15: Central Shrine",
-                    "Stage 16: Lion Heart Keep", "Stage 17: Five Jewels", "Stage 18: Grand Citadel",
-                    "Stage 19: Whispering Winds", "Stage 20: King of the Jungle"
-                ],
-                couplets: [
-                    '"Shayree leaps into freedom!"', '"Brave steps clear the way for Shayree!"',
-                    '"Courage leads to victory!"', '"Step by step, little lion moves ahead!"',
-                    '"Wisdom guides the brave lion cub!"', '"Shayree finds the open path!"',
-                    '"Clear the trail for the little lion!"', '"Freedom shines in every turn!"',
-                    '"The brave lion cub fears no obstacle!"', '"You helped Shayree conquer the maze!"',
-                    '"Two stones cannot stop little Shayree!"', '"Leap through the sky with courage!"',
-                    '"Four corners open wide to victory!"', '"Shayree shines bright like a star!"',
-                    '"Peace and power in every move!"', '"The brave lion cub reaches home!"',
-                    '"Five jewels sparkle for Shayree!"', '"The grand citadel is unlocked!"',
-                    '"Brave winds whisper victory!"', '"Hail the King! You are a puzzle master!"'
-                ]
+        /* DYNAMIC STAGE VISUAL PALETTES */
+        const STAGE_THEMES = [
+            { name: "Golden Dunes", bgDark: "#221910", bgLight: "#fefae0", gridDark: "rgba(212, 163, 89, 0.4)", gridLight: "rgba(202, 138, 4, 0.25)", border: "#eab308", tileDark: "#2d2218", tileLight: "#fef3c7", accent: "#f59e0b" },
+            { name: "Emerald Oasis", bgDark: "#0d2417", bgLight: "#ecfdf5", gridDark: "rgba(16, 185, 129, 0.4)", gridLight: "rgba(16, 185, 129, 0.25)", border: "#10b981", tileDark: "#133321", tileLight: "#d1fae5", accent: "#34d399" },
+            { name: "Cosmic Neon", bgDark: "#210f2d", bgLight: "#fdf4ff", gridDark: "rgba(236, 72, 153, 0.4)", gridLight: "rgba(219, 39, 119, 0.25)", border: "#ec4899", tileDark: "#2c153c", tileLight: "#fae8ff", accent: "#f472b6" },
+            { name: "Royal Sapphire", bgDark: "#0a192f", bgLight: "#f0f9ff", gridDark: "rgba(6, 182, 212, 0.4)", gridLight: "rgba(14, 165, 233, 0.25)", border: "#06b6d4", tileDark: "#102442", tileLight: "#e0f2fe", accent: "#38bdf8" },
+            { name: "Crimson Dusk", bgDark: "#2b0d12", bgLight: "#fff1f2", gridDark: "rgba(239, 68, 68, 0.4)", gridLight: "rgba(225, 29, 72, 0.25)", border: "#ef4444", tileDark: "#3b131a", tileLight: "#ffe4e6", accent: "#f87171" },
+            { name: "Mystic Violet", bgDark: "#19102c", bgLight: "#f5f3ff", gridDark: "rgba(139, 92, 246, 0.4)", gridLight: "rgba(124, 58, 237, 0.25)", border: "#8b5cf6", tileDark: "#24183e", tileLight: "#ede9fe", accent: "#a78bfa" },
+            { name: "Coral Sunset", bgDark: "#2d140b", bgLight: "#fff7ed", gridDark: "rgba(249, 115, 22, 0.4)", gridLight: "rgba(234, 88, 12, 0.25)", border: "#f97316", tileDark: "#3c1c10", tileLight: "#ffedd5", accent: "#fb923c" },
+            { name: "Teal Lagoon", bgDark: "#0b2528", bgLight: "#f0fdfa", gridDark: "rgba(20, 184, 166, 0.4)", gridLight: "rgba(13, 148, 136, 0.25)", border: "#14b8a6", tileDark: "#113539", tileLight: "#ccfbf1", accent: "#2dd4bf" },
+            { name: "Obsidian Temple", bgDark: "#171717", bgLight: "#f4f4f5", gridDark: "rgba(212, 212, 216, 0.4)", gridLight: "rgba(113, 113, 122, 0.25)", border: "#a1a1aa", tileDark: "#27272a", tileLight: "#e4e4e7", accent: "#d4d4d8" },
+            { name: "Solar Flare", bgDark: "#2e1c05", bgLight: "#fefce8", gridDark: "rgba(245, 158, 11, 0.4)", gridLight: "rgba(217, 119, 6, 0.25)", border: "#f59e0b", tileDark: "#3d2608", tileLight: "#fef9c3", accent: "#fbbf24" },
+            { name: "Mystic Forest", bgDark: "#142318", bgLight: "#f0fdf4", gridDark: "rgba(34, 197, 94, 0.4)", gridLight: "rgba(22, 163, 74, 0.25)", border: "#22c55e", tileDark: "#1c3122", tileLight: "#dcfce7", accent: "#4ade80" },
+            { name: "Twilight Ruins", bgDark: "#1c1917", bgLight: "#fafaf9", gridDark: "rgba(168, 162, 158, 0.4)", gridLight: "rgba(120, 113, 108, 0.25)", border: "#d6d3d1", tileDark: "#292524", tileLight: "#f5f5f4", accent: "#e7e5e4" }
+        ];
+
+        const audio = {
+            ctx: null,
+            muted: false,
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
             },
-            ur: {
-                subtitles: [
-                    "اسٹیج 1: شیری کی پہلی دہاڑ", "اسٹیج 2: کٹتے راستے", "اسٹیج 3: صاف افق",
-                    "اسٹیج 4: شیری کی بھول بھلیاں", "اسٹیج 5: پتھر کی رکاوٹ", "اسٹیج 6: جادوئی راستہ",
-                    "اسٹیج 7: گونجتے راستے", "اسٹیج 8: الجھے دھاگے", "اسٹیج 9: پرانی راہ",
-                    "اسٹیج 10: جنگل کا شہزادہ", "اسٹیج 11: دو پتھر", "اسٹیج 12: ترچھی چھلانگ",
-                    "اسٹیج 13: چار کونے", "اسٹیج 14: باہر کا دائرہ", "اسٹیج 15: اندرونی چوک",
-                    "اسٹیج 16: شیر دل قلعہ", "اسٹیج 17: پانچ موتی", "اسٹیج 18: بڑا قلعہ",
-                    "اسٹیج 19: ہواؤں کی سرگوشی", "اسٹیج 20: جنگل کا بادشاہ شیری"
-                ],
-                couplets: [
-                    '"شیری بہادری سے آگے بڑھتا ہے!"', '"بہادر شیری کے لیے ہر راستہ کھل گیا!"',
-                    '"شیری کی ہمت سے ہر مشکل آسان!"', '"ایک ایک کر کے راستہ صاف کریں!"',
-                    '"عقل سے چھوٹے شیر کو صحیح راستہ ملتا ہے!"', '"شیری نے اپنا آزاد راستہ ڈھونڈ لیا!"',
-                    '"چھوٹے شیر کی اڑان کے لیے راستہ صاف کریں!"', '"شیری کے ہر قدم میں کامیابی ہے!"',
-                    '"بہادر شیری کسی رکاوٹ سے نہیں ڈرتا!"', '"آپ نے شیری کو فتح دلا دی!"',
-                    '"دو پتھر چھوٹے شیر کو نہیں روک سکتے!"', '"ہمت کے ساتھ آسمان کو فتح کریں!"',
-                    '"چاروں کونے شیری کے لیے کھل گئے!"', '"شیری ستارے کی طرح چمک رہا ہے!"',
-                    '"ہر چال میں طاقت اور عقل ہے!"', '"بہادر شیری اپنی منزل پر پہنچ گیا!"',
-                    '"پانچ موتی شیری کے لیے چمک رہے ہیں!"', '"بڑا قلعہ فتح ہو گیا!"',
-                    '"ہوائیں شیری کی فتح کا گیت گا رہی ہیں!"', '"مبارک ہو! آپ اور شیری چیمپیئن بن گئے!"'
-                ]
+            playTone(freq, type, duration, gainVal = 0.1) {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e){}
             },
-            hi: {
-                subtitles: [
-                    "स्टेज 1: शेरी की पहली दहाड़", "स्टेज 2: काटते रास्ते", "स्टेज 3: साफ क्षितिज",
-                    "स्टेज 4: शेरी की भूलभुलैया", "स्टेज 5: पत्थर की रुकावट", "स्टेज 6: जादुई रास्ता",
-                    "स्टेज 7: गूंजते रास्ते", "स्टेज 8: उलझे धागे", "स्टेज 9: पुरानी राह",
-                    "स्टेज 10: जंगल का राजकुमार", "स्टेज 11: दो पत्थर", "स्टेज 12: तिरछी छलांग",
-                    "स्टेज 13: चार कोने", "स्टेज 14: बाहरी घेरा", "स्टेज 15: मुख्य चौक",
-                    "स्टेज 16: शेर-दिल किला", "स्टेज 17: पांच मोती", "स्टेज 18: विशाल किला",
-                    "स्टेज 19: बहती हवाएं", "स्टेज 20: जंगल का राजा शेरी"
-                ],
-                couplets: [
-                    '"शेरी बहादुरी से आगे बढ़ता है!"', '"बहादुर शेरी के लिए हर रास्ता खुल गया!"',
-                    '"शेरी की हिम्मत से हर मुश्किल आसान!"', '"एक-एक करके रास्ता साफ़ करें!"',
-                    '"समझदारी से नन्हे शेर को सही रास्ता मिलता है!"', '"शेरी ने अपना रास्ता ढूंढ लिया!"',
-                    '"नन्हे शेर के लिए रास्ता साफ़ करें!"', '"शेरी के हर कदम में कामयाबी है!"',
-                    '"बहादुर शेरी किसी रुकावट से नहीं डरता!"', '"आपने शेरी को जीत दिला दी!"',
-                    '"दो पत्थर नन्हे शेर को नहीं रोक सकते!"', '"हिम्मत के साथ जीत हासिल करें!"',
-                    '"चारों कोने शेरी के लिए खुल गए!"', '"शेरी सितारे की तरह चमक रहा है!"',
-                    '"हर चाल में ताकत और समझदारी है!"', '"बहादुर शेरी अपनी मंज़िल पर पहुँच गया!"',
-                    '"पाँच मोती शेरी के लिए चमक रहे हैं!"', '"विशाल किला फ़तह हो गया!"',
-                    '"हवाएं शेरी की जीत का गीत गा रही हैं!"', '"बधाई हो! आप और शेरी विजेता हैं!"'
-                ]
+            playBeepBeep() {
+                this.init();
+                if (this.muted || !this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    
+                    const playSingleHonk = (startTime) => {
+                        const osc1 = this.ctx.createOscillator();
+                        const osc2 = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        
+                        osc1.type = 'sawtooth';
+                        osc2.type = 'square';
+                        
+                        osc1.frequency.setValueAtTime(750, startTime);
+                        osc1.frequency.exponentialRampToValueAtTime(950, startTime + 0.02);
+                        osc1.frequency.exponentialRampToValueAtTime(700, startTime + 0.09);
+
+                        osc2.frequency.setValueAtTime(920, startTime);
+                        osc2.frequency.exponentialRampToValueAtTime(1150, startTime + 0.02);
+                        osc2.frequency.exponentialRampToValueAtTime(850, startTime + 0.09);
+
+                        gain.gain.setValueAtTime(0, startTime);
+                        gain.gain.linearRampToValueAtTime(0.3, startTime + 0.015);
+                        gain.gain.setValueAtTime(0.3, startTime + 0.07);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.1);
+
+                        osc1.connect(gain);
+                        osc2.connect(gain);
+                        gain.connect(this.ctx.destination);
+
+                        osc1.start(startTime);
+                        osc2.start(startTime);
+                        osc1.stop(startTime + 0.1);
+                        osc2.stop(startTime + 0.1);
+                    };
+
+                    playSingleHonk(now);
+                    playSingleHonk(now + 0.12);
+                } catch(e){}
             },
-            zh: {
-                subtitles: [
-                    "第 1 关：小狮 Shayree 的第一声咆哮", "第 2 关：交叉之路", "第 3 关：晴朗地平线",
-                    "第 4 关：狮子迷宫", "第 5 关：岩石障碍", "第 6 关：秘密通道",
-                    "第 7 关：回音之路", "第 8 关：织线交错", "第 9 关：古老小径",
-                    "第 10 关：森林王子", "第 11 关：双重墨石", "第 12 关：斜向跳跃",
-                    "第 13 关：四方天地", "第 14 关：外围环形", "第 15 关：中央圣殿",
-                    "第 16 关：狮心城堡", "第 17 关：五彩宝石", "第 18 关：宏伟城堡",
-                    "第 19 关：低语微风", "第 20 关：森林之王 Shayree"
-                ],
-                couplets: [
-                    '"小狮 Shayree 勇敢向前奔跑！"', '"勇敢的步伐为 Shayree 开辟道路！"',
-                    '"勇气带来最终的胜利！"', '"一步一步，小狮子在不断成长！"',
-                    '"智慧指引着勇敢的小狮子！"', '"Shayree 找到了畅通无阻的通道！"',
-                    '"为小狮子清理前方的道路吧！"', '"每一个转角都充满希望！"',
-                    '"勇敢的小狮子从不畏惧任何困难！"', '"你成功帮助 Shayree 征服了迷宫！"',
-                    '"两块障碍石阻挡不住小狮 Shayree！"', '"带着勇气迈向更高的胜利！"',
-                    '"四角为小狮 Shayree 敞开怀抱！"', '"Shayree 如繁星般璀璨耀眼！"',
-                    '"每一次思考都充满智慧！"', '"勇敢的小狮子终于回到了家！"',
-                    '"五颗宝石为 Shayree 闪耀！"', '"宏伟的城堡已被你成功解锁！"',
-                    '"胜利的风在深情吟唱！"', '"太棒了！你和 Shayree 成为真正的解谜之王！"'
-                ]
+            playCrash() {
+                if (this.muted || !this.ctx) return;
+                try {
+                    this.playTone(150, 'sawtooth', 0.3, 0.3);
+                    setTimeout(() => this.playTone(70, 'square', 0.25, 0.25), 60);
+                } catch(e){}
+            },
+            playCoin() {
+                this.playTone(987.77, 'sine', 0.15, 0.15);
+            },
+            playWin() {
+                if (this.muted || !this.ctx) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, i) => {
+                    setTimeout(() => this.playTone(freq, 'triangle', 0.25, 0.15), i * 100);
+                });
+            },
+            playCelebrationFanfare() {
+                if (this.muted || !this.ctx) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+                notes.forEach((freq, i) => {
+                    setTimeout(() => this.playTone(freq, 'sawtooth', 0.35, 0.22), i * 120);
+                });
+                setTimeout(() => {
+                    this.playTone(1046.50, 'triangle', 0.6, 0.3);
+                    this.playTone(1567.98, 'triangle', 0.6, 0.3);
+                }, notes.length * 120);
+            },
+            playHint() {
+                this.playTone(880, 'sine', 0.3, 0.15);
             }
         };
+
+        const DIR = { UP: 0, RIGHT: 1, DOWN: 2, LEFT: 3 };
+
+        function isStageSolvable(gridSize, quills, stones) {
+            let active = quills.map(q => ({r: q.r, c: q.c, dir: q.dir, dead: false}));
+            let stoneMap = Array.from({length: gridSize}, () => Array(gridSize).fill(false));
+            stones.forEach(s => {
+                if (s.r >= 0 && s.r < gridSize && s.c >= 0 && s.c < gridSize) {
+                    stoneMap[s.r][s.c] = true;
+                }
+            });
+
+            let removedCount = 0;
+            let progress = true;
+
+            while (progress) {
+                progress = false;
+                for (let q of active) {
+                    if (q.dead) continue;
+
+                    let dr = 0, dc = 0;
+                    if (q.dir === DIR.UP) dr = -1;
+                    else if (q.dir === DIR.RIGHT) dc = 1;
+                    else if (q.dir === DIR.DOWN) dr = 1;
+                    else if (q.dir === DIR.LEFT) dc = -1;
+
+                    let currR = q.r + dr;
+                    let currC = q.c + dc;
+                    let blocked = false;
+
+                    while (currR >= 0 && currR < gridSize && currC >= 0 && currC < gridSize) {
+                        if (stoneMap[currR][currC]) {
+                            blocked = true;
+                            break;
+                        }
+                        if (active.some(other => !other.dead && other.r === currR && other.c === currC)) {
+                            blocked = true;
+                            break;
+                        }
+                        currR += dr;
+                        currC += dc;
+                    }
+
+                    if (!blocked) {
+                        q.dead = true;
+                        removedCount++;
+                        progress = true;
+                    }
+                }
+            }
+
+            return removedCount === quills.length;
+        }
+
+        function generateStageData(stageIdx) {
+            let attemptSeed = 0;
+            
+            while (attemptSeed < 200) {
+                let seed = (stageIdx + 1) * 15485863 + attemptSeed * 37;
+                function pseudoRandom() {
+                    seed = (seed * 9301 + 49297) % 233280;
+                    return seed / 233280;
+                }
+
+                let grid = 5;
+                if (stageIdx >= 10) grid = 6;
+                if (stageIdx >= 25) grid = 7;
+                if (stageIdx >= 45) grid = 8;
+                if (stageIdx >= 65) grid = 9;
+                if (stageIdx >= 85) grid = 10;
+
+                const numBirds = Math.min(22, 3 + Math.floor(stageIdx * 0.18) + Math.floor(grid * 0.4));
+                const numStones = stageIdx < 4 ? 0 : Math.min(8, Math.floor(stageIdx * 0.08));
+
+                let stones = [];
+                let occupied = Array.from({length: grid}, () => Array(grid).fill(false));
+
+                let stoneAttempts = 0;
+                while (stones.length < numStones && stoneAttempts < 100) {
+                    stoneAttempts++;
+                    let r = Math.floor(pseudoRandom() * (grid - 2)) + 1;
+                    let c = Math.floor(pseudoRandom() * (grid - 2)) + 1;
+                    if (!occupied[r][c]) {
+                        occupied[r][c] = true;
+                        stones.push({r, c});
+                    }
+                }
+
+                let placementSequence = [];
+                let birdAttempts = 0;
+
+                while (placementSequence.length < numBirds && birdAttempts < 300) {
+                    birdAttempts++;
+                    let dir = Math.floor(pseudoRandom() * 4);
+                    let startR = 0, startC = 0;
+                    let rayCells = [];
+
+                    if (dir === DIR.UP) {
+                        startC = Math.floor(pseudoRandom() * grid);
+                        for (let r = grid - 1; r >= 0; r--) rayCells.push({r, c: startC});
+                    } else if (dir === DIR.DOWN) {
+                        startC = Math.floor(pseudoRandom() * grid);
+                        for (let r = 0; r < grid; r++) rayCells.push({r, c: startC});
+                    } else if (dir === DIR.LEFT) {
+                        startR = Math.floor(pseudoRandom() * grid);
+                        for (let c = grid - 1; c >= 0; c--) rayCells.push({r: startR, c});
+                    } else if (dir === DIR.RIGHT) {
+                        startR = Math.floor(pseudoRandom() * grid);
+                        for (let c = 0; c < grid; c++) rayCells.push({r: startR, c});
+                    }
+
+                    let validCell = null;
+                    for (let cell of rayCells) {
+                        if (occupied[cell.r][cell.c]) break;
+                        validCell = cell;
+                        if (pseudoRandom() > 0.4) break;
+                    }
+
+                    if (validCell) {
+                        occupied[validCell.r][validCell.c] = true;
+                        placementSequence.push({r: validCell.r, c: validCell.c, dir});
+                    }
+                }
+
+                let quills = placementSequence.reverse();
+
+                if (quills.length > 0 && isStageSolvable(grid, quills, stones)) {
+                    return { grid, quills, stones };
+                }
+
+                attemptSeed++;
+            }
+
+            return {
+                grid: 5,
+                quills: [
+                    {r: 2, c: 0, dir: DIR.LEFT},
+                    {r: 2, c: 4, dir: DIR.RIGHT},
+                    {r: 0, c: 2, dir: DIR.UP},
+                    {r: 4, c: 2, dir: DIR.DOWN}
+                ],
+                stones: []
+            };
+        }
 
         let currentLang = 'en';
         let playerCount = 1;
+        let isNightMode = false; // Default set to Day Mode
+
+        function toggleTheme() {
+            isNightMode = !isNightMode;
+            const body = document.getElementById('game-body');
+            const themeIcon = document.getElementById('theme-icon');
+
+            if (isNightMode) {
+                body.className = "night-theme parchment-bg-night h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-4 select-none overflow-hidden";
+                themeIcon.textContent = "🌙";
+            } else {
+                body.className = "day-theme parchment-bg-day h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-4 select-none overflow-hidden";
+                themeIcon.textContent = "☀️";
+            }
+
+            // Update Glass Card themes
+            const cards = ['card-intro', 'card-win', 'card-loss', 'card-leaderboard'];
+            cards.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (isNightMode) {
+                        el.classList.replace('glass-card-day', 'glass-card-night');
+                    } else {
+                        el.classList.replace('glass-card-night', 'glass-card-day');
+                    }
+                }
+            });
+
+            if (window.gameInstance) {
+                window.gameInstance.updateThemeUI();
+            }
+        }
 
         function setLanguage(lang) {
             if (!TRANSLATIONS[lang]) return;
@@ -620,6 +882,7 @@
             document.getElementById('txt-finale-desc').textContent = t.finaleDesc;
             document.getElementById('txt-restart-btn').textContent = t.playAgainBtn;
             document.getElementById('txt-mode-label').textContent = t.modeLabel;
+            document.getElementById('txt-ad-notice').textContent = t.adNotice;
 
             const buttons = document.querySelectorAll('.lang-btn');
             buttons.forEach(btn => {
@@ -651,118 +914,12 @@
             }
         }
 
-        const audio = {
-            ctx: null,
-            muted: false,
-            init() {
-                if (!this.ctx) {
-                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                    if (AudioCtx) this.ctx = new AudioCtx();
-                }
-                if (this.ctx && this.ctx.state === 'suspended') {
-                    this.ctx.resume();
-                }
-            },
-            playTone(freq, type, duration, gainVal = 0.1) {
-                if (this.muted || !this.ctx) return;
-                try {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = type;
-                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                    gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start();
-                    osc.stop(this.ctx.currentTime + duration);
-                } catch(e){}
-            },
-            playGlide() {
-                if (this.muted || !this.ctx) return;
-                try {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(400, this.ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.2);
-                    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start();
-                    osc.stop(this.ctx.currentTime + 0.2);
-                } catch(e){}
-            },
-            playError() {
-                this.playTone(150, 'sawtooth', 0.25, 0.2);
-            },
-            playCoin() {
-                this.playTone(987.77, 'sine', 0.15, 0.15);
-            },
-            playWin() {
-                if (this.muted || !this.ctx) return;
-                const notes = [523.25, 659.25, 783.99, 1046.50];
-                notes.forEach((freq, i) => {
-                    setTimeout(() => this.playTone(freq, 'triangle', 0.25, 0.15), i * 100);
-                });
-            },
-            playHint() {
-                this.playTone(880, 'sine', 0.3, 0.15);
-            }
-        };
-
-        const DIR = { UP: 0, RIGHT: 1, DOWN: 2, LEFT: 3 };
-
-        const STAGES = [
-            // Stage 1
-            { grid: 5, quills: [{r: 2, c: 1, dir: DIR.LEFT}, {r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 3, dir: DIR.RIGHT}], stones: [] },
-            // Stage 2
-            { grid: 5, quills: [{r: 1, c: 2, dir: DIR.UP}, {r: 2, c: 1, dir: DIR.LEFT}, {r: 2, c: 3, dir: DIR.RIGHT}, {r: 3, c: 2, dir: DIR.DOWN}], stones: [] },
-            // Stage 3
-            { grid: 6, quills: [{r: 1, c: 1, dir: DIR.UP}, {r: 4, c: 1, dir: DIR.UP}, {r: 4, c: 4, dir: DIR.LEFT}, {r: 1, c: 4, dir: DIR.DOWN}, {r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 3, dir: DIR.RIGHT}], stones: [] },
-            // Stage 4
-            { grid: 6, quills: [{r: 1, c: 2, dir: DIR.UP}, {r: 2, c: 2, dir: DIR.UP}, {r: 3, c: 2, dir: DIR.UP}, {r: 3, c: 3, dir: DIR.LEFT}, {r: 2, c: 3, dir: DIR.DOWN}, {r: 2, c: 4, dir: DIR.RIGHT}, {r: 4, c: 3, dir: DIR.DOWN}, {r: 3, c: 1, dir: DIR.LEFT}], stones: [] },
-            // Stage 5
-            { grid: 6, quills: [{r: 1, c: 2, dir: DIR.UP}, {r: 2, c: 1, dir: DIR.LEFT}, {r: 2, c: 3, dir: DIR.RIGHT}, {r: 3, c: 2, dir: DIR.DOWN}, {r: 2, c: 4, dir: DIR.UP}, {r: 4, c: 2, dir: DIR.LEFT}], stones: [{r: 2, c: 2}] },
-            // Stage 6
-            { grid: 7, quills: [{r: 1, c: 3, dir: DIR.UP}, {r: 1, c: 5, dir: DIR.UP}, {r: 3, c: 1, dir: DIR.LEFT}, {r: 3, c: 5, dir: DIR.RIGHT}, {r: 5, c: 3, dir: DIR.DOWN}, {r: 1, c: 1, dir: DIR.RIGHT}, {r: 3, c: 3, dir: DIR.RIGHT}, {r: 5, c: 1, dir: DIR.UP}, {r: 5, c: 5, dir: DIR.LEFT}], stones: [{r: 3, c: 2}] },
-            // Stage 7
-            { grid: 7, quills: [{r: 1, c: 1, dir: DIR.UP}, {r: 1, c: 5, dir: DIR.UP}, {r: 5, c: 1, dir: DIR.DOWN}, {r: 5, c: 5, dir: DIR.DOWN}, {r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 4, dir: DIR.LEFT}, {r: 4, c: 4, dir: DIR.UP}, {r: 4, c: 2, dir: DIR.RIGHT}, {r: 3, c: 3, dir: DIR.RIGHT}], stones: [{r: 0, c: 3}, {r: 6, c: 3}] },
-            // Stage 8
-            { grid: 7, quills: [{r: 1, c: 5, dir: DIR.UP}, {r: 5, c: 1, dir: DIR.DOWN}, {r: 1, c: 2, dir: DIR.RIGHT}, {r: 2, c: 1, dir: DIR.DOWN}, {r: 2, c: 3, dir: DIR.LEFT}, {r: 3, c: 2, dir: DIR.UP}, {r: 3, c: 4, dir: DIR.RIGHT}, {r: 4, c: 3, dir: DIR.DOWN}, {r: 4, c: 5, dir: DIR.LEFT}, {r: 5, c: 4, dir: DIR.UP}], stones: [{r: 3, c: 3}] },
-            // Stage 9
-            { grid: 8, quills: [{r: 1, c: 3, dir: DIR.UP}, {r: 1, c: 6, dir: DIR.UP}, {r: 1, c: 1, dir: DIR.RIGHT}, {r: 3, c: 1, dir: DIR.UP}, {r: 3, c: 3, dir: DIR.UP}, {r: 3, c: 6, dir: DIR.RIGHT}, {r: 6, c: 1, dir: DIR.RIGHT}, {r: 6, c: 3, dir: DIR.UP}, {r: 6, c: 6, dir: DIR.DOWN}, {r: 4, c: 2, dir: DIR.LEFT}, {r: 2, c: 5, dir: DIR.UP}, {r: 5, c: 4, dir: DIR.DOWN}], stones: [{r: 2, c: 2}, {r: 5, c: 5}] },
-            // Stage 10
-            { grid: 8, quills: [{r: 1, c: 3, dir: DIR.UP}, {r: 3, c: 6, dir: DIR.RIGHT}, {r: 6, c: 4, dir: DIR.DOWN}, {r: 4, c: 1, dir: DIR.LEFT}, {r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 5, dir: DIR.LEFT}, {r: 5, c: 5, dir: DIR.UP}, {r: 5, c: 2, dir: DIR.RIGHT}, {r: 3, c: 3, dir: DIR.UP}, {r: 4, c: 4, dir: DIR.DOWN}], stones: [{r: 0, c: 0}, {r: 0, c: 7}, {r: 7, c: 0}, {r: 7, c: 7}] },
-            // Stage 11
-            { grid: 8, quills: [{r: 1, c: 1, dir: DIR.UP}, {r: 1, c: 6, dir: DIR.RIGHT}, {r: 6, c: 6, dir: DIR.DOWN}, {r: 6, c: 1, dir: DIR.LEFT}, {r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 5, dir: DIR.RIGHT}, {r: 5, c: 5, dir: DIR.DOWN}, {r: 5, c: 2, dir: DIR.LEFT}], stones: [{r: 3, c: 3}, {r: 4, c: 4}] },
-            // Stage 12
-            { grid: 8, quills: [{r: 0, c: 2, dir: DIR.UP}, {r: 2, c: 7, dir: DIR.RIGHT}, {r: 7, c: 5, dir: DIR.DOWN}, {r: 5, c: 0, dir: DIR.LEFT}, {r: 1, c: 2, dir: DIR.UP}, {r: 2, c: 6, dir: DIR.RIGHT}, {r: 6, c: 5, dir: DIR.DOWN}, {r: 5, c: 1, dir: DIR.LEFT}, {r: 3, c: 3, dir: DIR.UP}, {r: 4, c: 4, dir: DIR.DOWN}], stones: [{r: 2, c: 4}, {r: 5, c: 3}] },
-            // Stage 13
-            { grid: 9, quills: [{r: 2, c: 4, dir: DIR.UP}, {r: 4, c: 6, dir: DIR.RIGHT}, {r: 6, c: 4, dir: DIR.DOWN}, {r: 4, c: 2, dir: DIR.LEFT}, {r: 3, c: 4, dir: DIR.UP}, {r: 4, c: 5, dir: DIR.RIGHT}, {r: 5, c: 4, dir: DIR.DOWN}, {r: 4, c: 3, dir: DIR.LEFT}], stones: [{r: 1, c: 1}, {r: 1, c: 7}, {r: 7, c: 1}, {r: 7, c: 7}] },
-            // Stage 14
-            { grid: 9, quills: [{r: 0, c: 4, dir: DIR.UP}, {r: 4, c: 8, dir: DIR.RIGHT}, {r: 8, c: 4, dir: DIR.DOWN}, {r: 4, c: 0, dir: DIR.LEFT}, {r: 1, c: 4, dir: DIR.UP}, {r: 4, c: 7, dir: DIR.RIGHT}, {r: 7, c: 4, dir: DIR.DOWN}, {r: 4, c: 1, dir: DIR.LEFT}, {r: 3, c: 3, dir: DIR.UP}, {r: 3, c: 5, dir: DIR.RIGHT}, {r: 5, c: 5, dir: DIR.DOWN}, {r: 5, c: 3, dir: DIR.LEFT}], stones: [{r: 2, c: 2}, {r: 2, c: 6}, {r: 6, c: 2}, {r: 6, c: 6}] },
-            // Stage 15
-            { grid: 9, quills: [{r: 1, c: 2, dir: DIR.UP}, {r: 2, c: 7, dir: DIR.RIGHT}, {r: 7, c: 6, dir: DIR.DOWN}, {r: 6, c: 1, dir: DIR.LEFT}, {r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 6, dir: DIR.RIGHT}, {r: 6, c: 6, dir: DIR.DOWN}, {r: 6, c: 2, dir: DIR.LEFT}, {r: 4, c: 4, dir: DIR.UP}], stones: [{r: 3, c: 3}, {r: 3, c: 5}, {r: 5, c: 3}, {r: 5, c: 5}] },
-            // Stage 16
-            { grid: 9, quills: [{r: 2, c: 2, dir: DIR.UP}, {r: 2, c: 6, dir: DIR.RIGHT}, {r: 6, c: 6, dir: DIR.DOWN}, {r: 6, c: 2, dir: DIR.LEFT}, {r: 3, c: 3, dir: DIR.UP}, {r: 3, c: 5, dir: DIR.RIGHT}, {r: 5, c: 5, dir: DIR.DOWN}, {r: 5, c: 3, dir: DIR.LEFT}, {r: 4, c: 3, dir: DIR.UP}, {r: 4, c: 5, dir: DIR.DOWN}], stones: [{r: 1, c: 4}, {r: 4, c: 1}, {r: 4, c: 7}, {r: 7, c: 4}] },
-            // Stage 17
-            { grid: 9, quills: [{r: 1, c: 3, dir: DIR.UP}, {r: 3, c: 7, dir: DIR.RIGHT}, {r: 7, c: 5, dir: DIR.DOWN}, {r: 5, c: 1, dir: DIR.LEFT}, {r: 2, c: 3, dir: DIR.UP}, {r: 3, c: 6, dir: DIR.RIGHT}, {r: 6, c: 5, dir: DIR.DOWN}, {r: 5, c: 2, dir: DIR.LEFT}, {r: 3, c: 3, dir: DIR.UP}, {r: 3, c: 5, dir: DIR.RIGHT}, {r: 5, c: 5, dir: DIR.DOWN}, {r: 5, c: 3, dir: DIR.LEFT}], stones: [{r: 0, c: 0}, {r: 0, c: 8}, {r: 8, c: 0}, {r: 8, c: 8}, {r: 4, c: 4}] },
-            // Stage 18
-            { grid: 10, quills: [{r: 0, c: 4, dir: DIR.UP}, {r: 4, c: 9, dir: DIR.RIGHT}, {r: 9, c: 5, dir: DIR.DOWN}, {r: 5, c: 0, dir: DIR.LEFT}, {r: 1, c: 4, dir: DIR.UP}, {r: 4, c: 8, dir: DIR.RIGHT}, {r: 8, c: 5, dir: DIR.DOWN}, {r: 5, c: 1, dir: DIR.LEFT}, {r: 3, c: 4, dir: DIR.UP}, {r: 4, c: 6, dir: DIR.RIGHT}, {r: 6, c: 5, dir: DIR.DOWN}, {r: 5, c: 3, dir: DIR.LEFT}], stones: [{r: 2, c: 2}, {r: 2, c: 7}, {r: 7, c: 2}, {r: 7, c: 7}] },
-            // Stage 19
-            { grid: 10, quills: [{r: 0, c: 3, dir: DIR.UP}, {r: 3, c: 9, dir: DIR.RIGHT}, {r: 9, c: 6, dir: DIR.DOWN}, {r: 6, c: 0, dir: DIR.LEFT}, {r: 2, c: 3, dir: DIR.UP}, {r: 3, c: 7, dir: DIR.RIGHT}, {r: 7, c: 6, dir: DIR.DOWN}, {r: 6, c: 2, dir: DIR.LEFT}, {r: 1, c: 5, dir: DIR.UP}, {r: 5, c: 8, dir: DIR.RIGHT}, {r: 8, c: 4, dir: DIR.DOWN}, {r: 4, c: 1, dir: DIR.LEFT}, {r: 3, c: 3, dir: DIR.UP}, {r: 6, c: 6, dir: DIR.DOWN}], stones: [{r: 1, c: 1}, {r: 1, c: 8}, {r: 8, c: 1}, {r: 8, c: 8}, {r: 4, c: 4}, {r: 5, c: 5}] },
-            // Stage 20
-            { grid: 10, quills: [{r: 1, c: 4, dir: DIR.UP}, {r: 4, c: 8, dir: DIR.RIGHT}, {r: 8, c: 5, dir: DIR.DOWN}, {r: 5, c: 1, dir: DIR.LEFT}, {r: 2, c: 4, dir: DIR.UP}, {r: 4, c: 7, dir: DIR.RIGHT}, {r: 7, c: 5, dir: DIR.DOWN}, {r: 5, c: 2, dir: DIR.LEFT}, {r: 1, c: 5, dir: DIR.UP}, {r: 5, c: 8, dir: DIR.RIGHT}, {r: 8, c: 4, dir: DIR.DOWN}, {r: 4, c: 1, dir: DIR.LEFT}, {r: 2, c: 5, dir: DIR.UP}, {r: 5, c: 7, dir: DIR.RIGHT}, {r: 7, c: 4, dir: DIR.DOWN}, {r: 4, c: 2, dir: DIR.LEFT}], stones: [{r: 0, c: 0}, {r: 0, c: 9}, {r: 9, c: 0}, {r: 9, c: 9}, {r: 3, c: 3}, {r: 3, c: 6}, {r: 6, c: 3}, {r: 6, c: 6}] }
-        ];
-
         class GameEngine {
             constructor() {
                 this.canvas = document.getElementById('gameCanvas');
                 this.ctx = this.canvas.getContext('2d');
                 this.currentStageIndex = 0;
-                this.lives = 3;
+                this.lives = 1;
                 this.hintsLeft = 3;
                 this.quills = [];
                 this.stones = [];
@@ -775,13 +932,11 @@
                 this.shakeAmount = 0;
                 this.highlightedQuillId = null;
 
-                // Timer & Multiplayer state
                 this.players = [];
                 this.activePlayerIndex = 0;
                 this.stageStartTime = 0;
                 this.stageTimerInterval = null;
                 this.elapsedSeconds = 0;
-                this.mistakesInStage = 0;
 
                 this.initPlayers(1);
                 this.bindEvents();
@@ -797,7 +952,8 @@
                         coins: 0,
                         totalTime: 0,
                         totalSpeedRating: 0,
-                        completedStages: 0
+                        currentStage: 0,
+                        eliminated: false
                     });
                 }
                 this.activePlayerIndex = 0;
@@ -845,7 +1001,7 @@
             }
 
             recalculateDimensions() {
-                const padding = 20;
+                const padding = 18;
                 const availableSize = Math.min(this.displayWidth, this.displayHeight) - (padding * 2);
                 this.cellSize = availableSize / this.gridSize;
                 this.offsetX = (this.displayWidth - (this.cellSize * this.gridSize)) / 2;
@@ -853,12 +1009,11 @@
             }
 
             loadStage(index) {
-                if (index < 0 || index >= STAGES.length) return;
+                if (index < 0 || index >= 100) return;
                 this.currentStageIndex = index;
-                const stageData = STAGES[index];
+                const stageData = generateStageData(index);
                 this.gridSize = stageData.grid;
-                this.lives = 3;
-                this.mistakesInStage = 0;
+                this.lives = 1;
                 this.highlightedQuillId = null;
                 this.animatingQuills = [];
                 this.particles = [];
@@ -869,6 +1024,8 @@
                     c: q.c,
                     dir: q.dir,
                     escaping: false,
+                    crashing: false,
+                    dead: false,
                     x: 0,
                     y: 0,
                     vx: 0,
@@ -879,21 +1036,35 @@
                 this.stones = stageData.stones.map(s => ({r: s.r, c: s.c}));
 
                 this.updateUI();
+                this.updateThemeUI();
                 this.recalculateDimensions();
                 this.hideBanner();
                 this.startTimer();
             }
 
             getQuillColor(id) {
-                const colors = ['#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#10b981', '#3b82f6'];
+                const colors = ['#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#10b981', '#3b82f6', '#ef4444', '#f97316', '#a855f7', '#14b8a6'];
                 return colors[id % colors.length];
             }
 
+            getStageTheme() {
+                const themeIdx = this.currentStageIndex % STAGE_THEMES.length;
+                return STAGE_THEMES[themeIdx];
+            }
+
+            updateThemeUI() {
+                const theme = this.getStageTheme();
+                const holder = document.getElementById('canvas-holder');
+                if (holder) {
+                    holder.style.borderColor = theme.border;
+                    holder.style.boxShadow = `0 10px 30px rgba(0, 0, 0, 0.25), inset 0 0 35px ${theme.border}44`;
+                }
+            }
+
             updateUI() {
-                document.getElementById('stage-display').textContent = `${this.currentStageIndex + 1} / ${STAGES.length}`;
-                
-                const stageTexts = STAGE_TEXTS[currentLang] || STAGE_TEXTS.en;
-                document.getElementById('stage-subtitle').textContent = stageTexts.subtitles[this.currentStageIndex];
+                const theme = this.getStageTheme();
+                document.getElementById('stage-display').textContent = `${this.currentStageIndex + 1} / 100`;
+                document.getElementById('stage-subtitle').textContent = `Stage ${this.currentStageIndex + 1}: ${theme.name}`;
                 document.getElementById('hint-count').textContent = this.hintsLeft;
 
                 const curPlayer = this.players[this.activePlayerIndex] || this.players[0];
@@ -901,26 +1072,11 @@
                 document.getElementById('txt-player-name').textContent = `${t.playerLabel}${curPlayer.id + 1}`;
                 document.getElementById('coins-display').textContent = curPlayer.coins;
 
-                // Update active player badge styling
                 const badge = document.getElementById('active-player-badge');
                 badge.className = `px-3 py-1 rounded-xl text-xs font-bold font-cinzel shadow-md transition-all flex items-center gap-1.5 badge-player-${curPlayer.id}`;
 
-                // Update Mode label
                 const modeTxt = playerCount === 1 ? t.modeSingle : `${playerCount}${t.modeMulti}`;
                 document.getElementById('txt-current-mode').textContent = modeTxt;
-
-                for (let i = 1; i <= 3; i++) {
-                    const heartEl = document.getElementById(`heart-${i}`);
-                    if (heartEl) {
-                        if (i <= this.lives) {
-                            heartEl.style.opacity = '1';
-                            heartEl.style.transform = 'scale(1)';
-                        } else {
-                            heartEl.style.opacity = '0.2';
-                            heartEl.style.transform = 'scale(0.8)';
-                        }
-                    }
-                }
             }
 
             bindEvents() {
@@ -949,7 +1105,7 @@
 
             processTap(x, y) {
                 for (let q of this.quills) {
-                    if (q.escaping) continue;
+                    if (q.escaping || q.crashing || q.dead) continue;
 
                     const qX = this.offsetX + q.c * this.cellSize + this.cellSize / 2;
                     const qY = this.offsetY + q.r * this.cellSize + this.cellSize / 2;
@@ -962,56 +1118,7 @@
                 }
             }
 
-            tryEscapeQuill(quill) {
-                this.highlightedQuillId = null;
-
-                const isClear = this.checkPathClear(quill);
-
-                if (isClear) {
-                    audio.playGlide();
-                    quill.escaping = true;
-                    
-                    const speed = 12;
-                    if (quill.dir === DIR.UP) quill.vy = -speed;
-                    if (quill.dir === DIR.RIGHT) quill.vx = speed;
-                    if (quill.dir === DIR.DOWN) quill.vy = speed;
-                    if (quill.dir === DIR.LEFT) quill.vx = -speed;
-
-                    quill.px = this.offsetX + quill.c * this.cellSize + this.cellSize / 2;
-                    quill.py = this.offsetY + quill.r * this.cellSize + this.cellSize / 2;
-
-                    this.animatingQuills.push(quill);
-                    
-                    // Award coins per quill
-                    const curPlayer = this.players[this.activePlayerIndex];
-                    curPlayer.coins += 10;
-                    this.updateUI();
-                    audio.playCoin();
-
-                    const coupletList = STAGE_TEXTS[currentLang].couplets;
-                    this.showBanner(coupletList[Math.floor(Math.random() * coupletList.length)]);
-                } else {
-                    audio.playError();
-                    this.shakeAmount = 10;
-                    this.mistakesInStage++;
-                    this.spawnInkSplatter(
-                        this.offsetX + quill.c * this.cellSize + this.cellSize / 2,
-                        this.offsetY + quill.r * this.cellSize + this.cellSize / 2
-                    );
-
-                    this.lives--;
-                    this.updateUI();
-
-                    if (this.lives <= 0) {
-                        this.stopTimer();
-                        setTimeout(() => {
-                            document.getElementById('modal-loss').classList.remove('hidden');
-                        }, 400);
-                    }
-                }
-            }
-
-            checkPathClear(quill) {
+            checkPathBlocker(quill) {
                 let dr = 0, dc = 0;
                 if (quill.dir === DIR.UP) dr = -1;
                 if (quill.dir === DIR.RIGHT) dc = 1;
@@ -1022,45 +1129,173 @@
                 let currC = quill.c + dc;
 
                 while (currR >= 0 && currR < this.gridSize && currC >= 0 && currC < this.gridSize) {
-                    const blockedByQuill = this.quills.some(q => !q.escaping && q.r === currR && q.c === currC);
-                    if (blockedByQuill) return false;
+                    const blockingBird = this.quills.find(q => !q.escaping && !q.crashing && !q.dead && q.r === currR && q.c === currC);
+                    if (blockingBird) {
+                        return { isClear: false, blocker: { r: currR, c: currC, type: 'bird', birdObj: blockingBird } };
+                    }
 
-                    const blockedByStone = this.stones.some(s => s.r === currR && s.c === currC);
-                    if (blockedByStone) return false;
+                    const blockingStone = this.stones.find(s => s.r === currR && s.c === currC);
+                    if (blockingStone) {
+                        return { isClear: false, blocker: { r: currR, c: currC, type: 'stone', birdObj: null } };
+                    }
 
                     currR += dr;
                     currC += dc;
                 }
 
-                return true;
+                return { isClear: true, blocker: null };
             }
 
-            spawnInkSplatter(x, y) {
-                for (let i = 0; i < 15; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const speed = 2 + Math.random() * 4;
-                    this.particles.push({
-                        x: x,
-                        y: y,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        radius: 2 + Math.random() * 3,
-                        alpha: 1,
-                        color: '#ef4444'
-                    });
+            checkPathClear(quill) {
+                return this.checkPathBlocker(quill).isClear;
+            }
+
+            tryEscapeQuill(quill) {
+                this.highlightedQuillId = null;
+                const pathCheck = this.checkPathBlocker(quill);
+
+                if (pathCheck.isClear) {
+                    audio.playBeepBeep();
+                    quill.escaping = true;
+                    
+                    const speed = 16;
+                    if (quill.dir === DIR.UP) quill.vy = -speed;
+                    if (quill.dir === DIR.RIGHT) quill.vx = speed;
+                    if (quill.dir === DIR.DOWN) quill.vy = speed;
+                    if (quill.dir === DIR.LEFT) quill.vx = -speed;
+
+                    quill.px = this.offsetX + quill.c * this.cellSize + this.cellSize / 2;
+                    quill.py = this.offsetY + quill.r * this.cellSize + this.cellSize / 2;
+
+                    this.animatingQuills.push(quill);
+                    
+                    const curPlayer = this.players[this.activePlayerIndex];
+                    curPlayer.coins += 10;
+                    this.updateUI();
+                    audio.playCoin();
+                } else {
+                    audio.playBeepBeep();
+                    quill.crashing = true;
+                    
+                    const speed = 14;
+                    if (quill.dir === DIR.UP) quill.vy = -speed;
+                    if (quill.dir === DIR.RIGHT) quill.vx = speed;
+                    if (quill.dir === DIR.DOWN) quill.vy = speed;
+                    if (quill.dir === DIR.LEFT) quill.vx = -speed;
+
+                    quill.px = this.offsetX + quill.c * this.cellSize + this.cellSize / 2;
+                    quill.py = this.offsetY + quill.r * this.cellSize + this.cellSize / 2;
+
+                    quill.targetX = this.offsetX + pathCheck.blocker.c * this.cellSize + this.cellSize / 2;
+                    quill.targetY = this.offsetY + pathCheck.blocker.r * this.cellSize + this.cellSize / 2;
+                    quill.blockerInfo = pathCheck.blocker;
+
+                    this.animatingQuills.push(quill);
                 }
             }
 
             giveHint() {
                 if (this.hintsLeft <= 0) return;
-
-                const solvableQuill = this.quills.find(q => !q.escaping && this.checkPathClear(q));
-
-                if (solvableQuill) {
+                const clearable = this.quills.find(q => !q.escaping && !q.crashing && !q.dead && this.checkPathClear(q));
+                if (clearable) {
+                    this.highlightedQuillId = clearable.id;
                     this.hintsLeft--;
-                    this.highlightedQuillId = solvableQuill.id;
-                    audio.playHint();
                     this.updateUI();
+                    audio.playHint();
+                }
+            }
+
+            spawnCrashExplosion(x, y, birdColor1, birdColor2) {
+                for (let i = 0; i < 28; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 3 + Math.random() * 8;
+                    this.particles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        radius: 3 + Math.random() * 5,
+                        alpha: 1,
+                        color: Math.random() > 0.5 ? birdColor1 : (birdColor2 || '#ef4444'),
+                        type: 'circle'
+                    });
+                }
+
+                for (let i = 0; i < 8; i++) {
+                    const angle = (Math.PI * 2 / 8) * i;
+                    const speed = 5;
+                    this.particles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        radius: 7, alpha: 1,
+                        color: '#facc15', type: 'star'
+                    });
+                }
+            }
+
+            spawnMilestoneFireworks(intensity = 1) {
+                const colors = ['#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#10b981', '#ef4444', '#facc15', '#38bdf8', '#ff0055', '#00ffcc'];
+                const totalRockets = Math.round(9 * intensity);
+
+                for (let r = 0; r < totalRockets; r++) {
+                    setTimeout(() => {
+                        const launchX = this.offsetX + Math.random() * (this.gridSize * this.cellSize);
+                        const startY = this.displayHeight;
+                        const targetY = this.offsetY + Math.random() * (this.gridSize * this.cellSize * 0.6);
+                        
+                        const speedY = - (8 + Math.random() * 4);
+                        const rocketColor = colors[Math.floor(Math.random() * colors.length)];
+
+                        audio.playTone(450 + Math.random() * 300, 'sine', 0.12, 0.12);
+
+                        let rx = launchX, ry = startY;
+                        const rocketInterval = setInterval(() => {
+                            ry += speedY;
+                            this.particles.push({
+                                x: rx + (Math.random() - 0.5) * 3,
+                                y: ry,
+                                vx: (Math.random() - 0.5) * 1,
+                                vy: 2 + Math.random() * 2,
+                                radius: 2.5 + Math.random() * 3,
+                                alpha: 0.9,
+                                color: '#fef08a',
+                                type: 'circle'
+                            });
+
+                            if (ry <= targetY) {
+                                clearInterval(rocketInterval);
+                                audio.playCoin();
+                                audio.playTone(850 + Math.random() * 400, 'triangle', 0.25, 0.22);
+
+                                // Expanding Shockwave Ring
+                                this.particles.push({
+                                    x: rx, y: ry,
+                                    vx: 0, vy: 0,
+                                    radius: 4,
+                                    maxRadius: 45 + Math.random() * 25,
+                                    alpha: 1,
+                                    color: rocketColor,
+                                    type: 'ring'
+                                });
+
+                                // Starburst Explosion
+                                for (let i = 0; i < 50; i++) {
+                                    const angle = Math.random() * Math.PI * 2;
+                                    const speed = 2.5 + Math.random() * 11;
+                                    this.particles.push({
+                                        x: rx,
+                                        y: ry,
+                                        vx: Math.cos(angle) * speed,
+                                        vy: Math.sin(angle) * speed,
+                                        radius: 3 + Math.random() * 6,
+                                        alpha: 1,
+                                        color: Math.random() > 0.3 ? rocketColor : colors[Math.floor(Math.random() * colors.length)],
+                                        type: Math.random() > 0.4 ? 'star' : 'circle'
+                                    });
+                                }
+                            }
+                        }, 20);
+                    }, r * 200);
                 }
             }
 
@@ -1079,6 +1314,22 @@
             render() {
                 this.ctx.clearRect(0, 0, this.displayWidth, this.displayHeight);
 
+                // Dynamic Canvas Stage Background
+                const theme = this.getStageTheme();
+                const baseBg = isNightMode ? theme.bgDark : theme.bgLight;
+                this.ctx.fillStyle = baseBg;
+                this.ctx.fillRect(0, 0, this.displayWidth, this.displayHeight);
+
+                // Stage Aura Radial Gradient
+                const cx = this.displayWidth / 2;
+                const cy = this.displayHeight / 2;
+                const radius = Math.max(this.displayWidth, this.displayHeight) * 0.7;
+                const grad = this.ctx.createRadialGradient(cx, cy, 10, cx, cy, radius);
+                grad.addColorStop(0, theme.accent + (isNightMode ? '25' : '18'));
+                grad.addColorStop(1, 'transparent');
+                this.ctx.fillStyle = grad;
+                this.ctx.fillRect(0, 0, this.displayWidth, this.displayHeight);
+
                 this.ctx.save();
                 if (this.shakeAmount > 0) {
                     const dx = (Math.random() - 0.5) * this.shakeAmount;
@@ -1088,17 +1339,17 @@
                     if (this.shakeAmount < 0.5) this.shakeAmount = 0;
                 }
 
-                this.drawGrid();
+                this.drawGrid(theme);
                 this.drawStones();
 
                 for (let q of this.quills) {
-                    if (!q.escaping) {
-                        this.drawQuill(
+                    if (!q.escaping && !q.crashing && !q.dead) {
+                        this.drawBird(
                             this.offsetX + q.c * this.cellSize + this.cellSize / 2,
                             this.offsetY + q.r * this.cellSize + this.cellSize / 2,
-                            q.dir,
-                            q.color,
-                            q.id === this.highlightedQuillId
+                            q.dir, q.color,
+                            q.id === this.highlightedQuillId,
+                            false
                         );
                     }
                 }
@@ -1109,26 +1360,54 @@
                     q.py += q.vy;
 
                     this.particles.push({
-                        x: q.px,
-                        y: q.py,
-                        vx: (Math.random() - 0.5) * 1,
-                        vy: (Math.random() - 0.5) * 1,
-                        radius: 2 + Math.random() * 2,
-                        alpha: 0.8,
-                        color: q.color
+                        x: q.px, y: q.py,
+                        vx: (Math.random() - 0.5) * 1.5,
+                        vy: (Math.random() - 0.5) * 1.5,
+                        radius: 2 + Math.random() * 3,
+                        alpha: 0.7, color: q.color,
+                        type: 'circle'
                     });
 
-                    this.drawQuill(q.px, q.py, q.dir, q.color, false);
+                    this.drawBird(q.px, q.py, q.dir, q.color, false, true);
 
-                    if (
-                        q.px < -100 || q.px > this.displayWidth + 100 ||
-                        q.py < -100 || q.py > this.displayHeight + 100
-                    ) {
-                        this.animatingQuills.splice(i, 1);
-                        this.quills = this.quills.filter(item => item.id !== q.id);
+                    if (q.crashing) {
+                        const distToTarget = Math.hypot(q.px - q.targetX, q.py - q.targetY);
+                        if (distToTarget <= Math.max(12, Math.abs(q.vx || q.vy))) {
+                            audio.playCrash();
+                            this.shakeAmount = 18;
 
-                        if (this.quills.length === 0) {
-                            this.handleStageComplete();
+                            const blocker = q.blockerInfo;
+                            const targetColor = blocker.birdObj ? blocker.birdObj.color : '#6b7280';
+                            
+                            this.spawnCrashExplosion(q.targetX, q.targetY, q.color, targetColor);
+
+                            q.dead = true;
+                            if (blocker.type === 'bird' && blocker.birdObj) {
+                                blocker.birdObj.dead = true;
+                            }
+
+                            this.animatingQuills.splice(i, 1);
+                            this.quills = this.quills.filter(item => !item.dead);
+
+                            this.lives = 0;
+                            this.updateUI();
+
+                            this.stopTimer();
+                            setTimeout(() => {
+                                this.handlePlayerCrash();
+                            }, 500);
+                        }
+                    } else if (q.escaping) {
+                        if (
+                            q.px < -100 || q.px > this.displayWidth + 100 ||
+                            q.py < -100 || q.py > this.displayHeight + 100
+                        ) {
+                            this.animatingQuills.splice(i, 1);
+                            this.quills = this.quills.filter(item => item.id !== q.id);
+
+                            if (this.quills.length === 0) {
+                                this.handleStageComplete();
+                            }
                         }
                     }
                 }
@@ -1139,9 +1418,25 @@
                 requestAnimationFrame(() => this.render());
             }
 
-            drawGrid() {
-                this.ctx.strokeStyle = 'rgba(212, 163, 89, 0.15)';
-                this.ctx.lineWidth = 1;
+            drawGrid(theme) {
+                const tileColor = isNightMode ? theme.tileDark : theme.tileLight;
+                this.ctx.fillStyle = tileColor;
+
+                for (let r = 0; r < this.gridSize; r++) {
+                    for (let c = 0; c < this.gridSize; c++) {
+                        if ((r + c) % 2 === 1) {
+                            this.ctx.fillRect(
+                                this.offsetX + c * this.cellSize,
+                                this.offsetY + r * this.cellSize,
+                                this.cellSize,
+                                this.cellSize
+                            );
+                        }
+                    }
+                }
+
+                this.ctx.strokeStyle = isNightMode ? theme.gridDark : theme.gridLight;
+                this.ctx.lineWidth = 1.5;
 
                 for (let i = 0; i <= this.gridSize; i++) {
                     this.ctx.beginPath();
@@ -1154,6 +1449,39 @@
                     this.ctx.lineTo(this.offsetX + this.gridSize * this.cellSize, this.offsetY + i * this.cellSize);
                     this.ctx.stroke();
                 }
+
+                const cornerSize = 12;
+                this.ctx.strokeStyle = theme.border;
+                this.ctx.lineWidth = 2.5;
+
+                const gx = this.offsetX;
+                const gy = this.offsetY;
+                const gw = this.gridSize * this.cellSize;
+                const gh = this.gridSize * this.cellSize;
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(gx - 4, gy + cornerSize);
+                this.ctx.lineTo(gx - 4, gy - 4);
+                this.ctx.lineTo(gx + cornerSize, gy - 4);
+                this.ctx.stroke();
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(gx + gw + 4 - cornerSize, gy - 4);
+                this.ctx.lineTo(gx + gw + 4, gy - 4);
+                this.ctx.lineTo(gx + gw + 4, gy + cornerSize);
+                this.ctx.stroke();
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(gx - 4, gy + gh - cornerSize);
+                this.ctx.lineTo(gx - 4, gy + gh + 4);
+                this.ctx.lineTo(gx + cornerSize, gy + gh + 4);
+                this.ctx.stroke();
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(gx + gw + 4 - cornerSize, gy + gh + 4);
+                this.ctx.lineTo(gx + gw + 4, gy + gh + 4);
+                this.ctx.lineTo(gx + gw + 4, gy + gh - cornerSize);
+                this.ctx.stroke();
             }
 
             drawStones() {
@@ -1178,45 +1506,177 @@
                 }
             }
 
-            drawQuill(x, y, dir, color, isHighlighted) {
+            drawBird(x, y, dir, color, isHighlighted, isAnimating = false) {
                 this.ctx.save();
                 this.ctx.translate(x, y);
 
-                let rotationAngle = 0;
-                if (dir === DIR.RIGHT) rotationAngle = Math.PI / 2;
-                if (dir === DIR.DOWN) rotationAngle = Math.PI;
-                if (dir === DIR.LEFT) rotationAngle = -Math.PI / 2;
-                this.ctx.rotate(rotationAngle);
+                if (dir === DIR.RIGHT) {
+                    // Default facing Right
+                } else if (dir === DIR.LEFT) {
+                    this.ctx.scale(-1, 1);
+                } else if (dir === DIR.UP) {
+                    this.ctx.rotate(-Math.PI / 2);
+                } else if (dir === DIR.DOWN) {
+                    this.ctx.rotate(Math.PI / 2);
+                }
 
-                const size = this.cellSize * 0.38;
+                const s = this.cellSize * 0.38;
 
                 if (isHighlighted) {
-                    this.ctx.strokeStyle = '#f59e0b';
-                    this.ctx.lineWidth = 3;
+                    this.ctx.strokeStyle = '#fbbf24';
+                    this.ctx.lineWidth = 3.5;
                     this.ctx.beginPath();
-                    this.ctx.arc(0, 0, size * 1.3, 0, Math.PI * 2);
+                    this.ctx.arc(0, 0, s * 1.35, 0, Math.PI * 2);
                     this.ctx.stroke();
                 }
 
-                this.ctx.fillStyle = color;
-                this.ctx.strokeStyle = '#fef3c7';
-                this.ctx.lineWidth = 1.5;
+                const mainColor = color || '#06b6d4';
+                const legColor = '#f97316';
+                const beakColor = '#facc15';
+
+                // Tail feathers
+                this.ctx.fillStyle = mainColor;
+                this.ctx.strokeStyle = '#1e1b4b';
+                this.ctx.lineWidth = 1.8;
 
                 this.ctx.beginPath();
-                this.ctx.moveTo(0, -size); 
-                this.ctx.lineTo(size * 0.6, size * 0.4);
-                this.ctx.lineTo(size * 0.2, size * 0.8);
-                this.ctx.lineTo(0, size * 0.4);
-                this.ctx.lineTo(-size * 0.2, size * 0.8);
-                this.ctx.lineTo(-size * 0.6, size * 0.4);
+                this.ctx.moveTo(-s * 0.3, -s * 0.1);
+                this.ctx.quadraticCurveTo(-s * 0.7, -s * 0.5, -s * 1.1, -s * 0.4);
+                this.ctx.quadraticCurveTo(-s * 0.7, -s * 0.1, -s * 0.35, 0);
                 this.ctx.closePath();
                 this.ctx.fill();
                 this.ctx.stroke();
 
-                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
                 this.ctx.beginPath();
-                this.ctx.moveTo(0, -size * 0.7);
-                this.ctx.lineTo(0, size * 0.3);
+                this.ctx.moveTo(-s * 0.35, 0);
+                this.ctx.quadraticCurveTo(-s * 0.8, -s * 0.1, -s * 1.25, 0);
+                this.ctx.quadraticCurveTo(-s * 0.7, s * 0.15, -s * 0.35, 0.1);
+                this.ctx.closePath();
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(-s * 0.3, 0.1);
+                this.ctx.quadraticCurveTo(-s * 0.7, s * 0.4, -s * 1.05, s * 0.35);
+                this.ctx.quadraticCurveTo(-s * 0.6, s * 0.1, -s * 0.3, 0);
+                this.ctx.closePath();
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                // Legs & 3-clawed feet
+                this.ctx.strokeStyle = legColor;
+                this.ctx.lineWidth = Math.max(3, s * 0.12);
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+
+                let leg1X2 = -s * 0.2, leg1Y2 = s * 0.75;
+                let leg2X2 = s * 0.1, leg2Y2 = s * 0.75;
+
+                if (isAnimating) {
+                    const phase = (Date.now() / 25) % (Math.PI * 2);
+                    leg1X2 = -s * 0.1 + Math.cos(phase) * s * 0.45;
+                    leg1Y2 = s * 0.65 + Math.sin(phase) * s * 0.2;
+                    leg2X2 = s * 0.1 + Math.cos(phase + Math.PI) * s * 0.45;
+                    leg2Y2 = s * 0.65 + Math.sin(phase + Math.PI) * s * 0.2;
+                }
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(-s * 0.1, s * 0.2);
+                this.ctx.lineTo(leg1X2, leg1Y2);
+                this.ctx.lineTo(leg1X2 + s * 0.22, leg1Y2 + s * 0.05);
+                this.ctx.moveTo(leg1X2, leg1Y2);
+                this.ctx.lineTo(leg1X2 + s * 0.12, leg1Y2 + s * 0.22);
+                this.ctx.moveTo(leg1X2, leg1Y2);
+                this.ctx.lineTo(leg1X2 - s * 0.15, leg1Y2 + s * 0.1);
+                this.ctx.stroke();
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(s * 0.15, s * 0.2);
+                this.ctx.lineTo(leg2X2, leg2Y2);
+                this.ctx.lineTo(leg2X2 + s * 0.22, leg2Y2 + s * 0.05);
+                this.ctx.moveTo(leg2X2, leg2Y2);
+                this.ctx.lineTo(leg2X2 + s * 0.12, leg2Y2 + s * 0.22);
+                this.ctx.moveTo(leg2X2, leg2Y2);
+                this.ctx.lineTo(leg2X2 - s * 0.15, leg2Y2 + s * 0.1);
+                this.ctx.stroke();
+
+                // Body & Wing
+                this.ctx.fillStyle = mainColor;
+                this.ctx.beginPath();
+                this.ctx.ellipse(0, 0, s * 0.45, s * 0.3, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                this.ctx.beginPath();
+                this.ctx.ellipse(s * 0.05, s * 0.08, s * 0.28, s * 0.18, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                this.ctx.fillStyle = mainColor;
+                this.ctx.beginPath();
+                this.ctx.ellipse(-s * 0.05, -s * 0.05, s * 0.22, s * 0.12, -0.3, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+                this.ctx.stroke();
+
+                // Neck & Head
+                this.ctx.fillStyle = mainColor;
+                this.ctx.strokeStyle = '#1e1b4b';
+                this.ctx.beginPath();
+                this.ctx.moveTo(s * 0.15, -s * 0.15);
+                this.ctx.quadraticCurveTo(s * 0.25, -s * 0.4, s * 0.35, -s * 0.55);
+                this.ctx.lineTo(s * 0.1, -s * 0.55);
+                this.ctx.quadraticCurveTo(-s * 0.02, -s * 0.3, -s * 0.1, -s * 0.15);
+                this.ctx.closePath();
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                this.ctx.beginPath();
+                this.ctx.arc(s * 0.25, -s * 0.6, s * 0.28, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                // Crown Crest
+                this.ctx.fillStyle = '#4338ca';
+                this.ctx.beginPath();
+                this.ctx.moveTo(s * 0.15, -s * 0.85);
+                this.ctx.quadraticCurveTo(s * 0.05, -s * 1.2, s * 0.2, -s * 1.0);
+                this.ctx.quadraticCurveTo(s * 0.25, -s * 1.3, s * 0.35, -s * 1.02);
+                this.ctx.quadraticCurveTo(s * 0.45, -s * 1.25, s * 0.4, -s * 0.82);
+                this.ctx.closePath();
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                // Cartoon Eye
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.beginPath();
+                this.ctx.arc(s * 0.32, -s * 0.65, s * 0.11, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.lineWidth = 1.2;
+                this.ctx.stroke();
+
+                this.ctx.fillStyle = '#0f172a';
+                this.ctx.beginPath();
+                this.ctx.arc(s * 0.35, -s * 0.65, s * 0.06, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.beginPath();
+                this.ctx.arc(s * 0.33, -s * 0.68, s * 0.025, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // Beak
+                this.ctx.fillStyle = beakColor;
+                this.ctx.strokeStyle = '#d97706';
+                this.ctx.lineWidth = 1.5;
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(s * 0.45, -s * 0.7);
+                this.ctx.lineTo(s * 0.95, -s * 0.58);
+                this.ctx.lineTo(s * 0.42, -s * 0.48);
+                this.ctx.closePath();
+                this.ctx.fill();
                 this.ctx.stroke();
 
                 this.ctx.restore();
@@ -1227,147 +1687,260 @@
                     let p = this.particles[i];
                     p.x += p.vx;
                     p.y += p.vy;
-                    p.alpha -= 0.02;
+
+                    if (p.type === 'ring') {
+                        p.radius += 2.8;
+                        p.alpha -= 0.04;
+                    } else {
+                        p.alpha -= 0.025;
+                    }
 
                     if (p.alpha <= 0) {
                         this.particles.splice(i, 1);
                         continue;
                     }
 
-                    this.ctx.fillStyle = p.color;
+                    this.ctx.save();
                     this.ctx.globalAlpha = p.alpha;
-                    this.ctx.beginPath();
-                    this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                    this.ctx.fill();
-                    this.ctx.globalAlpha = 1.0;
+
+                    if (p.type === 'ring') {
+                        this.ctx.strokeStyle = p.color;
+                        this.ctx.lineWidth = 3;
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    } else if (p.type === 'star') {
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.translate(p.x, p.y);
+                        this.ctx.beginPath();
+                        for (let j = 0; j < 5; j++) {
+                            this.ctx.lineTo(Math.cos((18 + j * 72) * Math.PI / 180) * p.radius, -Math.sin((18 + j * 72) * Math.PI / 180) * p.radius);
+                            this.ctx.lineTo(Math.cos((54 + j * 72) * Math.PI / 180) * (p.radius / 2), -Math.sin((54 + j * 72) * Math.PI / 180) * (p.radius / 2));
+                        }
+                        this.ctx.closePath();
+                        this.ctx.fill();
+                    } else {
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                    this.ctx.restore();
                 }
+            }
+
+            handlePlayerCrash() {
+                const curPlayer = this.players[this.activePlayerIndex];
+                curPlayer.eliminated = true;
+
+                document.getElementById('loss-stage-reached').textContent = `Stage ${this.currentStageIndex + 1}`;
+                document.getElementById('loss-total-coins').textContent = `${curPlayer.coins} 🪙`;
+
+                document.getElementById('modal-loss').classList.remove('hidden');
             }
 
             handleStageComplete() {
                 this.stopTimer();
-                audio.playWin();
 
                 const curPlayer = this.players[this.activePlayerIndex];
+                const clearedStageNum = this.currentStageIndex + 1;
+                curPlayer.currentStage = clearedStageNum;
                 
-                // Calculate Brain Speed Rating Index
-                const speedScore = Math.max(100, Math.round(1000 - (this.elapsedSeconds * 12) - (this.mistakesInStage * 120)));
-                const bonusCoins = Math.max(50, Math.round(150 - (this.elapsedSeconds * 2) + (this.lives * 25)));
+                const speedRating = Math.max(100, Math.round(1000 - (this.elapsedSeconds * 12)));
+                curPlayer.totalSpeedRating += speedRating;
 
-                curPlayer.coins += bonusCoins;
-                curPlayer.totalTime += this.elapsedSeconds;
-                curPlayer.totalSpeedRating += speedScore;
-                curPlayer.completedStages++;
+                const stageCoins = 100 + Math.round(speedRating / 10);
+                curPlayer.coins += stageCoins;
 
-                // Fill stats UI
-                const mins = Math.floor(this.elapsedSeconds / 60);
-                const secs = Math.floor(this.elapsedSeconds % 60);
-                document.getElementById('stat-time').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-                document.getElementById('stat-speed').textContent = speedScore;
-                document.getElementById('stat-coins').textContent = `+${bonusCoins} 🪙`;
+                document.getElementById('stat-time').textContent = `${Math.floor(this.elapsedSeconds)}s`;
+                document.getElementById('stat-speed').textContent = speedRating;
+                document.getElementById('stat-coins').textContent = `+${stageCoins} 🪙`;
 
-                const t = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
-                const coupletList = STAGE_TEXTS[currentLang].couplets;
-                document.getElementById('win-couplet').textContent = coupletList[this.currentStageIndex];
+                const winTitleEl = document.getElementById('txt-win-title');
+                const isMilestone = clearedStageNum % 5 === 0;
 
-                // Check multiplayer next turn
-                const nextPlayerNotice = document.getElementById('next-player-notice');
-                if (playerCount > 1) {
-                    const nextIndex = (this.activePlayerIndex + 1) % playerCount;
-                    const nextPlayer = this.players[nextIndex];
-                    document.getElementById('txt-next-turn-notice').textContent = `${t.nextTurnNotice}${t.playerLabel}${nextPlayer.id + 1}`;
-                    nextPlayerNotice.classList.remove('hidden');
+                if (isMilestone) {
+                    audio.playCelebrationFanfare();
+                    this.spawnMilestoneFireworks(clearedStageNum === 100 ? 3.5 : 2.5);
+
+                    if (clearedStageNum === 100) {
+                        if (winTitleEl) winTitleEl.textContent = "🏆 GRAND CHAMPION! ALL 100 STAGES CLEARED! 🎆👑";
+                        this.showBanner("🎉 CONGRATULATIONS! YOU CONQUERED ALL 100 STAGES! 🎉");
+                    } else {
+                        if (winTitleEl) winTitleEl.textContent = `🎆 Stage ${clearedStageNum} Celebration! 🎉`;
+                        this.showBanner(`🚀 FANTASTIC! ${clearedStageNum} Stages Milestone Cleared! 🎆`);
+                    }
                 } else {
-                    nextPlayerNotice.classList.add('hidden');
+                    audio.playWin();
+                    if (winTitleEl) winTitleEl.textContent = TRANSLATIONS[currentLang]?.winTitle || "Stage Completed!";
                 }
 
-                document.getElementById('modal-win').classList.remove('hidden');
-            }
+                const nextNotice = document.getElementById('next-player-notice');
+                if (playerCount > 1) {
+                    let nextIdx = (this.activePlayerIndex + 1) % playerCount;
+                    let foundActive = false;
 
-            showLeaderboard() {
-                const body = document.getElementById('leaderboard-body');
-                body.innerHTML = '';
+                    for (let i = 0; i < playerCount; i++) {
+                        let checkIdx = (this.activePlayerIndex + 1 + i) % playerCount;
+                        if (!this.players[checkIdx].eliminated) {
+                            nextIdx = checkIdx;
+                            foundActive = true;
+                            break;
+                        }
+                    }
 
-                const sorted = [...this.players].sort((a, b) => (b.coins + b.totalSpeedRating) - (a.coins + a.totalSpeedRating));
-                const ranks = ['🥇 1st', '🥈 2nd', '🥉 3rd', '4th'];
+                    if (foundActive) {
+                        const t = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+                        document.getElementById('txt-next-turn-notice').textContent = `${t.nextTurnNotice}${t.playerLabel}${nextIdx + 1}`;
+                        nextNotice.classList.remove('hidden');
+                    } else {
+                        nextNotice.classList.add('hidden');
+                    }
+                } else {
+                    nextNotice.classList.add('hidden');
+                }
 
-                sorted.forEach((p, rankIdx) => {
-                    const row = document.createElement('tr');
-                    row.className = p.id === this.activePlayerIndex ? 'bg-amber-500/10 font-bold' : '';
-                    row.innerHTML = `
-                        <td class="p-2 text-center">${ranks[rankIdx]}</td>
-                        <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] badge-player-${p.id}">${p.name}</span></td>
-                        <td class="p-2 text-center text-amber-300 font-bold">${p.coins} 🪙</td>
-                        <td class="p-2 text-center text-amber-300 font-bold">${p.totalSpeedRating}</td>
-                    `;
-                    body.appendChild(row);
-                });
-
-                document.getElementById('modal-leaderboard').classList.remove('hidden');
+                const delayMs = isMilestone ? 3200 : 600;
+                setTimeout(() => {
+                    document.getElementById('modal-win').classList.remove('hidden');
+                    if (isMilestone) {
+                        this.spawnMilestoneFireworks(2.0);
+                        setTimeout(() => {
+                            this.spawnMilestoneFireworks(1.5);
+                        }, 1200);
+                    }
+                }, delayMs);
             }
         }
 
-        window.onload = () => {
-            const game = new GameEngine();
-            window.gameInstance = game;
-            game.render();
+        window.onload = function() {
+            window.gameInstance = new GameEngine();
 
-            setLanguage('en');
-
-            document.getElementById('btn-start').onclick = () => {
+            document.getElementById('btn-start').onclick = function() {
+                audio.init();
                 document.getElementById('modal-intro').classList.add('hidden');
-                game.loadStage(0);
+                window.gameInstance.loadStage(0);
             };
 
-            document.getElementById('btn-next-stage').onclick = () => {
+            document.getElementById('btn-next-stage').onclick = function() {
                 document.getElementById('modal-win').classList.add('hidden');
 
                 if (playerCount > 1) {
-                    game.activePlayerIndex = (game.activePlayerIndex + 1) % playerCount;
-                }
+                    let activeCount = window.gameInstance.players.filter(p => !p.eliminated).length;
+                    if (activeCount === 0) {
+                        showLeaderboard();
+                        return;
+                    }
 
-                if (game.currentStageIndex >= STAGES.length - 1 && game.activePlayerIndex === 0) {
-                    game.showLeaderboard();
+                    let nextIdx = (window.gameInstance.activePlayerIndex + 1) % playerCount;
+                    while (window.gameInstance.players[nextIdx].eliminated) {
+                        nextIdx = (nextIdx + 1) % playerCount;
+                    }
+
+                    window.gameInstance.activePlayerIndex = nextIdx;
+                    const pStage = window.gameInstance.players[nextIdx].currentStage;
+                    window.gameInstance.loadStage(pStage);
                 } else {
-                    const nextStage = game.activePlayerIndex === 0 ? game.currentStageIndex + 1 : game.currentStageIndex;
-                    game.loadStage(nextStage);
+                    const nextStage = window.gameInstance.currentStageIndex + 1;
+                    if (nextStage < 100) {
+                        window.gameInstance.loadStage(nextStage);
+                    } else {
+                        showLeaderboard();
+                    }
                 }
             };
 
-            document.getElementById('btn-retry').onclick = () => {
+            document.getElementById('btn-retry').onclick = function() {
                 document.getElementById('modal-loss').classList.add('hidden');
-                game.loadStage(game.currentStageIndex);
+
+                if (playerCount > 1) {
+                    let activeCount = window.gameInstance.players.filter(p => !p.eliminated).length;
+                    if (activeCount === 0) {
+                        showLeaderboard();
+                        return;
+                    }
+
+                    let nextIdx = (window.gameInstance.activePlayerIndex + 1) % playerCount;
+                    while (window.gameInstance.players[nextIdx].eliminated && activeCount > 0) {
+                        nextIdx = (nextIdx + 1) % playerCount;
+                    }
+
+                    window.gameInstance.activePlayerIndex = nextIdx;
+                    const pStage = window.gameInstance.players[nextIdx].currentStage;
+                    window.gameInstance.loadStage(pStage);
+                } else {
+                    window.gameInstance.players[0].coins = 0;
+                    window.gameInstance.players[0].totalSpeedRating = 0;
+                    window.gameInstance.players[0].currentStage = 0;
+                    window.gameInstance.players[0].eliminated = false;
+                    window.gameInstance.loadStage(0);
+                }
             };
 
-            document.getElementById('btn-reset').onclick = () => {
-                game.loadStage(game.currentStageIndex);
+            document.getElementById('btn-reset').onclick = function() {
+                window.gameInstance.loadStage(window.gameInstance.currentStageIndex);
             };
 
-            document.getElementById('btn-hint').onclick = () => {
-                game.giveHint();
+            document.getElementById('btn-hint').onclick = function() {
+                window.gameInstance.giveHint();
             };
 
-            document.getElementById('btn-scores').onclick = () => {
-                game.showLeaderboard();
+            document.getElementById('btn-scores').onclick = function() {
+                showLeaderboard();
             };
 
-            document.getElementById('btn-lang').onclick = () => {
-                document.getElementById('modal-intro').classList.remove('hidden');
-            };
-
-            document.getElementById('btn-restart-game').onclick = () => {
+            document.getElementById('btn-restart-game').onclick = function() {
                 document.getElementById('modal-leaderboard').classList.add('hidden');
-                game.initPlayers(playerCount);
-                game.loadStage(0);
+                window.gameInstance.initPlayers(playerCount);
+                window.gameInstance.loadStage(0);
             };
 
-            document.getElementById('btn-sound').onclick = () => {
+            document.getElementById('btn-theme').onclick = function() {
+                toggleTheme();
+            };
+
+            document.getElementById('btn-lang').onclick = function() {
+                const langs = ['en', 'ur', 'hi', 'zh'];
+                const nextIdx = (langs.indexOf(currentLang) + 1) % langs.length;
+                setLanguage(langs[nextIdx]);
+            };
+
+            document.getElementById('btn-sound').onclick = function() {
                 audio.muted = !audio.muted;
                 document.getElementById('sound-icon').textContent = audio.muted ? '🔇' : '🔊';
             };
 
-            document.getElementById('btn-info').onclick = () => {
+            document.getElementById('btn-info').onclick = function() {
                 document.getElementById('modal-intro').classList.remove('hidden');
             };
+
+            function showLeaderboard() {
+                const tbody = document.getElementById('leaderboard-body');
+                tbody.innerHTML = '';
+
+                const sorted = [...window.gameInstance.players].sort((a, b) => {
+                    if (b.currentStage !== a.currentStage) return b.currentStage - a.currentStage;
+                    return b.coins - a.coins;
+                });
+                const ranks = ['🥇', '🥈', '🥉', '4th'];
+
+                sorted.forEach((p, idx) => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-purple-900/40 opacity-90';
+                    row.innerHTML = `
+                        <td class="p-2 text-center text-sm font-bold">${ranks[idx] || idx + 1}</td>
+                        <td class="p-2 font-semibold">${p.name} ${p.eliminated ? '💥' : '🏆'}</td>
+                        <td class="p-2 text-center font-bold text-amber-300">Stage ${p.currentStage + 1}</td>
+                        <td class="p-2 text-center text-amber-300 font-bold">${p.coins} 🪙</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                document.getElementById('modal-leaderboard').classList.remove('hidden');
+            }
+
+            // Start main render loop
+            window.gameInstance.render();
         };
     </script>
 </body>
