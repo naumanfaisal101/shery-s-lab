@@ -155,20 +155,19 @@
     <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             
-            <!-- Shayree Escape Slot (Ready for New Game) -->
-            <a href="#" class="app-card block rounded-2xl shadow-md border overflow-hidden relative">
+            <!-- Chicku Run (Click opens choices modal) -->
+            <div onclick="openChickuModal()" class="app-card block rounded-2xl shadow-md border overflow-hidden relative cursor-pointer group">
                 <div class="absolute top-3 right-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-lg z-10 animate-pulse uppercase tracking-widest border border-white/30">
-                    Coming Soon
+                    New!
                 </div>
-                <div class="h-48 overflow-hidden relative flex flex-col items-center justify-center p-4 img-wrapper text-center opacity-70">
-                    <i class="fa-solid fa-gamepad text-5xl mb-2 text-cyan-400"></i>
-                    <span class="text-xs font-semibold tracking-wider uppercase text-gray-400">New Game Coming Soon</span>
+                <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
+                    <img src="chicku run/chicku run game/thumbnail of game.jpeg" alt="Chicku Run" class="w-full h-full object-contain drop-shadow-md rounded group-hover:scale-105 transition-transform duration-300">
                 </div>
                 <div class="p-5 border-t text-center border-inherit">
-                    <h2 class="text-xl font-bold mb-2">New Game</h2>
-                    <p class="text-sm">Exciting new interactive game is being integrated into the suite.</p>
+                    <h2 class="text-xl font-bold mb-2">Chicku Run</h2>
+                    <p class="text-sm">Endless runner adventure game. Tap to play or view privacy policy.</p>
                 </div>
-            </a>
+            </div>
 
             <!-- Safar Counter Pro -->
             <a href="safar counter pro/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden relative">
@@ -317,6 +316,43 @@
         </div>
     </main>
 
+    <!-- Chicku Run Option Modal -->
+    <div id="chickuModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden p-4">
+        <div class="bg-[#242424] text-white rounded-3xl border border-gray-700 w-full max-w-2xl overflow-hidden shadow-2xl relative transform transition-all scale-95" id="chickuModalCard">
+            <!-- Close Button -->
+            <button onclick="closeChickuModal()" class="absolute top-4 right-4 bg-gray-800 hover:bg-red-600 text-gray-300 hover:text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors z-20">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            
+            <div class="p-6 text-center border-b border-gray-700">
+                <h3 class="text-2xl font-black tracking-wide text-cyan-400">Chicku Run Portal</h3>
+                <p class="text-sm text-gray-400 mt-1">Select an option below to proceed</p>
+            </div>
+
+            <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <!-- Option 1: Game -->
+                <a href="chicku run/chicku run game/index.html" class="bg-[#1b1b1b] hover:bg-[#2e2e2e] border border-gray-700 hover:border-cyan-400 rounded-2xl p-4 flex flex-col items-center text-center transition-all group hover:-translate-y-1">
+                    <div class="w-full h-36 rounded-xl overflow-hidden mb-3 bg-black flex items-center justify-center">
+                        <img src="chicku run/chicku run game/thumbnail of game.jpeg" alt="Play Chicku Run" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <h4 class="font-bold text-lg text-white mb-1">Play Game</h4>
+                    <p class="text-xs text-gray-400 mb-4">Launch and play Chicku Run game directly.</p>
+                    <span class="mt-auto px-4 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs rounded-full uppercase tracking-wider">Play Now</span>
+                </a>
+
+                <!-- Option 2: Privacy Policy -->
+                <a href="chicku run/chicku run privacy policy/index.html" class="bg-[#1b1b1b] hover:bg-[#2e2e2e] border border-gray-700 hover:border-blue-400 rounded-2xl p-4 flex flex-col items-center text-center transition-all group hover:-translate-y-1">
+                    <div class="w-full h-36 rounded-xl overflow-hidden mb-3 bg-black flex items-center justify-center">
+                        <img src="chicku run/chicku run privacy policy/thumbnail image privacy policy HTML page.jpeg" alt="Privacy Policy" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
+                    </div>
+                    <h4 class="font-bold text-lg text-white mb-1">Privacy Policy</h4>
+                    <p class="text-xs text-gray-400 mb-4">Official legal & data privacy policy terms.</p>
+                    <span class="mt-auto px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-full uppercase tracking-wider">Read Policy</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <footer class="mt-auto pt-10 pb-6">
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-extrabold mb-2 font-sans tracking-tight">MNF apps suit</h2>
@@ -352,6 +388,32 @@
     </footer>
 
     <script>
+        function openChickuModal() {
+            const modal = document.getElementById('chickuModal');
+            const card = document.getElementById('chickuModalCard');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                card.classList.remove('scale-95');
+                card.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeChickuModal() {
+            const modal = document.getElementById('chickuModal');
+            const card = document.getElementById('chickuModalCard');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 150);
+        }
+
+        document.getElementById('chickuModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeChickuModal();
+            }
+        });
+
         function setTheme(themeName) {
             document.body.classList.forEach(className => {
                 if (className.startsWith('theme-')) {
