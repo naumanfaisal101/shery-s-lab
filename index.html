@@ -139,7 +139,6 @@
                 <img src="logo mnf.jpg" alt="MNF Apps Suit Logo" 
                      class="relative w-40 h-40 sm:w-48 sm:h-48 object-contain rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.3)] border-4 border-white/10 transition-transform duration-300 group-hover:scale-105 bg-white">
             </div>
-
             <h1 class="text-4xl font-extrabold tracking-tight mb-2">MNF apps suit</h1>
             <p class="text-lg font-medium tracking-wide">All-in-One Professional Web Applications Suite</p>
             
@@ -156,17 +155,18 @@
     <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             
-            <!-- Shayree Escape - Train Your Brain -->
-            <a href="Shayree Escape  train your brain/index.html" class="app-card block rounded-2xl shadow-md border overflow-hidden relative">
+            <!-- Shayree Escape Slot (Ready for New Game) -->
+            <a href="#" class="app-card block rounded-2xl shadow-md border overflow-hidden relative">
                 <div class="absolute top-3 right-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-lg z-10 animate-pulse uppercase tracking-widest border border-white/30">
-                    New!
+                    Coming Soon
                 </div>
-                <div class="h-48 overflow-hidden relative flex items-center justify-center p-4 img-wrapper">
-                    <img src="Shayree Escape  train your brain/thumbnail of game.jpeg" alt="Shayree Escape Logo" class="w-full h-full object-contain drop-shadow-md rounded" onerror="this.src='https://via.placeholder.com/300x220?text=Shayree+Escape'">
+                <div class="h-48 overflow-hidden relative flex flex-col items-center justify-center p-4 img-wrapper text-center opacity-70">
+                    <i class="fa-solid fa-gamepad text-5xl mb-2 text-cyan-400"></i>
+                    <span class="text-xs font-semibold tracking-wider uppercase text-gray-400">New Game Coming Soon</span>
                 </div>
                 <div class="p-5 border-t text-center border-inherit">
-                    <h2 class="text-xl font-bold mb-2">Shayree Escape</h2>
-                    <p class="text-sm">Brain training puzzle adventure game to sharpen focus, logic, and cognitive reflexes.</p>
+                    <h2 class="text-xl font-bold mb-2">New Game</h2>
+                    <p class="text-sm">Exciting new interactive game is being integrated into the suite.</p>
                 </div>
             </a>
 
@@ -313,6 +313,7 @@
                     <p class="text-sm">Efficient image conversion tool for optimizing standard images to next-gen WEBP format.</p>
                 </div>
             </a>
+
         </div>
     </main>
 
@@ -357,12 +358,9 @@
                     document.body.classList.remove(className);
                 }
             });
-
             document.body.classList.add('theme-' + themeName);
-
             document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelector(`.theme-${themeName}-bg`).classList.add('active');
-
             localStorage.setItem('mnf_apps_suit_theme', themeName);
         }
 
