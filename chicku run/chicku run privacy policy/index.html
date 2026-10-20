@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - Chicku Run | Nusrat Shaheen Apps Suite</title>
+    <title>🐣 Chicku Run — Official Privacy Policy | Nusrat Shaheen Apps Suite</title>
+    <meta name="description" content="Official Privacy Policy for Chicku Run (com.nusratshaheen.chickurun) developed by Nusrat Shaheen Apps Suite.">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts Inter -->
+    
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -19,11 +21,15 @@
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
                     },
                     colors: {
-                        brand: {
-                            50: '#fffbebe6',
+                        chicku: {
+                            50: '#fffbeb',
                             100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
                             500: '#f59e0b',
                             600: '#d97706',
                             700: '#b45309',
@@ -34,216 +40,492 @@
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .print-card {
+                box-shadow: none !important;
+                border: 1px solid #e5e7eb !important;
+            }
+        }
+        /* Custom Subtle Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 min-h-screen flex flex-col justify-between transition-colors duration-200">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 font-sans antialiased transition-colors duration-200 selection:bg-amber-200 selection:text-amber-900">
 
-    <!-- Header Navigation -->
-    <header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
+    <header class="sticky top-0 z-40 backdrop-blur-md bg-white/85 dark:bg-slate-900/85 border-b border-slate-200/80 dark:border-slate-800 no-print">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-amber-500/20">
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center text-2xl shadow-sm group-hover:scale-105 transition-transform">
                     🐣
                 </div>
                 <div>
-                    <h1 class="text-base font-bold text-slate-900 dark:text-white leading-tight">Chicku Run</h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Nusrat Shaheen Apps Suite</p>
+                    <span class="font-display font-extrabold text-lg tracking-tight text-slate-900 dark:text-white block leading-none">Chicku Run</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Nusrat Shaheen Apps Suite</span>
                 </div>
-            </div>
-            
-            <div class="flex items-center space-x-2 sm:space-x-4">
-                <a href="https://nusratshaheen.space" class="text-xs sm:text-sm font-medium text-slate-600 hover:text-amber-600 dark:text-slate-300 dark:hover:text-amber-400 transition flex items-center gap-1">
-                    <i class="fa-solid fa-globe text-xs"></i>
-                    <span>Official Website</span>
-                </a>
+            </a>
+
+            <!-- Utility Actions -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="copyPackageId()" id="copyPkgBtn" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition" title="Copy Package ID">
+                    <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    <span>com.nusratshaheen.chickurun</span>
+                </button>
+
+                <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition" title="Print or Save as PDF">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    <span class="hidden md:inline">Print / PDF</span>
+                </button>
+
+                <button id="themeToggle" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition" aria-label="Toggle Dark Mode">
+                    <!-- Sun Icon -->
+                    <svg id="sunIcon" class="w-5 h-5 hidden text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <!-- Moon Icon -->
+                    <svg id="moonIcon" class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-grow">
-        
-        <!-- Hero Title Banner -->
-        <div class="mb-8 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 relative overflow-hidden">
-            <div class="relative z-10">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 mb-3">
-                    <i class="fa-solid fa-shield-halved"></i> Official Privacy Document
-                </span>
-                <h1 class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-                    Privacy Policy
-                </h1>
-                <p class="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl">
-                    This Privacy Policy applies to the mobile game <strong>Chicku Run</strong> developed by <strong>Nusrat Shaheen Apps Suite</strong>. Your privacy and trust are our top priorities.
-                </p>
+    <section class="relative overflow-hidden bg-gradient-to-b from-amber-50/90 via-orange-50/40 to-slate-50 dark:from-slate-900 dark:via-slate-900/60 dark:to-slate-950 pt-10 pb-12 border-b border-amber-200/50 dark:border-slate-800">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/80 border border-amber-300/60 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-semibold uppercase tracking-wider mb-4">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Official Privacy Policy Document
+                    </div>
+                    <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+                        <span>🐣 Chicku Run</span>
+                        <span class="text-amber-500 font-light">—</span>
+                        <span>Privacy Policy</span>
+                    </h1>
+                    <p class="mt-3 text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl">
+                        Transparent, family-safe privacy practices for players and parents of <strong class="text-slate-800 dark:text-slate-200">Chicku Run</strong>.
+                    </p>
+                </div>
 
-                <!-- Metadata Grid -->
-                <div class="mt-6 flex flex-wrap items-center gap-3 sm:gap-4 text-xs font-medium text-slate-600 dark:text-slate-400">
-                    <div class="flex items-center space-x-2 bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                        <i class="fa-regular fa-calendar text-amber-500"></i>
-                        <span>Last Updated: <strong class="text-slate-800 dark:text-slate-200">September 21, 2026</strong></span>
+                <!-- COPPA / Family Friendly Trust Badge -->
+                <div class="flex items-center gap-3 bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 self-start md:self-center">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     </div>
-                    <div class="flex items-center space-x-2 bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                        <i class="fa-solid fa-cube text-amber-500"></i>
-                        <span>Package ID: <strong class="text-slate-800 dark:text-slate-200">com.nusratsaheen.chickurun</strong></span>
-                    </div>
-                    <div class="flex items-center space-x-2 bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                        <i class="fa-solid fa-user text-amber-500"></i>
-                        <span>Developer: <strong class="text-slate-800 dark:text-slate-200">Nusrat Shaheen Apps Suite</strong></span>
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Zero Direct PII</div>
+                        <div class="text-sm font-bold text-slate-900 dark:text-white">COPPA & Families Compliant</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Safe for all ages</div>
                     </div>
                 </div>
             </div>
+
+            <!-- Metadata Grid -->
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Developer</div>
+                    <div class="mt-1 font-semibold text-slate-900 dark:text-white text-sm sm:text-base">Nusrat Shaheen Apps Suite</div>
+                </div>
+                <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Game Title</div>
+                    <div class="mt-1 font-semibold text-slate-900 dark:text-white text-sm sm:text-base">Chicku Run</div>
+                </div>
+                <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Package ID</div>
+                    <div class="mt-1 font-mono font-semibold text-amber-600 dark:text-amber-400 text-xs sm:text-sm break-all">com.nusratshaheen.chickurun</div>
+                </div>
+                <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Last Updated</div>
+                    <div class="mt-1 font-semibold text-slate-900 dark:text-white text-sm sm:text-base">September 21, 2026</div>
+                </div>
+            </div>
         </div>
+    </section>
 
-        <!-- Content Sections -->
-        <div class="space-y-6 sm:space-y-8">
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left Sidebar: Table of Contents (Sticky on Desktop) -->
+            <aside class="lg:col-span-4 lg:sticky lg:top-24 no-print">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <h2 class="font-display font-bold text-sm uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3 px-2">
+                        Table of Contents
+                    </h2>
+                    <nav class="space-y-1 text-sm" id="tocNav">
+                        <a href="#section-1" class="toc-link flex items-center gap-2.5 px-3 py-2 rounded-xl font-medium text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-700 dark:hover:text-amber-400 transition">
+                            <span class="w-5 h-5 rounded-md bg-amber-100 dark:bg-slate-800 text-amber-700 dark:text-amber-400 text-xs flex items-center justify-center font-bold">1</span>
+                            <span>Introduction & Overview</span>
+                        </a>
+                        <a href="#section-2" class="toc-link flex items-center gap-2.5 px-3 py-2 rounded-xl font-medium text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-700 dark:hover:text-amber-400 transition">
+                            <span class="w-5 h-5 rounded-md bg-amber-100 dark:bg-slate-800 text-amber-700 dark:text-amber-400 text-xs flex items-center justify-center font-bold">2</span>
+                            <span>Information Collection & Usage</span>
+                        </a>
+                        <a href="#section-3" class="toc-link flex items-center gap-2.5 px-3 py-2 rounded-xl font-medium text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-700 dark:hover:text-amber-400 transition">
+                            <span class="w-5 h-5 rounded-md bg-amber-100 dark:bg-slate-800 text-amber-700 dark:text-amber-400 text-xs flex items-center justify-center font-bold">3</span>
+                            <span>Google Play Games Services</span>
+                        </a>
+                        <a href="#section-4" class="toc-link flex items-center gap-2.5 px-3 py-2 rounded-xl font-medium text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-700 dark:hover:text-amber-400 transition">
+                            <span class="w-5 h-5 rounded-md bg-amber-100 dark:bg-slate-800 text-amber-700 dark:text-amber-400 text-xs flex items-center justify-center font-bold">4</span>
+                            <span>Third-Party Services & Ads</span>
+                        </a>
+                        <a href="#section-5" class="toc-link flex items-center gap-2.5 px-3 py-2 rounded-xl font-medium text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-700 dark:hover:text-amber-400 transition">
+                            <span class="w-5 h-5 rounded-md bg-amber-100 dark:bg-slate-800 text-amber-700 dark:text-amber-400 text-xs flex items-center justify-center font-bold">5</span>
+                            <span>Children's Privacy (COPPA)</span>
+                        </a>
+                        <a href="#section-6" class="toc-link flex items-center gap-2.5 px-3 py-2 rounded-xl font-medium text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-700 dark:hover:text-amber-400 transition">
+                            <span class="w-5 h-5 rounded-md bg-amber-100 dark:bg-slate-800 text-amber-700 dark:text-amber-400 text-xs flex items-center justify-center font-bold">6</span>
+                            <span>Data Retention & Deletion</span>
+                        </a>
+                        <a href="#section-7" class="toc-link flex items-center gap-2.5 px-3 py-2 rounded-xl font-medium text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-700 dark:hover:text-amber-400 transition">
+                            <span class="w-5 h-5 rounded-md bg-amber-100 dark:bg-slate-800 text-amber-700 dark:text-amber-400 text-xs flex items-center justify-center font-bold">7</span>
+                            <span>Security & Policy Updates</span>
+                        </a>
+                        <a href="#section-8" class="toc-link flex items-center gap-2.5 px-3 py-2 rounded-xl font-medium text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-800 hover:text-amber-700 dark:hover:text-amber-400 transition">
+                            <span class="w-5 h-5 rounded-md bg-amber-100 dark:bg-slate-800 text-amber-700 dark:text-amber-400 text-xs flex items-center justify-center font-bold">8</span>
+                            <span>Contact Us</span>
+                        </a>
+                    </nav>
 
-            <!-- Section 1 -->
-            <section id="introduction" class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div class="flex items-center space-x-3 mb-4">
-                    <span class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-sm">1</span>
-                    <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Introduction & Overview</h2>
-                </div>
-                <p class="text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                    Chicku Run is provided as a <strong>Free-to-Play</strong> application. This service is provided by Nusrat Shaheen Apps Suite at no cost and is intended for use as is. This document informs users regarding our policies with the collection, use, and disclosure of Personal Information if anyone decides to use our Game.
-                </p>
-                <p class="mt-3 text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                    If you choose to play Chicku Run, then you agree to the collection and use of information in relation to this policy. We will not use or share your information with anyone except as described in this Privacy Policy.
-                </p>
-            </section>
-
-            <!-- Section 2 -->
-            <section id="data-collection" class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div class="flex items-center space-x-3 mb-4">
-                    <span class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-sm">2</span>
-                    <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Information Collection and Direct Usage</h2>
-                </div>
-                <p class="text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                    Chicku Run <strong>does not directly collect, store, or transmit any personally identifiable information (PII)</strong> such as your real name, email address, phone number, physical address, or contact list. The game logic, graphics rendering, and core mechanics run locally on your mobile device.
-                </p>
-            </section>
-
-            <!-- Section 3: Play Games Services (UPDATED SECTION) -->
-            <section id="play-games-services" class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div class="flex items-center space-x-3 mb-4">
-                    <span class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-sm">3</span>
-                    <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Google Play Games Services (Leaderboards & Scores)</h2>
-                </div>
-                <p class="text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                    Chicku Run integrates <strong>Google Play Games Services</strong> to provide interactive social features including public global leaderboards and score achievements. This allows players globally to submit high scores, view competitive rankings, and break high score records set by other players worldwide.
-                </p>
-                <p class="mt-3 text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                    When you sign in or interact with Play Games Services within Chicku Run:
-                </p>
-                <ul class="list-disc list-inside mt-2 space-y-1.5 text-sm text-slate-600 dark:text-slate-300 pl-2">
-                    <li>Your public Gamer ID, avatar, and high score statistics are synchronized with Google Play Games servers.</li>
-                    <li>Your high scores are displayed on public leaderboards to compare achievements with friends and global players.</li>
-                    <li>We do not store your Google login credentials or account details on external servers owned by Nusrat Shaheen Apps Suite.</li>
-                </ul>
-                <div class="mt-4 p-4 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-xs text-slate-600 dark:text-slate-400">
-                    <p>
-                        <i class="fa-solid fa-gamepad text-amber-500 mr-1"></i> 
-                        <strong>Leaderboard Data Control:</strong> You can manage or disconnect your Play Games profile and privacy settings anytime through the <em>Google Play Games app settings</em> on your device.
-                    </p>
-                </div>
-            </section>
-
-            <!-- Section 4 -->
-            <section id="third-party" class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div class="flex items-center space-x-3 mb-4">
-                    <span class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-sm">4</span>
-                    <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Third-Party Services & Advertisements</h2>
-                </div>
-                <p class="text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                    To keep the game free for all players, Chicku Run integrates trusted third-party services (such as Google Play Services, Google Play Games, and Google AdMob) to serve non-intrusive advertisements, manage social features, and provide basic performance telemetry.
-                </p>
-                <p class="mt-3 text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-200">
-                    These third-party SDKs may automatically collect non-sensitive device parameters including:
-                </p>
-                <ul class="list-disc list-inside mt-2 space-y-1.5 text-sm text-slate-600 dark:text-slate-300 pl-2">
-                    <li>Anonymous Advertising IDs (Google Advertising ID / GAID)</li>
-                    <li>Device model, OS version, and language settings</li>
-                    <li>Coarse geographic region (Country/City level)</li>
-                    <li>Game crash diagnostics and performance benchmarks</li>
-                </ul>
-                <div class="mt-4 p-4 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-xs text-slate-600 dark:text-slate-400">
-                    <p>
-                        <i class="fa-solid fa-circle-info text-amber-500 mr-1"></i> 
-                        <strong>Opt-out Notice:</strong> You can reset or disable personalized advertising at any time through your Android device settings (<em>Settings &gt; Google &gt; Ads</em>). For additional details, please refer to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="text-amber-600 dark:text-amber-400 underline font-medium">Google's Privacy Policy</a>.
-                    </p>
-                </div>
-            </section>
-
-            <!-- Section 5 -->
-            <section id="children-privacy" class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div class="flex items-center space-x-3 mb-4">
-                    <span class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-sm">5</span>
-                    <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Children's Privacy (COPPA Compliance)</h2>
-                </div>
-                <p class="text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                    Chicku Run is designed to be a family-friendly arcade game enjoyed by general audiences. We do not knowingly collect personally identifiable information from children under the age of 13.
-                </p>
-                <p class="mt-3 text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                    If you are a parent or legal guardian and you discover that your child has provided personal information without your consent, please contact us immediately. We will take prompt steps to purge any such data from third-party streams where applicable.
-                </p>
-            </section>
-
-            <!-- Section 6 -->
-            <section id="data-safety" class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div class="flex items-center space-x-3 mb-4">
-                    <span class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-sm">6</span>
-                    <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Data Safety & User Deletion Rights</h2>
-                </div>
-                <p class="text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                    Since Chicku Run does not create separate custom user accounts on private servers, local app settings and offline progress can be cleared by uninstalling the application. For Play Games Services data (like scores and leaderboards), users can request score removal or reset Play Games data directly via Google Play Games profile settings.
-                </p>
-            </section>
-
-            <!-- Section 7 -->
-            <section id="security" class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div class="flex items-center space-x-3 mb-4">
-                    <span class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-sm">7</span>
-                    <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Security & Policy Updates</h2>
-                </div>
-                <p class="text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                    We value your trust in downloading Chicku Run and strive to utilize industry-standard practices. However, please remember that no method of transmission over the internet or method of electronic storage is 100% secure and reliable.
-                </p>
-                <p class="mt-3 text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                    We may update our Privacy Policy periodically to reflect changes in regulatory standards or game features. You are advised to review this page occasionally. Changes become effective immediately upon posting on this URL.
-                </p>
-            </section>
-
-            <!-- Section 8 -->
-            <section id="contact" class="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-amber-500/10 via-white dark:via-slate-900 to-white dark:to-slate-900 border border-amber-500/30 shadow-sm">
-                <div class="flex items-center space-x-3 mb-4">
-                    <span class="w-8 h-8 rounded-lg bg-amber-500 text-white font-bold flex items-center justify-center text-sm">8</span>
-                    <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Contact Us</h2>
-                </div>
-                <p class="text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                    If you have any questions, concerns, or feedback regarding this Privacy Policy or Chicku Run, please feel free to reach out to us:
-                </p>
-                <div class="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                    <div class="inline-flex items-center space-x-2 bg-white dark:bg-slate-800 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm text-sm font-medium text-slate-800 dark:text-slate-200">
-                        <i class="fa-solid fa-envelope text-amber-500"></i>
-                        <span>Developer Support: <strong class="text-amber-600 dark:text-amber-400">Nusrat Shaheen Apps Suite</strong></span>
+                    <!-- Quick Summary Box -->
+                    <div class="mt-5 pt-5 border-t border-slate-100 dark:border-slate-800">
+                        <div class="rounded-xl bg-amber-50/80 dark:bg-amber-950/30 p-3.5 border border-amber-200/60 dark:border-amber-900/50">
+                            <div class="text-xs font-bold text-amber-900 dark:text-amber-300 mb-1 flex items-center gap-1.5">
+                                <span>💡</span> Quick Highlights
+                            </div>
+                            <ul class="text-xs text-amber-800 dark:text-amber-200/80 space-y-1.5">
+                                <li>• No personal name, email, or phone collection.</li>
+                                <li>• Progress & coins saved locally on your device.</li>
+                                <li>• Family-friendly ads compliant with COPPA.</li>
+                            </ul>
+                        </div>
                     </div>
-                    <a href="https://nusratshaheen.space" class="inline-flex items-center space-x-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition shadow-md shadow-amber-500/20">
-                        <i class="fa-solid fa-globe"></i>
-                        <span>Visit nusratshaheen.space</span>
-                    </a>
                 </div>
-            </section>
+            </aside>
 
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- Section 1 -->
+                <article id="section-1" class="print-card scroll-mt-24 bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 font-display font-extrabold flex items-center justify-center text-base shrink-0">
+                            1
+                        </span>
+                        <h2 class="font-display text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                            Introduction & Overview
+                        </h2>
+                    </div>
+                    <div class="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            <strong class="text-slate-900 dark:text-white">Chicku Run</strong> is provided as a Free-to-Play mobile application by <strong class="text-slate-900 dark:text-white">Nusrat Shaheen Apps Suite</strong>. This document informs players and parents regarding our policies on the collection, use, and disclosure of personal information when using our game.
+                        </p>
+                        <p>
+                            By downloading and playing Chicku Run, you agree to the collection and use of information in accordance with this Privacy Policy. We will not use or share your information with anyone except as described in this policy.
+                        </p>
+                    </div>
+                </article>
+
+                <!-- Section 2 -->
+                <article id="section-2" class="print-card scroll-mt-24 bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-display font-extrabold flex items-center justify-center text-base shrink-0">
+                            2
+                        </span>
+                        <h2 class="font-display text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                            Information Collection & Direct Usage
+                        </h2>
+                    </div>
+                    <div class="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed text-sm sm:text-base">
+                        <div class="p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-900/60 text-emerald-950 dark:text-emerald-200 font-medium">
+                            Chicku Run <strong>DOES NOT</strong> directly collect, store, or transmit any personally identifiable information (PII) such as real names, email addresses, phone numbers, physical addresses, or contact lists on private external servers.
+                        </div>
+                        <p>
+                            All core game mechanics, stage grids, profile scores, virtual coins, and game settings run locally on your Android device.
+                        </p>
+                    </div>
+                </article>
+
+                <!-- Section 3 -->
+                <article id="section-3" class="print-card scroll-mt-24 bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-display font-extrabold flex items-center justify-center text-base shrink-0">
+                            3
+                        </span>
+                        <h2 class="font-display text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                            Google Play Games Services (Leaderboards & Achievements)
+                        </h2>
+                    </div>
+                    <div class="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            Chicku Run integrates <strong class="text-slate-900 dark:text-white">Google Play Games Services</strong> to provide competitive global leaderboards and score achievements. When you sign in or interact with Google Play Games in Chicku Run:
+                        </p>
+                        <ul class="space-y-2.5 pl-1">
+                            <li class="flex items-start gap-3">
+                                <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs mt-0.5 shrink-0">✓</span>
+                                <span>Your public Gamer ID, avatar, and high score statistics are synchronized with Google Play Games servers.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs mt-0.5 shrink-0">✓</span>
+                                <span>High scores are displayed on public leaderboards to allow competitive ranking among friends and global players.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs mt-0.5 shrink-0">✓</span>
+                                <span>We do not store your Google account credentials or passwords on any servers owned by Nusrat Shaheen Apps Suite.</span>
+                            </li>
+                        </ul>
+                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/70 text-sm">
+                            <strong class="text-slate-900 dark:text-white">Control & Opt-out:</strong> You can manage, disconnect, or request deletion of your Play Games profile and leaderboard data at any time via your Android device's Google Play Games app settings.
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Section 4 -->
+                <article id="section-4" class="print-card scroll-mt-24 bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 font-display font-extrabold flex items-center justify-center text-base shrink-0">
+                            4
+                        </span>
+                        <h2 class="font-display text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                            Third-Party Services & Advertisements
+                        </h2>
+                    </div>
+                    <div class="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            To keep Chicku Run free for all players, the game integrates trusted third-party SDKs (such as <strong class="text-slate-900 dark:text-white">Google Play Services</strong>, <strong class="text-slate-900 dark:text-white">Google Play Games</strong>, and <strong class="text-slate-900 dark:text-white">Google AdMob</strong>) to serve non-intrusive, family-friendly advertisements and manage basic telemetry.
+                        </p>
+                        <p>
+                            These third-party SDKs may automatically process anonymous, non-sensitive technical parameters including:
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-200">
+                                🔹 Anonymous Advertising IDs (Google Advertising ID / GAID)
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-200">
+                                🔹 Device model, OS version, and language settings
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-200">
+                                🔹 Coarse geographic region (Country/City level)
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-200">
+                                🔹 Game performance diagnostics and crash logs
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-900/60 text-sm">
+                            <strong class="text-amber-950 dark:text-amber-300">Opt-out Notice:</strong> You can reset or disable personalized advertising at any time through your Android device settings (<code class="px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 font-mono text-xs">Settings &gt; Google &gt; Ads</code>).
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Section 5 -->
+                <article id="section-5" class="print-card scroll-mt-24 bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 font-display font-extrabold flex items-center justify-center text-base shrink-0">
+                            5
+                        </span>
+                        <h2 class="font-display text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                            Children's Privacy & Google Play Families Policy Compliance
+                        </h2>
+                    </div>
+                    <div class="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            Chicku Run is designed to be a family-friendly arcade and educational quiz game suitable for players of all ages, including children. We strictly comply with the <strong class="text-slate-900 dark:text-white">Children's Online Privacy Protection Act (COPPA)</strong> and <strong class="text-slate-900 dark:text-white">Google Play Families Policy</strong> requirements.
+                        </p>
+                        <ul class="space-y-2.5 pl-1">
+                            <li class="flex items-start gap-3">
+                                <span class="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xs mt-0.5 shrink-0">★</span>
+                                <span>We do not knowingly collect personal information from children under the age of 13.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xs mt-0.5 shrink-0">★</span>
+                                <span>Advertisements served within Chicku Run comply with Google Play Families ad policies and strictly adhere to appropriate content rating guidelines.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xs mt-0.5 shrink-0">★</span>
+                                <span>If you are a parent or legal guardian and believe that your child has provided personal information without consent, please contact us immediately, and we will take prompt steps to remove such data.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </article>
+
+                <!-- Section 6 -->
+                <article id="section-6" class="print-card scroll-mt-24 bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-9 h-9 rounded-xl bg-cyan-100 dark:bg-cyan-950 text-cyan-600 dark:text-cyan-400 font-display font-extrabold flex items-center justify-center text-base shrink-0">
+                            6
+                        </span>
+                        <h2 class="font-display text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                            Data Retention, Storage & User Deletion Rights
+                        </h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm sm:text-base">
+                        <div class="p-5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800">
+                            <div class="font-display font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                                <span>📱</span> Local Game Data
+                            </div>
+                            <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+                                Offline stage progress, virtual coin balances, and local profiles remain stored strictly on your local device storage. You can clear this data at any time by uninstalling the application or clearing app storage in Android settings.
+                            </p>
+                        </div>
+                        <div class="p-5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800">
+                            <div class="font-display font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                                <span>☁️</span> Cloud / Play Games Data
+                            </div>
+                            <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+                                Leaderboards and achievements synced via Google Play Games can be cleared or managed directly through the Google Play Games profile settings.
+                            </p>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Section 7 -->
+                <article id="section-7" class="print-card scroll-mt-24 bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-display font-extrabold flex items-center justify-center text-base shrink-0">
+                            7
+                        </span>
+                        <h2 class="font-display text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                            Security & Policy Updates
+                        </h2>
+                    </div>
+                    <div class="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed text-sm sm:text-base">
+                        <p>
+                            We value your trust in downloading Chicku Run and employ industry-standard safety practices. However, please note that no method of transmission over the internet or electronic storage is 100% secure.
+                        </p>
+                        <p>
+                            We may update our Privacy Policy periodically to reflect changes in regulatory standards or game features. You are advised to review this policy occasionally. Changes become effective immediately upon being published on this page.
+                        </p>
+                    </div>
+                </article>
+
+                <!-- Section 8: Contact Us -->
+                <article id="section-8" class="print-card scroll-mt-24 bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-2xl p-6 sm:p-8 shadow-md">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur text-white font-display font-extrabold flex items-center justify-center text-base shrink-0">
+                            8
+                        </span>
+                        <h2 class="font-display text-xl sm:text-2xl font-bold">
+                            Contact Us
+                        </h2>
+                    </div>
+                    <p class="text-amber-50 leading-relaxed text-sm sm:text-base mb-6">
+                        If you have any questions, feedback, or concerns regarding this Privacy Policy or Chicku Run, please contact us:
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-white/15 backdrop-blur-md rounded-xl p-4 border border-white/20">
+                            <div class="text-xs uppercase tracking-wider text-amber-100 font-semibold">Developer Support</div>
+                            <div class="mt-1 font-bold text-base">Nusrat Shaheen Apps Suite</div>
+                        </div>
+                        <a href="https://nusratshaheen.space" target="_blank" rel="noopener noreferrer" class="bg-white/15 hover:bg-white/25 transition backdrop-blur-md rounded-xl p-4 border border-white/20 block group">
+                            <div class="text-xs uppercase tracking-wider text-amber-100 font-semibold flex items-center justify-between">
+                                <span>Official Website</span>
+                                <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </div>
+                            <div class="mt-1 font-bold text-base underline decoration-white/50">nusratshaheen.space</div>
+                        </a>
+                        <a href="https://nusratshaheen.space" target="_blank" rel="noopener noreferrer" class="bg-white/15 hover:bg-white/25 transition backdrop-blur-md rounded-xl p-4 border border-white/20 block">
+                            <div class="text-xs uppercase tracking-wider text-amber-100 font-semibold">Email Support</div>
+                            <div class="mt-1 font-bold text-sm sm:text-base">Contact via mnf101.101@gmail.com</div>
+                        </a>
+                    </div>
+                </article>
+
+            </div>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="mt-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
-        <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p>© 2026 <strong>Nusrat Shaheen Apps Suite</strong>. All rights reserved.</p>
-            <p class="font-medium text-slate-600 dark:text-slate-300">Chicku Run - Privacy Policy Page for Google Play Console.</p>
+    <!-- Toast Notification for Copy -->
+    <div id="toastMsg" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2.5 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2">
+        <span class="text-emerald-400 dark:text-emerald-600">✓</span>
+        <span id="toastText">Copied to clipboard!</span>
+    </div>
+
+    <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-8 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 dark:text-slate-400">
+            <div class="flex items-center gap-2">
+                <span>🐣</span>
+                <span class="font-semibold text-slate-700 dark:text-slate-200">Chicku Run</span>
+                <span>•</span>
+                <span>© 2026 Nusrat Shaheen Apps Suite. All rights reserved.</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="https://nusratshaheen.space" target="_blank" rel="noopener noreferrer" class="hover:text-amber-600 dark:hover:text-amber-400 transition font-medium">
+                    nusratshaheen.space
+                </a>
+                <a href="#" class="hover:text-amber-600 dark:hover:text-amber-400 transition font-medium no-print">
+                    Back to top ↑
+                </a>
+            </div>
         </div>
     </footer>
 
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        function updateThemeUI(isDark) {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        }
+
+        // Check system preference on load
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        updateThemeUI(prefersDark);
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = !document.documentElement.classList.contains('dark');
+            updateThemeUI(isDark);
+        });
+
+        // Copy Package ID using fallback-safe method
+        function copyPackageId() {
+            const pkg = 'com.nusratshaheen.chickurun';
+            const tempInput = document.createElement('textarea');
+            tempInput.value = pkg;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            try {
+                document.execCommand('copy');
+                showToast('Package ID copied: ' + pkg);
+            } catch (err) {
+                showToast('Package ID: ' + pkg);
+            }
+            document.body.removeChild(tempInput);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toastMsg');
+            const toastText = document.getElementById('toastText');
+            toastText.textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2600);
+        }
+    </script>
 </body>
 </html>
