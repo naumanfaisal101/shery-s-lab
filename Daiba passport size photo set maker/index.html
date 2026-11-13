@@ -2,1039 +2,1930 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daiba passport photo set maker by Nusrat Shaheen inc.</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Cropper.js CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Imgly AI Background Removal (Naya Feature) -->
-    <script src="https://unpkg.com/@imgly/background-removal@1.4.3/dist/browser/bundle.js"></script>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Frog Match — 2048 Shooter</title>
     <style>
-        body {
-            background-color: #f3f4f6;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        /* ============================================================
+           style.css — Frog Match Styles (Single-File Edition)
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .cropper-container {
+
+        html, body {
             width: 100%;
-            max-height: 500px;
-            background-color: #e5e7eb;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            display: flex;
+            flex-direction: column;
             transition: background-color 0.3s ease;
         }
-        #resultPreview {
+
+        body.theme-day {
+            background-color: #EAF7EE;
+            color: #1B4332;
+        }
+
+        body.theme-night {
+            background-color: #0F1E24;
+            color: #E2F3F5;
+        }
+
+        /* Top Header Bar */
+        .game-header {
             width: 100%;
-            max-width: 400px;
-            height: auto;
-            aspect-ratio: 4 / 6;
-            background-color: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 8px 12px;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 18px;
+            padding: 6px 12px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+            border: 1.5px solid rgba(46, 213, 115, 0.35);
+            transition: all 0.3s ease;
+        }
+
+        body.theme-night .header-inner {
+            background: rgba(22, 44, 53, 0.9);
+            border-color: rgba(0, 210, 211, 0.25);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        }
+
+        /* Logo Area */
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .frog-emoji {
+            font-size: 22px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+            animation: frogHop 2.5s infinite ease-in-out;
+        }
+
+        .game-title {
+            font-weight: 900;
+            font-size: 15px;
+            letter-spacing: -0.3px;
+            color: #2ED573;
+            display: none;
+        }
+
+        @media (min-width: 360px) {
+            .game-title {
+                display: inline-block;
+            }
+        }
+
+        body.theme-night .game-title {
+            color: #00D2D3;
+        }
+
+        /* Scores Area */
+        .scores-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .score-card {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(46, 213, 115, 0.12);
+            border-radius: 12px;
+            padding: 4px 10px;
+            font-size: 13px;
+            border: 1px solid rgba(46, 213, 115, 0.25);
+            min-width: 75px;
+            justify-content: center;
+        }
+
+        body.theme-night .score-card {
+            background: rgba(0, 210, 211, 0.12);
+            border-color: rgba(0, 210, 211, 0.25);
+        }
+
+        .score-card .icon {
+            font-size: 13px;
+        }
+
+        .score-card .label {
+            font-size: 9px;
+            font-weight: 800;
+            opacity: 0.65;
+            letter-spacing: 0.5px;
+        }
+
+        .score-card .val {
+            font-size: 15px;
+            font-weight: 900;
+            letter-spacing: -0.2px;
+            color: #1B4332;
+            transition: transform 0.15s ease, color 0.15s ease;
+        }
+
+        body.theme-night .score-card .val {
+            color: #E2F3F5;
+        }
+
+        /* Scale bump on score increase */
+        .val.bump {
+            transform: scale(1.3);
+            color: #FF4757 !important;
+        }
+
+        /* Controls */
+        .btn-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .icon-btn {
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        body.theme-night .icon-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #E2F3F5;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.08);
+            background: rgba(46, 213, 115, 0.2);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* Canvas Wrapper */
+        .canvas-wrap {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #gameCanvas {
             display: block;
             margin: 0 auto;
+            touch-action: none;
+            cursor: crosshair;
         }
-        .handle {
-            cursor: move;
-            fill: white;
-            stroke: #3b82f6;
-            stroke-width: 3px;
-            transition: r 0.1s;
-        }
-        .handle:hover {
-            r: 12px;
-            fill: #eff6ff;
-        }
-        #perspectiveWrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 300px;
-            overflow: hidden;
-            background: #e5e7eb;
-            transition: background-color 0.3s ease;
-        }
-        #perspectiveWrapper.hidden {
-            display: none !important;
-        }
-        #dropZone.dragover {
-            border-color: #3b82f6 !important;
-            background-color: #eff6ff !important;
-        }
-        #cameraModal {
-            backdrop-filter: blur(5px);
+
+        @keyframes frogHop {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
         }
     </style>
 </head>
-<body class="min-h-screen p-2 sm:p-4 md:p-8 overflow-x-hidden">
+<body class="theme-day">
 
-    <a id="floatingMobileBtn" href="../index.html" class="sm:hidden fixed bottom-6 right-6 z-[9999] bg-blue-900 hover:bg-blue-800 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-2xl transition-transform active:scale-95 border-2 border-white">
-        <i class="fa-solid fa-house text-xl"></i>
-    </a>
-
-    <a id="floatingDesktopBtn" href="../index.html" class="hidden sm:flex items-center gap-2 fixed bottom-8 right-8 z-[9999] bg-blue-900 hover:bg-blue-800 text-white py-3 px-6 rounded-full font-bold text-sm shadow-xl transition-all hover:scale-105 border-2 border-white">
-        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
-    </a>
-
-    <!-- FIX: Camera Modal overhauled for mobile AND Desktop perfect view -->
-    <div id="cameraModal" class="hidden fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 sm:p-4">
-        <div class="bg-white sm:rounded-xl shadow-2xl w-full max-w-3xl h-full sm:h-auto sm:max-h-[95vh] flex flex-col overflow-hidden">
-            
-            <div class="p-3 sm:p-4 bg-gray-900 text-white flex justify-between items-center shrink-0">
-                <h3 class="font-bold text-base sm:text-lg"><i class="fa-solid fa-camera mr-2"></i> Camera Live View</h3>
-                <div class="flex items-center gap-3 sm:gap-4">
-                    <button id="flipCameraBtn" class="text-blue-400 hover:text-blue-300 transition-colors p-1" title="Front/Back Camera Switch">
-                        <i class="fa-solid fa-camera-rotate text-xl sm:text-2xl"></i>
-                    </button>
-                    <button id="closeCameraBtn" class="text-red-400 hover:text-red-300 transition-colors p-1">
-                        <i class="fa-solid fa-times text-xl sm:text-2xl"></i>
-                    </button>
-                </div>
+    <!-- Top Header Bar: Guaranteed Live Score Display -->
+    <header id="gameHeader" class="game-header">
+        <div class="header-inner">
+            <div class="logo-area">
+                <span class="frog-emoji">🐸</span>
+                <span class="game-title">Frog Match</span>
             </div>
             
-            <!-- FIX: Added min-h-[400px] specifically for desktop to ensure the video isn't hidden -->
-            <div class="relative bg-black flex-grow w-full overflow-hidden min-h-[400px] sm:min-h-[500px]">
-                <video id="videoElement" autoplay playsinline class="absolute inset-0 w-full h-full object-contain"></video>
-                <div id="camLoading" class="absolute inset-0 flex items-center justify-center text-white hidden z-10 bg-black/70 flex-col">
-                    <i class="fa-solid fa-spinner fa-spin text-4xl mb-3"></i>
-                    <p id="camLoadingText" class="font-bold text-lg">Camera Shuru Ho Raha Hai...</p>
+            <div class="scores-area">
+                <div class="score-card current-score">
+                    <span class="icon">⭐</span>
+                    <span class="label">SCORE</span>
+                    <span id="hudScore" class="val">0</span>
+                </div>
+                
+                <div class="score-card best-score">
+                    <span class="icon">👑</span>
+                    <span class="label">BEST</span>
+                    <span id="hudBest" class="val">0</span>
                 </div>
             </div>
 
-            <!-- UPGRADE: Extended Camera Controls (Beautify & Background) -->
-            <div class="p-4 sm:p-5 bg-gray-50 shrink-0 border-t border-gray-200">
-                <h4 class="text-xs sm:text-sm font-bold text-gray-700 mb-2 border-b pb-1">Camera Settings & Filters</h4>
-                
-                <div class="grid grid-cols-2 gap-x-4 gap-y-3 mb-3">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
-                            <span>Exposure</span>
-                            <span class="text-blue-600 font-bold"><span id="camExpVal">100</span>%</span>
-                        </label>
-                        <input type="range" id="camExposureSlider" min="50" max="200" value="100" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
-                            <span>Contrast</span>
-                            <span class="text-blue-600 font-bold"><span id="camContVal">100</span>%</span>
-                        </label>
-                        <input type="range" id="camContrastSlider" min="50" max="200" value="100" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
-                            <span>Beautify (Skin Smooth)</span>
-                            <span class="text-pink-500 font-bold"><span id="camBeautyVal">0</span>%</span>
-                        </label>
-                        <input type="range" id="camBeautifySlider" min="0" max="100" value="0" class="w-full h-2 bg-pink-200 rounded-lg appearance-none cursor-pointer">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
-                            <span>Auto Background</span>
-                        </label>
-                        <select id="camBgColor" class="w-full h-[26px] text-xs border border-gray-300 rounded focus:ring-blue-500 bg-white">
-                            <option value="none">Original (No Change)</option>
-                            <option value="blue">Blue Background</option>
-                            <option value="white">White Background</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="flex justify-center">
-                    <button id="capturePhotoBtn" class="bg-blue-600 text-white rounded-full w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg hover:bg-blue-700 transition transform hover:scale-105 border-4 border-white ring-2 ring-blue-600" title="Tasweer Khainchain">
-                        <i class="fa-solid fa-camera text-xl sm:text-2xl"></i>
-                    </button>
-                </div>
+            <div class="btn-group">
+                <button id="btnTheme" class="icon-btn" title="Toggle Day/Night" aria-label="Toggle Theme">🌙</button>
+                <button id="btnSound" class="icon-btn" title="Toggle Sound" aria-label="Toggle Sound">🔊</button>
+                <button id="btnRestart" class="icon-btn" title="Restart Game" aria-label="Restart">🔄</button>
             </div>
         </div>
+    </header>
+
+    <div class="canvas-wrap">
+        <canvas id="gameCanvas"></canvas>
     </div>
 
-    <div class="max-w-5xl mx-auto w-full">
-        <header class="mb-8 sm:mb-10 flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 sm:gap-6 bg-white p-5 sm:p-8 sm:pr-40 rounded-2xl shadow-sm border border-gray-100 relative">
-            
-            <a href="index.html" class="hidden sm:flex absolute top-6 right-6 bg-gray-50 hover:bg-gray-100 text-gray-600 px-4 py-2 rounded-full font-medium text-sm transition items-center gap-2 border border-gray-200">
-                <i class="fa-solid fa-house"></i> Home Page
-            </a>
-
-            <div class="relative shrink-0 group">
-                <a href="index.html" title="Go to Home Page">
-                    <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 via-red-400 to-yellow-400 blur-md opacity-60 scale-110 group-hover:scale-125 transition-all duration-300"></div>
-                    <img src="Gemini_Generated_Image_57wlmt57wlmt57wl.jpg" 
-                         onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Daiba&background=ec4899&color=fff&size=200&font-size=0.4';" 
-                         alt="Daiba Logo" 
-                         class="relative w-24 h-24 sm:w-36 sm:h-36 object-cover object-top rounded-full border-4 border-white shadow-lg z-10 bg-white">
-                </a>
-            </div>
-            
-            <div class="text-center sm:text-left mt-2 sm:mt-0 max-w-full">
-                <a href="index.html" class="inline-block hover:opacity-80 transition-opacity" title="Go to Home Page">
-                    <h1 class="text-2xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-purple-600 mb-2 sm:mb-3 tracking-tight break-words">
-                        Daiba Passport Photo Set Maker
-                    </h1>
-                </a>
-                <div class="mb-3">
-                    <span class="inline-block bg-gradient-to-r from-blue-50 to-purple-50 text-purple-800 border border-purple-100 py-1 px-4 rounded-full text-xs sm:text-sm font-semibold tracking-wide shadow-sm">
-                        by Nusrat Shaheen inc.
-                    </span>
-                </div>
-                <p class="text-gray-600 text-xs sm:text-base max-w-md mx-auto sm:mx-0 leading-relaxed px-2 sm:px-0">
-                    Crop to 35x45mm, Face Beautify karein, Blue/White background lagayein, aur ek hi 4x6 sheet par lagayein.
-                </p>
-            </div>
-        </header>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-            
-            <!-- Left Column: Upload & Crop -->
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">1. Photo Chunein</h2>
-                
-                <div id="dropZone" class="mb-6 bg-gray-50 p-4 rounded-lg border-2 border-dashed border-gray-200 transition-all relative overflow-hidden">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10 items-end">
-                        <div class="w-full">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">File Upload</label>
-                            <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/jpg" 
-                                   class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors border border-gray-300 rounded-md p-1.5 bg-white h-[44px]">
-                        </div>
-                        <div class="w-full">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Camera Istemal</label>
-                            <button id="openCameraBtn" class="w-full bg-blue-600 text-white px-4 rounded-md hover:bg-blue-700 transition flex justify-center items-center gap-2 font-medium h-[44px] whitespace-nowrap">
-                                <i class="fa-solid fa-camera"></i> Camera
-                            </button>
-                        </div>
-                        <div class="w-full">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Copy Paste</label>
-                            <button id="pasteBtn" class="w-full bg-purple-600 text-white px-4 rounded-md hover:bg-purple-700 transition flex justify-center items-center gap-2 font-medium h-[44px] whitespace-nowrap" title="Ctrl+V bhi kaam karega">
-                                <i class="fa-solid fa-clipboard"></i> Paste Image
-                            </button>
-                        </div>
-                    </div>
-                    <div id="dragOverlay" class="absolute inset-0 bg-blue-50/95 flex items-center justify-center hidden z-20 pointer-events-none transition-opacity">
-                        <div class="text-center">
-                            <i class="fa-solid fa-cloud-arrow-up text-blue-600 text-4xl mb-2"></i>
-                            <span class="block text-blue-700 font-bold text-lg">Yahan Photo Drop Karein</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="cropModeToggle" class="mb-4 hidden flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-100">
-                    <span class="text-sm font-medium text-gray-700">Crop Mode:</span>
-                    <label class="inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="perspectiveToggle" class="sr-only peer">
-                        <div class="relative w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                        <span class="ml-3 text-sm font-bold text-blue-700" id="modeLabelText">Flat Box Selection</span>
-                    </label>
-                </div>
-
-                <div class="cropper-container rounded-lg overflow-hidden border border-gray-200 mb-4 hidden" id="cropperWrapper">
-                    <img id="imageToCrop" src="" alt="Picture to crop" style="transition: filter 0.1s;">
-                </div>
-
-                <div class="relative rounded-lg overflow-hidden border border-gray-200 mb-4 hidden" id="perspectiveWrapper">
-                    <div class="relative inline-block" id="perspectiveImgContainer" style="line-height: 0;">
-                        <img id="perspectiveImg" src="" class="max-w-full max-h-[500px] pointer-events-none" style="display:block; transition: filter 0.1s;">
-                        <svg id="perspectiveSvg" class="absolute top-0 left-0 w-full h-full pointer-events-auto" style="z-index: 10;">
-                            <polygon id="perspectivePoly" points="0,0 0,0 0,0 0,0" fill="rgba(59, 130, 246, 0.2)" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4"/>
-                            <circle cx="0" cy="0" r="10" class="handle" data-index="0" />
-                            <circle cx="0" cy="0" r="10" class="handle" data-index="1" />
-                            <circle cx="0" cy="0" r="10" class="handle" data-index="2" />
-                            <circle cx="0" cy="0" r="10" class="handle" data-index="3" />
-                        </svg>
-                    </div>
-                </div>
-
-                <!-- UPGRADE 3: Advanced Adjustments (Beautify & AI Background) -->
-                <div id="imageAdjustmentsPanel" class="mb-4 hidden bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                    <h3 class="text-sm font-bold text-gray-700 mb-3 border-b pb-1">Photo Adjustments & AI Options</h3>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="text-xs font-medium text-gray-600"><i class="fa-solid fa-sun mr-1"></i> Exposure</label>
-                                <span id="imgExpVal" class="text-xs text-blue-600 font-bold">100%</span>
-                            </div>
-                            <input type="range" id="imgExposureSlider" min="50" max="200" value="100" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
-                        </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="text-xs font-medium text-gray-600"><i class="fa-solid fa-circle-half-stroke mr-1"></i> Contrast</label>
-                                <span id="imgContVal" class="text-xs text-blue-600 font-bold">100%</span>
-                            </div>
-                            <input type="range" id="imgContrastSlider" min="50" max="200" value="100" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
-                        </div>
-                        
-                        <!-- Beautify Feature -->
-                        <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="text-xs font-medium text-pink-600"><i class="fa-solid fa-wand-magic mr-1"></i> Beautify (Glow)</label>
-                                <span id="imgBeautyVal" class="text-xs text-pink-600 font-bold">0%</span>
-                            </div>
-                            <input type="range" id="imgBeautifySlider" min="0" max="100" value="0" class="w-full h-2 bg-pink-200 rounded-lg appearance-none cursor-pointer">
-                        </div>
-
-                        <!-- AI Background Feature -->
-                        <div class="flex flex-col justify-end">
-                            <label class="text-xs font-medium text-indigo-600 mb-1"><i class="fa-solid fa-fill-drip mr-1"></i> Background Color</label>
-                            <div class="flex gap-2">
-                                <select id="imgBgColor" class="flex-grow text-xs border border-gray-300 rounded h-8">
-                                    <option value="none">Original (Transparent)</option>
-                                    <option value="blue">Blue (#005bb5)</option>
-                                    <option value="white">White (#ffffff)</option>
-                                </select>
-                                <button id="removeBgBtn" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-1 rounded text-xs hover:opacity-90 transition whitespace-nowrap shadow-sm font-bold" title="AI se Background Hatayein">
-                                    <i class="fa-solid fa-scissors"></i> AI Remove
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="rotationControls">
-                        <label class="block text-xs font-medium text-gray-600 mb-2"><i class="fa-solid fa-rotate mr-1"></i> Rotate Photo (Seedha Karein)</label>
-                        <div class="flex items-center gap-3">
-                            <button id="rotateLeftBtn" class="w-10 h-10 flex items-center justify-center bg-gray-50 border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="Rotate Left 1 Degree">
-                                <i class="fa-solid fa-rotate-left text-gray-600"></i>
-                            </button>
-                            <input type="range" id="rotationSlider" min="-45" max="45" value="0" step="0.1" class="flex-grow h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
-                            <button id="rotateRightBtn" class="w-10 h-10 flex items-center justify-center bg-gray-50 border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="Rotate Right 1 Degree">
-                                <i class="fa-solid fa-rotate-right text-gray-600"></i>
-                            </button>
-                            <button id="resetAdjustmentsBtn" class="px-3 h-10 flex items-center justify-center bg-red-50 border border-red-200 text-red-600 rounded hover:bg-red-100 transition-colors text-sm font-medium" title="Reset All Adjustments">
-                                Reset Sab
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="cropSettings" class="hidden">
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="block text-sm font-medium text-gray-700">Kitni copies chahiye? (Is photo ki)</label>
-                        <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded">Khali Jagah: <span id="availableSlotsText">8</span>/8</span>
-                    </div>
-                    <select id="photoCount" class="block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 mb-4">
-                    </select>
-
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Capture Date</label>
-                            <input type="date" id="captureDate" class="block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Photo Number (Auto)</label>
-                            <input type="text" id="photoNumber" readonly class="block w-full border border-gray-300 rounded-md py-2 px-3 bg-gray-100 text-gray-500 cursor-not-allowed focus:outline-none">
-                        </div>
-                    </div>
-
-                    <button id="addToSheetBtn" class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium flex justify-center items-center gap-2 text-lg shadow-md">
-                        <i class="fa-solid fa-plus-circle"></i> Sheet Mein Shamil Karein
-                    </button>
-                </div>
-                
-                <div id="initialMessage" class="text-center py-12 text-gray-400 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
-                    <i class="fa-solid fa-images text-4xl mb-3 text-blue-300"></i>
-                    <p class="font-medium text-gray-600">Sheet shuru karne ke liye photo upload karein ya Camera istemal karein.</p>
-                </div>
-            </div>
-
-            <!-- Right Column: Preview & Actions -->
-            <div class="bg-white rounded-xl shadow-md p-6 flex flex-col">
-                <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">2. Preview & Download</h2>
-                
-                <div id="resultContainer" class="flex-grow flex flex-col items-center justify-center hidden">
-                    
-                    <div class="w-full flex justify-between items-center mb-3">
-                        <span class="text-sm font-medium text-gray-700">Sheet Preview (<span id="previewSlotsText">0</span>/8 bhari hui)</span>
-                        <button id="clearSheetBtn" class="text-xs text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1 rounded border border-red-200 transition-colors flex items-center gap-1">
-                            <i class="fa-solid fa-trash-can"></i> Sheet Saaf Karein
-                        </button>
-                    </div>
-
-                    <img id="resultPreview" alt="4x6 Print Sheet Preview">
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full mt-6">
-                        <button id="downloadJpgBtn" class="bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-900 transition flex justify-center items-center gap-2 text-sm shadow">
-                            <i class="fa-solid fa-file-image"></i> Save JPG
-                        </button>
-                        <button id="downloadPdfBtn" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition flex justify-center items-center gap-2 text-sm shadow">
-                            <i class="fa-solid fa-file-pdf"></i> Save PDF
-                        </button>
-                        <button id="printBtn" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition flex justify-center items-center gap-2 text-sm shadow">
-                            <i class="fa-solid fa-print"></i> Quick Print
-                        </button>
-                    </div>
-                </div>
-
-                <div id="resultPlaceholder" class="flex-grow flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-300 rounded-lg min-h-[400px] bg-gray-50">
-                    <div class="text-center">
-                        <i class="fa-regular fa-file-image text-5xl mb-4 text-gray-300"></i>
-                        <p class="font-medium text-gray-500">Aapki tayar karda print sheet yahan aayegi.</p>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
+    <!-- Complete Integrated Game Code -->
     <script>
-        let cropper = null;
-        let finalOutputDataUrl = null;
-        let isPerspectiveMode = false;
-        
-        let printSheetSlots = [];
-        const MAX_SLOTS = 8;
+    // ============================================================
+    // 1. CONFIGURATION
+    // ============================================================
+    const CONFIG = {
+        COLS: 6,
+        ROWS: 8,
+        CELL_SIZE: 64,
+        GRID_PADDING: 12,
+        DANGER_ROW: 6,
 
-        const imageUpload = document.getElementById('imageUpload');
-        const imageToCrop = document.getElementById('imageToCrop');
-        const cropperWrapper = document.getElementById('cropperWrapper');
-        const cropSettings = document.getElementById('cropSettings');
-        const initialMessage = document.getElementById('initialMessage');
-        const addToSheetBtn = document.getElementById('addToSheetBtn');
-        const photoCountSelect = document.getElementById('photoCount');
-        const captureDateInput = document.getElementById('captureDate');
-        const photoNumberInput = document.getElementById('photoNumber');
-        const cropModeToggle = document.getElementById('cropModeToggle');
-        const perspectiveToggle = document.getElementById('perspectiveToggle');
-        const modeLabelText = document.getElementById('modeLabelText');
-        
-        const imageAdjustmentsPanel = document.getElementById('imageAdjustmentsPanel');
-        const rotationControls = document.getElementById('rotationControls');
-        const rotationSlider = document.getElementById('rotationSlider');
-        const rotateLeftBtn = document.getElementById('rotateLeftBtn');
-        const rotateRightBtn = document.getElementById('rotateRightBtn');
-        const resetAdjustmentsBtn = document.getElementById('resetAdjustmentsBtn');
-        
-        const imgExposureSlider = document.getElementById('imgExposureSlider');
-        const imgContrastSlider = document.getElementById('imgContrastSlider');
-        const imgBeautifySlider = document.getElementById('imgBeautifySlider');
-        const imgBgColor = document.getElementById('imgBgColor');
-        const removeBgBtn = document.getElementById('removeBgBtn');
+        SHOOT_SPEED: 22,
+        AIM_LINE_SEGMENTS: 16,
+        AIM_LINE_DOT_RADIUS: 3.5,
+        MIN_ANGLE: Math.PI * 0.12,
+        MAX_ANGLE: Math.PI * 0.88,
 
-        const imgExpVal = document.getElementById('imgExpVal');
-        const imgContVal = document.getElementById('imgContVal');
-        const imgBeautyVal = document.getElementById('imgBeautyVal');
+        SHOTS_PER_NEW_ROW: 5,
+        INITIAL_AMMO_TIERS: [1, 2],
+        SCALED_AMMO_TIERS: [1, 2, 3, 4],
+        AMMO_SCALE_THRESHOLD: 5,
+        GRAVITY_SPEED: 14,
+        COMBO_DISPLAY_TIME: 600,
 
-        const perspectiveWrapper = document.getElementById('perspectiveWrapper');
-        const perspectiveImg = document.getElementById('perspectiveImg');
-        const perspectiveSvg = document.getElementById('perspectiveSvg');
-        const perspectivePoly = document.getElementById('perspectivePoly');
-        
-        const resultContainer = document.getElementById('resultContainer');
-        const resultPlaceholder = document.getElementById('resultPlaceholder');
-        const resultPreview = document.getElementById('resultPreview');
-        const availableSlotsText = document.getElementById('availableSlotsText');
-        const previewSlotsText = document.getElementById('previewSlotsText');
-        const clearSheetBtn = document.getElementById('clearSheetBtn');
-        
-        const openCameraBtn = document.getElementById('openCameraBtn');
-        const cameraModal = document.getElementById('cameraModal');
-        const closeCameraBtn = document.getElementById('closeCameraBtn');
-        const videoElement = document.getElementById('videoElement');
-        const capturePhotoBtn = document.getElementById('capturePhotoBtn');
-        
-        const camExposureSlider = document.getElementById('camExposureSlider');
-        const camContrastSlider = document.getElementById('camContrastSlider');
-        const camBeautifySlider = document.getElementById('camBeautifySlider');
-        const camBgColor = document.getElementById('camBgColor');
-        
-        const camExpVal = document.getElementById('camExpVal');
-        const camContVal = document.getElementById('camContVal');
-        const camBeautyVal = document.getElementById('camBeautyVal');
-        
-        const camLoading = document.getElementById('camLoading');
-        const camLoadingText = document.getElementById('camLoadingText');
-        const flipCameraBtn = document.getElementById('flipCameraBtn');
-        const floatingMobileBtn = document.getElementById('floatingMobileBtn');
-        const floatingDesktopBtn = document.getElementById('floatingDesktopBtn');
-        
-        let cameraStream = null;
-        let currentFacingMode = "environment"; 
+        BOMB_CHANCE: 0.05,
+        WILDCARD_CHANCE: 0.03,
+        BOMB_RADIUS: 1,
 
-        captureDateInput.value = new Date().toISOString().split('T')[0];
+        BLOCK_BOMB: -1,
+        BLOCK_WILDCARD: -2,
 
-        function getNextPhotoNumber() {
-            let lastNum = localStorage.getItem('daiba_last_photo_number');
-            if (!lastNum) lastNum = 10000;
-            else lastNum = parseInt(lastNum, 10);
-            lastNum++;
-            localStorage.setItem('daiba_last_photo_number', lastNum.toString());
-            return 'DB-' + lastNum;
+        // Vibrant distinct species colors
+        FROG_COLORS: {
+            1:  { body: '#2ED573', dark: '#26af5f', belly: '#C8F7C5', blush: '#FFAAA6', name: 'Green Frog' },
+            2:  { body: '#FFA502', dark: '#e59400', belly: '#FFEAA7', blush: '#FF7675', name: 'Lemon Frog' },
+            3:  { body: '#FF4757', dark: '#dc3342', belly: '#FFD2D7', blush: '#FF6B81', name: 'Cherry Frog' },
+            4:  { body: '#1E90FF', dark: '#1873cc', belly: '#D2E9FF', blush: '#FF9FF3', name: 'Sky Frog' },
+            5:  { body: '#9B59B6', dark: '#804399', belly: '#EBD4F5', blush: '#FF78C4', name: 'Violet Frog' },
+            6:  { body: '#00D2D3', dark: '#00a3a4', belly: '#D0FFFF', blush: '#FF6B6B', name: 'Aqua Frog' },
+            7:  { body: '#FD79A8', dark: '#e05988', belly: '#FFE5EF', blush: '#FF4757', name: 'Pink Frog' },
+            8:  { body: '#341F97', dark: '#251570', belly: '#D4CCF7', blush: '#FF9FF3', name: 'Midnight Frog' },
+            9:  { body: '#F9CA24', dark: '#d4aa19', belly: '#FFF5CC', blush: '#FF7675', name: 'King Frog' },
+            10: { body: '#54A0FF', dark: '#3b7fd6', belly: '#E0EEFF', blush: '#FF6B81', name: 'Diamond Frog' },
+        },
+        MAX_TIER: 10,
+
+        // Snappy, non-blocking celebrations
+        PARTICLE_COUNT: 6,
+        PARTICLE_LIFETIME: 240,
+        PARTICLE_SPEED: 3.5,
+
+        SHAKE_INTENSITY: 4,
+        SHAKE_DURATION: 180,
+
+        THEMES: {
+            day: {
+                bg: '#EAF7EE',
+                gridBg: '#D6EED9',
+                gridLine: 'rgba(46, 213, 115, 0.25)',
+                text: '#1B4332',
+                accent: '#2ED573'
+            },
+            night: {
+                bg: '#0F1E24',
+                gridBg: '#162C35',
+                gridLine: 'rgba(0, 210, 211, 0.2)',
+                text: '#E2F3F5',
+                accent: '#00D2D3'
+            }
+        },
+
+        MASTER_VOLUME: 0.28
+    };
+
+    CONFIG.GRID_WIDTH = CONFIG.COLS * CONFIG.CELL_SIZE;
+    CONFIG.GRID_HEIGHT = CONFIG.ROWS * CONFIG.CELL_SIZE;
+
+    CONFIG.getFrogColors = function(tier) {
+        if (tier === CONFIG.BLOCK_BOMB) {
+            return { body: '#2F3640', dark: '#1e232a', belly: '#718093', blush: '#EA2027', name: 'Bomb Toad' };
         }
-
-        function updatePhotoCountDropdown() {
-            const remaining = MAX_SLOTS - printSheetSlots.length;
-            photoCountSelect.innerHTML = '';
-            if (remaining === 0) {
-                const opt = document.createElement('option');
-                opt.value = 0; opt.text = "Sheet Full";
-                photoCountSelect.appendChild(opt);
-                addToSheetBtn.disabled = true;
-                addToSheetBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                availableSlotsText.innerText = '0';
-                return;
-            }
-            addToSheetBtn.disabled = false;
-            addToSheetBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            for (let i = 1; i <= remaining; i++) {
-                const opt = document.createElement('option');
-                opt.value = i; opt.text = `${i} Photo${i > 1 ? 's' : ''}`;
-                if (i === remaining) opt.selected = true; 
-                photoCountSelect.appendChild(opt);
-            }
-            availableSlotsText.innerText = remaining;
+        if (tier === CONFIG.BLOCK_WILDCARD) {
+            return { body: '#FF78C4', dark: '#E056FD', belly: '#FFF', blush: '#FF4757', name: 'Rainbow Frog' };
         }
-        updatePhotoCountDropdown();
+        const safeTier = Math.min(CONFIG.MAX_TIER, Math.max(1, tier || 1));
+        return CONFIG.FROG_COLORS[safeTier] || CONFIG.FROG_COLORS[1];
+    };
 
-        // --- CAMERA LOGIC ---
-        async function startCamera(facingMode = currentFacingMode) {
-            cameraModal.classList.remove('hidden');
-            camLoading.classList.remove('hidden');
-            camLoadingText.innerText = "Camera Shuru Ho Raha Hai...";
-            
-            if(floatingMobileBtn) floatingMobileBtn.style.display = 'none';
-            if(floatingDesktopBtn) floatingDesktopBtn.style.display = 'none';
-            
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-            }
-
-            try {
-                const constraints = { video: { facingMode: { ideal: facingMode }, width: { ideal: 1920 }, height: { ideal: 1080 } } };
-                cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
-                videoElement.srcObject = cameraStream;
-                currentFacingMode = facingMode; 
-                
-                if (currentFacingMode === "user") videoElement.style.transform = "scaleX(-1)";
-                else videoElement.style.transform = "scaleX(1)";
-
-                camLoading.classList.add('hidden');
-                camExposureSlider.value = 100;
-                camContrastSlider.value = 100;
-                camBeautifySlider.value = 0;
-                camBgColor.value = 'none';
-                applyCameraFilters();
-            } catch (err) {
-                console.error("Camera error:", err);
-                camLoading.classList.add('hidden');
-                alert("Camera permission denied ya error aya hai.");
-                stopCamera();
-            }
+    // ============================================================
+    // 2. STORAGE
+    // ============================================================
+    const Storage = {
+        getHighScore() {
+            try { return parseInt(localStorage.getItem('frogmatch_highscore') || '0', 10); } 
+            catch(e) { return 0; }
+        },
+        setHighScore(val) {
+            try { localStorage.setItem('frogmatch_highscore', String(val)); } 
+            catch(e) {}
+        },
+        getTheme() {
+            try { return localStorage.getItem('frogmatch_theme') || 'day'; } 
+            catch(e) { return 'day'; }
+        },
+        setTheme(theme) {
+            try { localStorage.setItem('frogmatch_theme', theme); } 
+            catch(e) {}
         }
+    };
 
-        function stopCamera() {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
+    // ============================================================
+    // 3. AUDIO ENGINE (Procedural Web Audio API — No External Files)
+    // ============================================================
+    const AudioFX = {
+        ctx: null,
+        masterGain: null,
+        enabled: true,
+
+        init() { this.enabled = true; },
+
+        ensureContext() {
+            if (!this.ctx) {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return;
+                this.ctx = new AC();
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.gain.setValueAtTime(this.enabled ? CONFIG.MASTER_VOLUME : 0, this.ctx.currentTime);
+                this.masterGain.connect(this.ctx.destination);
             }
-            videoElement.srcObject = null;
-            cameraModal.classList.add('hidden');
-            
-            if(floatingMobileBtn) floatingMobileBtn.style.display = '';
-            if(floatingDesktopBtn) floatingDesktopBtn.style.display = '';
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume().catch(() => {});
+            }
+        },
+
+        createNoise(duration = 0.2) {
+            if (!this.ctx) return null;
+            const rate = this.ctx.sampleRate;
+            const count = Math.max(1, Math.floor(rate * duration));
+            const buffer = this.ctx.createBuffer(1, count, rate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < count; i++) data[i] = Math.random() * 2 - 1;
+            const node = this.ctx.createBufferSource();
+            node.buffer = buffer;
+            return node;
+        },
+
+        playShoot() {
+            if (!this.enabled) return;
+            this.ensureContext();
+            if (!this.ctx || !this.masterGain) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(240, now);
+            osc.frequency.exponentialRampToValueAtTime(480, now + 0.08);
+
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.09);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(now);
+            osc.stop(now + 0.09);
+        },
+
+        playTongue() {
+            if (!this.enabled) return;
+            this.ensureContext();
+            if (!this.ctx || !this.masterGain) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(650, now);
+            osc.frequency.exponentialRampToValueAtTime(220, now + 0.07);
+
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.08);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(now);
+            osc.stop(now + 0.08);
+        },
+
+        playGulp(tier = 1) {
+            if (!this.enabled) return;
+            this.ensureContext();
+            if (!this.ctx || !this.masterGain) return;
+            const now = this.ctx.currentTime;
+            const baseFreq = 220 + Math.min(tier, 10) * 35;
+
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(baseFreq * 0.9, now);
+            osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.35, now + 0.12);
+
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.35, now + 0.02);
+            gain.gain.linearRampToValueAtTime(0, now + 0.14);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(now);
+            osc.stop(now + 0.14);
+        },
+
+        playChainCombo(combo = 1) {
+            if (!this.enabled) return;
+            this.ensureContext();
+            if (!this.ctx || !this.masterGain) return;
+            const now = this.ctx.currentTime;
+            const freq = 440 + Math.max(1, combo) * 120;
+
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now);
+
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.16);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(now);
+            osc.stop(now + 0.16);
+        },
+
+        playBomb() {
+            if (!this.enabled) return;
+            this.ensureContext();
+            if (!this.ctx || !this.masterGain) return;
+            const now = this.ctx.currentTime;
+            const gain = this.ctx.createGain();
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.2);
+            gain.connect(this.masterGain);
+
+            const noise = this.createNoise(0.2);
+            if (noise) {
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(500, now);
+                filter.frequency.linearRampToValueAtTime(80, now + 0.2);
+                noise.connect(filter);
+                filter.connect(gain);
+                noise.start(now);
+                noise.stop(now + 0.2);
+            }
+        },
+
+        playLand() {
+            if (!this.enabled) return;
+            this.ensureContext();
+            if (!this.ctx || !this.masterGain) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(160, now + 0.06);
+
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.06);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(now);
+            osc.stop(now + 0.06);
+        },
+
+        playGameOver() {
+            if (!this.enabled) return;
+            this.ensureContext();
+            if (!this.ctx || !this.masterGain) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(260, now);
+            osc.frequency.exponentialRampToValueAtTime(80, now + 0.5);
+
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.5);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        },
+
+        toggle() {
+            this.enabled = !this.enabled;
+            if (this.ctx && this.masterGain) {
+                const target = this.enabled ? CONFIG.MASTER_VOLUME : 0;
+                this.masterGain.gain.setValueAtTime(target, this.ctx.currentTime);
+            }
+            return this.enabled;
         }
+    };
 
-        function applyCameraFilters() {
-            let exp = camExposureSlider.value;
-            let con = camContrastSlider.value;
-            let beauty = camBeautifySlider.value;
-            
-            camExpVal.innerText = exp;
-            camContVal.innerText = con;
-            camBeautyVal.innerText = beauty;
-            
-            // Beauty calculation: up to 1.5px blur and 150% saturation
-            let blurVal = (beauty / 100) * 1.5;
-            let satVal = 100 + (beauty * 0.5);
+    // ============================================================
+    // 4. PARTICLES (Snappy & Non-Intrusive)
+    // ============================================================
+    const Particles = {
+        particles: [],
 
-            videoElement.style.filter = `brightness(${exp}%) contrast(${con}%) saturate(${satVal}%) blur(${blurVal}px)`;
+        init() { this.particles = []; },
+
+        spawn(type, x, y, options = {}) {
+            switch (type) {
+                case 'merge': {
+                    const count = options.count || CONFIG.PARTICLE_COUNT || 6;
+                    const life = CONFIG.PARTICLE_LIFETIME || 240;
+                    const color = options.color || '#2ED573';
+                    const palette = [color, '#FFEAA7', '#FF7675', '#74B9FF', '#A29BFE'];
+
+                    for (let i = 0; i < count; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const speed = 3.5 * (0.5 + Math.random() * 0.8);
+                        this.particles.push({
+                            x: x, y: y,
+                            vx: Math.cos(angle) * speed,
+                            vy: Math.sin(angle) * speed - 0.5,
+                            color: palette[i % palette.length],
+                            life: life, maxLife: life,
+                            size: 2 + Math.random() * 1.5,
+                            type: 'merge'
+                        });
+                    }
+                    break;
+                }
+                case 'bomb': {
+                    for (let i = 0; i < 12; i++) {
+                        const angle = (i / 12) * Math.PI * 2;
+                        this.particles.push({
+                            x: x, y: y,
+                            vx: Math.cos(angle) * 4,
+                            vy: Math.sin(angle) * 4,
+                            color: (i % 2 === 0) ? '#FF4757' : '#FFA502',
+                            life: 200, maxLife: 200,
+                            size: 2.5,
+                            type: 'bomb'
+                        });
+                    }
+                    break;
+                }
+            }
+        },
+
+        update(dt) {
+            const dtMs = (typeof dt === 'number' && dt > 2) ? dt : 16.67;
+            for (let i = this.particles.length - 1; i >= 0; i--) {
+                const p = this.particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= dtMs;
+                p.size *= 0.95;
+                if (p.life <= 0 || p.size <= 0.4) {
+                    this.particles.splice(i, 1);
+                }
+            }
+        },
+
+        draw(ctx) {
+            if (!ctx || this.particles.length === 0) return;
+            ctx.save();
+            for (let i = 0; i < this.particles.length; i++) {
+                const p = this.particles[i];
+                const alpha = Math.max(0, Math.min(1, p.life / p.maxLife));
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, Math.max(0.5, p.size), 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
         }
+    };
 
-        camExposureSlider.addEventListener('input', applyCameraFilters);
-        camContrastSlider.addEventListener('input', applyCameraFilters);
-        camBeautifySlider.addEventListener('input', applyCameraFilters);
+    // ============================================================
+    // 5. GRID (Ceiling-Attached Frog Colony)
+    // ============================================================
+    const Grid = {
+        cells: [],
+        offsetX: 0,
+        offsetY: 16,
 
-        flipCameraBtn.addEventListener('click', () => {
-            const newMode = currentFacingMode === "environment" ? "user" : "environment";
-            startCamera(newMode);
-        });
-
-        openCameraBtn.addEventListener('click', () => {
-            if (printSheetSlots.length >= MAX_SLOTS) {
-                alert("Sheet already full hai. Pehle 'Sheet Saaf Karein' par click karein.");
-                return;
+        init() {
+            const canvas = document.getElementById('gameCanvas') || { width: 384 };
+            this.offsetX = Math.floor((canvas.width - CONFIG.GRID_WIDTH) / 2);
+            this.offsetY = 16;
+            this.cells = [];
+            for (let r = 0; r < CONFIG.ROWS; r++) {
+                this.cells[r] = [];
+                for (let c = 0; c < CONFIG.COLS; c++) {
+                    this.cells[r][c] = null;
+                }
             }
-            startCamera();
-        });
+        },
 
-        closeCameraBtn.addEventListener('click', stopCamera);
+        getCell(r, c) {
+            if (r < 0 || r >= CONFIG.ROWS || c < 0 || c >= CONFIG.COLS) return null;
+            return this.cells[r][c];
+        },
 
-        capturePhotoBtn.addEventListener('click', async () => {
-            if (!cameraStream) return;
-            
-            const canvas = document.createElement('canvas');
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            const ctx = canvas.getContext('2d');
-            
-            // Bake filters
-            let beauty = camBeautifySlider.value;
-            let blurVal = (beauty / 100) * 1.5;
-            let satVal = 100 + (beauty * 0.5);
-            ctx.filter = `brightness(${camExposureSlider.value}%) contrast(${camContrastSlider.value}%) saturate(${satVal}%) blur(${blurVal}px)`;
-            
-            if (currentFacingMode === "user") {
-                ctx.translate(canvas.width, 0);
-                ctx.scale(-1, 1);
+        setCell(r, c, val) {
+            if (r < 0 || r >= CONFIG.ROWS || c < 0 || c >= CONFIG.COLS) return;
+            const pos = this.getCellPixelPos(r, c);
+            this.cells[r][c] = {
+                value: val,
+                x: pos.x,
+                y: pos.y,
+                targetY: pos.y,
+                merging: false,
+                eating: false,
+                beingEaten: false,
+                scale: 1,
+                blinkTimer: Math.random() * 3000 + 1500,
+                isBlinking: false,
+                spawnTime: performance.now()
+            };
+        },
+
+        clearCell(r, c) {
+            if (r < 0 || r >= CONFIG.ROWS || c < 0 || c >= CONFIG.COLS) return;
+            this.cells[r][c] = null;
+        },
+
+        getLandingRow(col) {
+            if (col < 0 || col >= CONFIG.COLS) return -1;
+            let lowestOccupied = -1;
+            for (let r = 0; r < CONFIG.ROWS; r++) {
+                if (this.cells[r][col] !== null) lowestOccupied = r;
             }
-            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-            let dataUrl = canvas.toDataURL('image/jpeg', 1.0);
-            
-            // Auto Remove Background Logic if Blue/White selected during capture!
-            let chosenBg = camBgColor.value;
-            if (chosenBg !== 'none') {
-                camLoadingText.innerText = "Background hataya ja raha hai (AI)...";
-                camLoading.classList.remove('hidden');
-                try {
-                    let config = { publicPath: 'https://unpkg.com/@imgly/background-removal@1.4.3/dist/' };
-                    let blob = await imglyRemoveBackground(dataUrl, config);
-                    dataUrl = URL.createObjectURL(blob);
-                } catch(e) {
-                    console.error(e);
-                    alert("AI Background removal fail ho gaya. Original photo load ho rahi hai.");
+            if (lowestOccupied === -1) return 0;
+            const nextRow = lowestOccupied + 1;
+            return (nextRow >= CONFIG.ROWS) ? -1 : nextRow;
+        },
+
+        applyGravity() {
+            let moved = false;
+            for (let c = 0; c < CONFIG.COLS; c++) {
+                let writeRow = 0;
+                for (let r = 0; r < CONFIG.ROWS; r++) {
+                    if (this.cells[r][c] !== null) {
+                        if (r !== writeRow) {
+                            const frog = this.cells[r][c];
+                            this.cells[writeRow][c] = frog;
+                            this.cells[r][c] = null;
+                            frog.targetY = this.getCellPixelPos(writeRow, c).y;
+                            moved = true;
+                        }
+                        writeRow++;
+                    }
+                }
+            }
+            return moved;
+        },
+
+        isGameOver() {
+            for (let c = 0; c < CONFIG.COLS; c++) {
+                for (let r = CONFIG.DANGER_ROW; r < CONFIG.ROWS; r++) {
+                    if (this.cells[r][c] !== null) return true;
+                }
+            }
+            return false;
+        },
+
+        pushNewRow() {
+            for (let r = CONFIG.ROWS - 1; r >= 1; r--) {
+                for (let c = 0; c < CONFIG.COLS; c++) {
+                    this.cells[r][c] = this.cells[r - 1][c];
+                    if (this.cells[r][c]) {
+                        this.cells[r][c].targetY = this.getCellPixelPos(r, c).y;
+                    }
+                }
+            }
+            const starters = CONFIG.INITIAL_AMMO_TIERS;
+            for (let c = 0; c < CONFIG.COLS; c++) {
+                const t = starters[Math.floor(Math.random() * starters.length)];
+                this.setCell(0, c, t);
+            }
+            return this.isGameOver();
+        },
+
+        getAllBlocks() {
+            const blocks = [];
+            for (let r = 0; r < CONFIG.ROWS; r++) {
+                for (let c = 0; c < CONFIG.COLS; c++) {
+                    if (this.cells[r][c] !== null) {
+                        blocks.push({ row: r, col: c, cell: this.cells[r][c] });
+                    }
+                }
+            }
+            return blocks;
+        },
+
+        getNeighbors(r, c) {
+            const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+            const res = [];
+            for (let i = 0; i < dirs.length; i++) {
+                const nr = r + dirs[i][0];
+                const nc = c + dirs[i][1];
+                const cell = this.getCell(nr, nc);
+                if (cell !== null) res.push({ row: nr, col: nc, cell: cell });
+            }
+            return res;
+        },
+
+        getCellPixelPos(r, c) {
+            return {
+                x: this.offsetX + c * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2,
+                y: this.offsetY + r * CONFIG.CELL_SIZE + CONFIG.CELL_SIZE / 2
+            };
+        }
+    };
+
+    // ============================================================
+    // 6. MERGE ENGINE (Tongue Snatch & Swallow)
+    // ============================================================
+    const MergeEngine = {
+        activeTongues: [],
+
+        init() { this.activeTongues = []; },
+
+        processMerge(row, col) {
+            const cell = Grid.getCell(row, col);
+            if (!cell) return { merged: false };
+
+            if (cell.value === CONFIG.BLOCK_BOMB) {
+                return this.detonateBomb(row, col);
+            }
+
+            if (cell.value === CONFIG.BLOCK_WILDCARD) {
+                const nbrs = Grid.getNeighbors(row, col);
+                if (nbrs.length === 0) return { merged: false };
+                let best = 1;
+                for (let i = 0; i < nbrs.length; i++) {
+                    if (nbrs[i].cell.value > best) best = nbrs[i].cell.value;
+                }
+                cell.value = best;
+            }
+
+            return this._startTongueMerge(row, col, 1);
+        },
+
+        _startTongueMerge(row, col, comboStep = 1) {
+            const currentCell = Grid.getCell(row, col);
+            if (!currentCell) return { merged: false };
+
+            const targetTier = currentCell.value;
+            const neighbors = Grid.getNeighbors(row, col);
+
+            let match = null;
+            // Prefer frog directly above
+            for (let i = 0; i < neighbors.length; i++) {
+                const n = neighbors[i];
+                if (n.row === row - 1 && n.col === col && (n.cell.value === targetTier || n.cell.value === CONFIG.BLOCK_WILDCARD)) {
+                    match = n;
+                    break;
+                }
+            }
+            if (!match) {
+                for (let i = 0; i < neighbors.length; i++) {
+                    const n = neighbors[i];
+                    if (n.cell.value === targetTier || n.cell.value === CONFIG.BLOCK_WILDCARD) {
+                        match = n;
+                        break;
+                    }
                 }
             }
 
-            stopCamera();
-            
-            // Load and keep the BG setting in sync
-            loadImageIntoEditor(dataUrl, false);
-            imgBgColor.value = chosenBg;
-            applyImageAdjustments();
-        });
+            if (!match) return { merged: false };
 
-        // --- IMAGE ADJUSTMENT LOGIC ---
-        function applyImageAdjustments() {
-            let exp = imgExposureSlider.value;
-            let con = imgContrastSlider.value;
-            let beauty = imgBeautifySlider.value;
-            let bg = imgBgColor.value;
+            // Determine Eater vs Prey
+            let eaterR = match.row, eaterC = match.col;
+            let preyR = row, preyC = col;
 
-            imgExpVal.innerText = exp + '%';
-            imgContVal.innerText = con + '%';
-            imgBeautyVal.innerText = beauty + '%';
-            
-            let blurVal = (beauty / 100) * 1.5;
-            let satVal = 100 + (beauty * 0.5);
-            let filterString = `brightness(${exp}%) contrast(${con}%) saturate(${satVal}%) blur(${blurVal}px)`;
-            
-            imageToCrop.style.filter = filterString;
-            perspectiveImg.style.filter = filterString;
-
-            // Apply Background color to view
-            let actualBgColor = bg === 'blue' ? '#005bb5' : (bg === 'white' ? '#ffffff' : '#e5e7eb');
-            cropperWrapper.style.backgroundColor = actualBgColor;
-            perspectiveWrapper.style.backgroundColor = actualBgColor;
-
-            document.querySelectorAll('.cropper-container img').forEach(img => {
-                img.style.filter = filterString;
-                img.style.transition = 'filter 0.1s';
-            });
-            document.querySelectorAll('.cropper-wrap-box, .cropper-canvas').forEach(el => {
-                el.style.backgroundColor = actualBgColor;
-            });
-        }
-
-        imgExposureSlider.addEventListener('input', applyImageAdjustments);
-        imgContrastSlider.addEventListener('input', applyImageAdjustments);
-        imgBeautifySlider.addEventListener('input', applyImageAdjustments);
-        imgBgColor.addEventListener('change', applyImageAdjustments);
-
-        // AI Background Removal Button Event
-        removeBgBtn.addEventListener('click', async () => {
-            if (!imageToCrop.src) return;
-            removeBgBtn.disabled = true;
-            removeBgBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
-            
-            try {
-                let config = { publicPath: 'https://unpkg.com/@imgly/background-removal@1.4.3/dist/' };
-                let blob = await imglyRemoveBackground(imageToCrop.src, config);
-                let url = URL.createObjectURL(blob);
-                
-                // Keep the current rotation and sliders intact
-                loadImageIntoEditor(url, true);
-            } catch(e) {
-                console.error(e);
-                alert("Background hatane mein masla pesh aya. Internet connection check karein.");
+            if (row < match.row) {
+                eaterR = row; eaterC = col;
+                preyR = match.row; preyC = match.col;
             }
-            
-            removeBgBtn.disabled = false;
-            removeBgBtn.innerHTML = '<i class="fa-solid fa-scissors"></i> AI Remove';
-        });
 
-        // Rotation
-        function updateRotation() {
-            if (cropper && !isPerspectiveMode) cropper.rotateTo(parseFloat(rotationSlider.value));
-        }
-        rotationSlider.addEventListener('input', updateRotation);
-        rotateLeftBtn.addEventListener('click', () => { rotationSlider.value = Math.max(-45, parseFloat(rotationSlider.value) - 1); updateRotation(); });
-        rotateRightBtn.addEventListener('click', () => { rotationSlider.value = Math.min(45, parseFloat(rotationSlider.value) + 1); updateRotation(); });
+            const eater = Grid.getCell(eaterR, eaterC);
+            const prey = Grid.getCell(preyR, preyC);
+            if (!eater || !prey) return { merged: false };
 
-        resetAdjustmentsBtn.addEventListener('click', () => {
-            imgExposureSlider.value = 100;
-            imgContrastSlider.value = 100;
-            imgBeautifySlider.value = 0;
-            rotationSlider.value = 0;
-            imgBgColor.value = 'none';
-            applyImageAdjustments();
-            updateRotation();
-        });
+            const eaterPos = Grid.getCellPixelPos(eaterR, eaterC);
+            const preyPos = Grid.getCellPixelPos(preyR, preyC);
 
-        // --- PERSPECTIVE TOOL LOGIC ---
-        let perspectivePts = [ {x: 0.15, y: 0.1}, {x: 0.85, y: 0.1}, {x: 0.85, y: 0.9}, {x: 0.15, y: 0.9} ];
-        let activeHandle = null;
+            eater.eating = true;
+            prey.beingEaten = true;
 
-        function renderPerspectiveUI() {
-            const w = perspectiveImg.clientWidth;
-            const h = perspectiveImg.clientHeight;
-            if(w === 0 || h === 0) return;
-            const handles = document.querySelectorAll('.handle');
-            let pointsStr = '';
-            perspectivePts.forEach((p, i) => {
-                const px = p.x * w; const py = p.y * h;
-                pointsStr += `${px},${py} `;
-                handles[i].setAttribute('cx', px); handles[i].setAttribute('cy', py);
+            const nextTier = Math.min(CONFIG.MAX_TIER, eater.value + 1);
+            const points = (nextTier * 100) * comboStep;
+
+            this.activeTongues.push({
+                eaterR, eaterC, preyR, preyC,
+                eaterX: eaterPos.x, eaterY: eaterPos.y,
+                preyX: preyPos.x, preyY: preyPos.y,
+                preyTier: prey.value,
+                nextTier: nextTier,
+                comboStep: comboStep,
+                progress: 0,
+                duration: 220,
+                startTime: performance.now(),
+                finished: false
             });
-            perspectivePoly.setAttribute('points', pointsStr.trim());
-        }
 
-        function startDrag(e) {
-            if(e.target.classList.contains('handle')) {
-                e.preventDefault();
-                activeHandle = parseInt(e.target.getAttribute('data-index'));
-                document.addEventListener('mousemove', drag);
-                document.addEventListener('touchmove', drag, {passive: false});
-                document.addEventListener('mouseup', endDrag);
-                document.addEventListener('touchend', endDrag);
+            AudioFX.playTongue();
+
+            return {
+                merged: true,
+                combos: comboStep,
+                score: points,
+                maxTier: nextTier
+            };
+        },
+
+        detonateBomb(r, c) {
+            const rad = CONFIG.BOMB_RADIUS;
+            let score = 0;
+            for (let row = r - rad; row <= r + rad; row++) {
+                for (let col = c - rad; col <= c + rad; col++) {
+                    const cell = Grid.getCell(row, col);
+                    if (cell) {
+                        score += Math.max(1, cell.value) * 60;
+                        Grid.clearCell(row, col);
+                    }
+                }
+            }
+            Grid.clearCell(r, c);
+            Grid.applyGravity();
+            return { merged: true, combos: 1, isBomb: true, score: score || 180 };
+        },
+
+        update(dt) {
+            const now = performance.now();
+            for (let i = this.activeTongues.length - 1; i >= 0; i--) {
+                const t = this.activeTongues[i];
+                t.progress = Math.min(1, (now - t.startTime) / t.duration);
+
+                if (t.progress >= 1 && !t.finished) {
+                    t.finished = true;
+                    Grid.clearCell(t.preyR, t.preyC);
+
+                    const eater = Grid.getCell(t.eaterR, t.eaterC);
+                    if (eater) {
+                        eater.value = t.nextTier;
+                        eater.eating = false;
+                        eater.merging = true;
+                        eater.spawnTime = now;
+                    }
+
+                    AudioFX.playGulp(t.nextTier);
+
+                    const eaterPos = Grid.getCellPixelPos(t.eaterR, t.eaterC);
+                    Particles.spawn('merge', eaterPos.x, eaterPos.y, {
+                        color: CONFIG.getFrogColors(t.nextTier).body
+                    });
+
+                    Grid.applyGravity();
+
+                    setTimeout(() => {
+                        const next = MergeEngine._startTongueMerge(t.eaterR, t.eaterC, t.comboStep + 1);
+                        if (next && next.merged && typeof Game !== 'undefined') {
+                            Game.addScore(next.score, next.combos);
+                            UI.addComboText(`COMBO x${next.combos}! 👅`, eaterPos.x, eaterPos.y - 15);
+                        }
+                    }, 40);
+
+                    this.activeTongues.splice(i, 1);
+                }
             }
         }
+    };
 
-        function drag(e) {
-            if (activeHandle !== null) {
-                e.preventDefault();
-                const rect = perspectiveImg.getBoundingClientRect();
-                let clientX = e.clientX; let clientY = e.clientY;
-                if(e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
-                let nx = (clientX - rect.left) / rect.width; let ny = (clientY - rect.top) / rect.height;
-                nx = Math.max(0, Math.min(1, nx)); ny = Math.max(0, Math.min(1, ny));
-                perspectivePts[activeHandle] = {x: nx, y: ny};
-                renderPerspectiveUI();
+    // ============================================================
+    // 7. SHOOTER CONTROLLER
+    // ============================================================
+    const Shooter = {
+        currentBlock: null,
+        nextBlock: null,
+        x: 0, y: 0,
+        angle: Math.PI / 2,
+        isFiring: false,
+        projectile: null,
+        shotCount: 0,
+
+        init() {
+            const canvas = document.getElementById('gameCanvas') || { width: 384 };
+            this.x = canvas.width / 2;
+            this.y = Grid.offsetY + CONFIG.GRID_HEIGHT + CONFIG.CELL_SIZE * 0.95;
+            this.angle = Math.PI / 2;
+            this.isFiring = false;
+            this.projectile = null;
+            this.shotCount = 0;
+            this.currentBlock = { value: this.generateBlockValue() };
+            this.nextBlock = { value: this.generateBlockValue() };
+        },
+
+        generateBlockValue() {
+            const rand = Math.random();
+            if (rand < CONFIG.BOMB_CHANCE) return CONFIG.BLOCK_BOMB;
+            if (rand < CONFIG.BOMB_CHANCE + CONFIG.WILDCARD_CHANCE) return CONFIG.BLOCK_WILDCARD;
+
+            let pool = CONFIG.INITIAL_AMMO_TIERS;
+            const blocks = Grid.getAllBlocks();
+            let maxTier = 1;
+            for (let i = 0; i < blocks.length; i++) {
+                if (blocks[i].cell.value > maxTier) maxTier = blocks[i].cell.value;
             }
+            if (maxTier >= CONFIG.AMMO_SCALE_THRESHOLD) pool = CONFIG.SCALED_AMMO_TIERS;
+            return pool[Math.floor(Math.random() * pool.length)];
+        },
+
+        setAngle(a) {
+            this.angle = Math.max(CONFIG.MIN_ANGLE, Math.min(CONFIG.MAX_ANGLE, a));
+        },
+
+        fire() {
+            if (this.isFiring || !this.currentBlock) return;
+            const speed = CONFIG.SHOOT_SPEED;
+            this.projectile = {
+                x: this.x, y: this.y,
+                value: this.currentBlock.value,
+                vx: -Math.cos(this.angle) * speed,
+                vy: -Math.sin(this.angle) * speed,
+                trail: []
+            };
+            this.isFiring = true;
+        },
+
+        updateProjectile() {
+            if (!this.isFiring || !this.projectile) return null;
+            const p = this.projectile;
+            p.x += p.vx;
+            p.y += p.vy;
+
+            p.trail.push({ x: p.x, y: p.y });
+            if (p.trail.length > 5) p.trail.shift();
+
+            const left = Grid.offsetX;
+            const right = Grid.offsetX + CONFIG.GRID_WIDTH;
+            const half = CONFIG.CELL_SIZE / 2;
+
+            if (p.x - half < left) { p.x = left + half; p.vx = Math.abs(p.vx); }
+            else if (p.x + half > right) { p.x = right - half; p.vx = -Math.abs(p.vx); }
+
+            let col = Math.floor((p.x - Grid.offsetX) / CONFIG.CELL_SIZE);
+            col = Math.max(0, Math.min(CONFIG.COLS - 1, col));
+
+            const landRow = Grid.getLandingRow(col);
+            const targetRow = (landRow === -1) ? (CONFIG.ROWS - 1) : landRow;
+            const targetPos = Grid.getCellPixelPos(targetRow, col);
+
+            if (p.y <= targetPos.y || p.y - half <= Grid.offsetY) {
+                const val = p.value;
+                this.isFiring = false;
+                this.projectile = null;
+                Grid.setCell(targetRow, col, val);
+                this.advanceBlock();
+                return { landed: true, row: targetRow, col: col, value: val };
+            }
+            return null;
+        },
+
+        advanceBlock() {
+            this.currentBlock = this.nextBlock;
+            this.nextBlock = { value: this.generateBlockValue() };
+            this.shotCount++;
+            if (this.shotCount >= CONFIG.SHOTS_PER_NEW_ROW) {
+                Grid.pushNewRow();
+                this.shotCount = 0;
+                AudioFX.playLand();
+            }
+        },
+
+        getTrajectory() {
+            const pts = [];
+            let vx = -Math.cos(this.angle) * 12;
+            let vy = -Math.sin(this.angle) * 12;
+            let px = this.x, py = this.y;
+            const left = Grid.offsetX, right = Grid.offsetX + CONFIG.GRID_WIDTH;
+            const half = CONFIG.CELL_SIZE / 2;
+
+            for (let i = 0; i < 45; i++) {
+                px += vx; py += vy;
+                if (px - half < left) { px = left + half; vx = Math.abs(vx); }
+                else if (px + half > right) { px = right - half; vx = -Math.abs(vx); }
+
+                let col = Math.floor((px - Grid.offsetX) / CONFIG.CELL_SIZE);
+                col = Math.max(0, Math.min(CONFIG.COLS - 1, col));
+                const landRow = Grid.getLandingRow(col);
+                const targetRow = (landRow === -1) ? (CONFIG.ROWS - 1) : landRow;
+                const targetPos = Grid.getCellPixelPos(targetRow, col);
+
+                if (py <= targetPos.y || py - half <= Grid.offsetY) {
+                    pts.push({ x: targetPos.x, y: targetPos.y });
+                    break;
+                }
+                if (i % 2 === 0) pts.push({ x: px, y: py });
+            }
+            return pts;
         }
+    };
 
-        function endDrag() {
-            activeHandle = null;
-            document.removeEventListener('mousemove', drag); document.removeEventListener('touchmove', drag);
-            document.removeEventListener('mouseup', endDrag); document.removeEventListener('touchend', endDrag);
+    // ============================================================
+    // 8. RENDERER (Cute Chibi Cartoon Frogs & Animated Tongues)
+    // ============================================================
+    const Renderer = {
+        canvas: null,
+        ctx: null,
+        shakeX: 0, shakeY: 0,
+        shakeEndTime: 0,
+        theme: 'day',
+        rippleTime: 0,
+
+        init(c) {
+            this.canvas = c || document.getElementById('gameCanvas');
+            if (this.canvas) this.ctx = this.canvas.getContext('2d');
+            this.setTheme(Storage.getTheme());
+        },
+
+        setTheme(name) {
+            this.theme = (name === 'night') ? 'night' : 'day';
+            document.body.classList.remove('theme-day', 'theme-night');
+            document.body.classList.add(`theme-${this.theme}`);
+        },
+
+        getTheme() { return CONFIG.THEMES[this.theme] || CONFIG.THEMES.day; },
+
+        triggerShake(intensity = 4, dur = 180) {
+            this.shakeEndTime = Date.now() + dur;
+        },
+
+        clear() {
+            if (!this.ctx) return;
+            const w = this.canvas.width, h = this.canvas.height;
+            const bgGrad = this.ctx.createLinearGradient(0, 0, 0, h);
+            if (this.theme === 'night') {
+                bgGrad.addColorStop(0, '#0a161d');
+                bgGrad.addColorStop(1, '#11252e');
+            } else {
+                bgGrad.addColorStop(0, '#E8F5E9');
+                bgGrad.addColorStop(1, '#D8EEDC');
+            }
+            this.ctx.fillStyle = bgGrad;
+            this.ctx.fillRect(0, 0, w, h);
+
+            if (Date.now() < this.shakeEndTime) {
+                this.shakeX = (Math.random() * 2 - 1) * CONFIG.SHAKE_INTENSITY;
+                this.shakeY = (Math.random() * 2 - 1) * CONFIG.SHAKE_INTENSITY;
+                this.ctx.save();
+                this.ctx.translate(this.shakeX, this.shakeY);
+            } else {
+                this.shakeX = 0; this.shakeY = 0;
+            }
+        },
+
+        drawGrid() {
+            if (!this.ctx) return;
+            const theme = this.getTheme();
+            const gx = Grid.offsetX, gy = Grid.offsetY;
+            const gw = CONFIG.GRID_WIDTH, gh = CONFIG.GRID_HEIGHT;
+
+            this.roundRect(gx, gy, gw, gh, 14);
+            this.ctx.fillStyle = theme.gridBg;
+            this.ctx.shadowColor = 'rgba(0,0,0,0.06)';
+            this.ctx.shadowBlur = 8;
+            this.ctx.fill();
+
+            this.ctx.shadowColor = 'transparent';
+            this.ctx.strokeStyle = theme.gridLine;
+            this.ctx.lineWidth = 1;
+            this.ctx.stroke();
+
+            const dangerY = gy + CONFIG.DANGER_ROW * CONFIG.CELL_SIZE;
+            const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 250);
+            this.ctx.save();
+            this.ctx.strokeStyle = `rgba(255, 71, 87, ${0.4 + 0.45 * pulse})`;
+            this.ctx.lineWidth = 2.5;
+            this.ctx.setLineDash([6, 5]);
+            this.ctx.beginPath();
+            this.ctx.moveTo(gx + 4, dangerY);
+            this.ctx.lineTo(gx + gw - 4, dangerY);
+            this.ctx.stroke();
+            this.ctx.restore();
+        },
+
+        drawFrog(ctx, x, y, size, tier, scale = 1, alpha = 1, frogState = {}) {
+            if (!ctx || size <= 0) return;
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+
+            const cx = x + size / 2, cy = y + size / 2;
+            ctx.translate(cx, cy);
+            ctx.scale(scale, scale);
+
+            const colors = CONFIG.getFrogColors(tier);
+            const radius = size * 0.38;
+            const isRainbow = (tier === CONFIG.BLOCK_WILDCARD);
+            const isBomb = (tier === CONFIG.BLOCK_BOMB);
+            const isEating = frogState.eating;
+            const isBlinking = frogState.isBlinking;
+
+            // Feet
+            ctx.fillStyle = colors.dark;
+            ctx.beginPath();
+            ctx.ellipse(-radius * 0.72, radius * 0.75, radius * 0.28, radius * 0.16, -0.2, 0, Math.PI * 2);
+            ctx.ellipse(radius * 0.72, radius * 0.75, radius * 0.28, radius * 0.16, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Chubby Body
+            if (isRainbow) {
+                const grad = ctx.createLinearGradient(-radius, -radius, radius, radius);
+                const tOff = (Date.now() / 1500) % 1;
+                grad.addColorStop((0.0 + tOff) % 1, '#FF6B6B');
+                grad.addColorStop((0.2 + tOff) % 1, '#FECA57');
+                grad.addColorStop((0.4 + tOff) % 1, '#48DBFB');
+                grad.addColorStop((0.6 + tOff) % 1, '#1DD1A1');
+                grad.addColorStop((0.8 + tOff) % 1, '#9B59B6');
+                grad.addColorStop(1.0, '#FF6B6B');
+                ctx.fillStyle = grad;
+            } else {
+                const bGrad = ctx.createRadialGradient(-radius * 0.2, -radius * 0.3, radius * 0.1, 0, 0, radius * 1.1);
+                bGrad.addColorStop(0, colors.body);
+                bGrad.addColorStop(1, colors.dark);
+                ctx.fillStyle = bGrad;
+            }
+            ctx.beginPath();
+            ctx.ellipse(0, radius * 0.1, radius * 0.92, radius * 0.82, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Soft Belly
+            ctx.fillStyle = isRainbow ? 'rgba(255,255,255,0.45)' : colors.belly;
+            ctx.beginPath();
+            ctx.ellipse(0, radius * 0.35, radius * 0.55, radius * 0.45, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Big Anime Eyes
+            const eyeX = radius * 0.52, eyeY = -radius * 0.72, eyeR = radius * 0.38;
+            ctx.fillStyle = colors.body;
+            ctx.beginPath();
+            ctx.arc(-eyeX, eyeY, eyeR * 1.05, 0, Math.PI * 2);
+            ctx.arc(eyeX, eyeY, eyeR * 1.05, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (isBlinking) {
+                ctx.strokeStyle = '#1a1a2e';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.arc(-eyeX, eyeY + 2, eyeR * 0.65, Math.PI * 1.1, Math.PI * 1.9);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(eyeX, eyeY + 2, eyeR * 0.65, Math.PI * 1.1, Math.PI * 1.9);
+                ctx.stroke();
+            } else {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(-eyeX, eyeY, eyeR * 0.9, 0, Math.PI * 2);
+                ctx.arc(eyeX, eyeY, eyeR * 0.9, 0, Math.PI * 2);
+                ctx.fill();
+
+                const pupilR = eyeR * 0.58;
+                ctx.fillStyle = isBomb ? '#EA2027' : '#1A1A2E';
+                ctx.beginPath();
+                ctx.arc(-eyeX, eyeY, pupilR, 0, Math.PI * 2);
+                ctx.arc(eyeX, eyeY, pupilR, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Sparkles ✨
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(-eyeX - pupilR * 0.35, eyeY - pupilR * 0.35, pupilR * 0.42, 0, Math.PI * 2);
+                ctx.arc(-eyeX + pupilR * 0.35, eyeY + pupilR * 0.35, pupilR * 0.22, 0, Math.PI * 2);
+                ctx.arc(eyeX - pupilR * 0.35, eyeY - pupilR * 0.35, pupilR * 0.42, 0, Math.PI * 2);
+                ctx.arc(eyeX + pupilR * 0.35, eyeY + pupilR * 0.35, pupilR * 0.22, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Blushing Cheeks
+            ctx.fillStyle = colors.blush;
+            ctx.globalAlpha = 0.55;
+            ctx.beginPath();
+            ctx.ellipse(-radius * 0.58, radius * 0.05, radius * 0.22, radius * 0.14, 0, 0, Math.PI * 2);
+            ctx.ellipse(radius * 0.58, radius * 0.05, radius * 0.22, radius * 0.14, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+
+            // Mouth
+            if (isEating) {
+                ctx.fillStyle = '#800020';
+                ctx.beginPath();
+                ctx.ellipse(0, radius * 0.12, radius * 0.35, radius * 0.28, 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.strokeStyle = colors.dark;
+                ctx.lineWidth = 2.2;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.arc(0, -radius * 0.05, radius * 0.24, 0.2 * Math.PI, 0.8 * Math.PI);
+                ctx.stroke();
+            }
+
+            // King Crown
+            if (tier === 9 || tier >= CONFIG.MAX_TIER) {
+                ctx.fillStyle = '#FFD700';
+                ctx.strokeStyle = '#DAA520';
+                ctx.lineWidth = 1.5;
+                const cY = -radius * 1.15;
+                ctx.beginPath();
+                ctx.moveTo(-radius * 0.4, cY + radius * 0.35);
+                ctx.lineTo(-radius * 0.45, cY);
+                ctx.lineTo(-radius * 0.15, cY + radius * 0.18);
+                ctx.lineTo(0, cY - radius * 0.1);
+                ctx.lineTo(radius * 0.15, cY + radius * 0.18);
+                ctx.lineTo(radius * 0.45, cY);
+                ctx.lineTo(radius * 0.4, cY + radius * 0.35);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+            ctx.restore();
+        },
+
+        drawBlocks(blocks) {
+            if (!blocks || !this.ctx) return;
+            const cs = CONFIG.CELL_SIZE;
+            for (let i = 0; i < blocks.length; i++) {
+                const b = blocks[i];
+                if (!b || b.value === 0 || b.value === null || b.beingEaten) continue;
+                this.drawFrog(this.ctx, b.x, b.y, cs, b.value, b.scale || 1, 1, {
+                    eating: b.eating || b.merging,
+                    isBlinking: b.isBlinking
+                });
+            }
+        },
+
+        drawTongues() {
+            if (!this.ctx || typeof MergeEngine === 'undefined') return;
+            const tongues = MergeEngine.activeTongues;
+            if (!tongues || tongues.length === 0) return;
+
+            const ctx = this.ctx;
+            ctx.save();
+
+            for (let i = 0; i < tongues.length; i++) {
+                const t = tongues[i];
+                const p = t.progress;
+
+                let tipX, tipY;
+                if (p < 0.4) {
+                    const ext = p / 0.4;
+                    tipX = t.eaterX + (t.preyX - t.eaterX) * ext;
+                    tipY = t.eaterY + (t.preyY - t.eaterY) * ext;
+                    this.drawFrog(ctx, t.preyX - CONFIG.CELL_SIZE / 2, t.preyY - CONFIG.CELL_SIZE / 2, CONFIG.CELL_SIZE, t.preyTier, 1, 1);
+                } else {
+                    const ret = (p - 0.4) / 0.6;
+                    tipX = t.preyX + (t.eaterX - t.preyX) * ret;
+                    tipY = t.preyY + (t.eaterY - t.preyY) * ret;
+                    const preyScale = Math.max(0.2, 1 - ret * 0.8);
+                    const preyAlpha = Math.max(0.1, 1 - ret * 0.9);
+                    this.drawFrog(ctx, tipX - CONFIG.CELL_SIZE / 2, tipY - CONFIG.CELL_SIZE / 2, CONFIG.CELL_SIZE, t.preyTier, preyScale, preyAlpha);
+                }
+
+                // Elastic Pink Cartoon Tongue
+                ctx.strokeStyle = '#FF477E';
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                const midX = (t.eaterX + tipX) / 2 + Math.sin(p * Math.PI) * 14;
+                const midY = (t.eaterY + tipY) / 2;
+
+                ctx.beginPath();
+                ctx.moveTo(t.eaterX, t.eaterY);
+                ctx.quadraticCurveTo(midX, midY, tipX, tipY);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#FFAAA6';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(t.eaterX, t.eaterY);
+                ctx.quadraticCurveTo(midX, midY, tipX, tipY);
+                ctx.stroke();
+
+                // Sticky tip
+                ctx.fillStyle = '#FF2A6D';
+                ctx.beginPath();
+                ctx.arc(tipX, tipY, 6.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        },
+
+        drawShooter(shooter) {
+            if (!this.ctx || !shooter) return;
+            const cs = CONFIG.CELL_SIZE;
+            const sx = shooter.x, sy = shooter.y;
+
+            // Lily Pad
+            const padR = cs * 0.72;
+            this.ctx.fillStyle = (this.theme === 'night') ? '#1B4A3A' : '#78B88C';
+            this.ctx.strokeStyle = (this.theme === 'night') ? '#2E6F56' : '#5D9A70';
+            this.ctx.lineWidth = 2;
+            this.ctx.beginPath();
+            this.ctx.arc(sx, sy + 6, padR, 0.25 * Math.PI, 1.95 * Math.PI);
+            this.ctx.lineTo(sx, sy + 6);
+            this.ctx.closePath();
+            this.ctx.fill();
+            this.ctx.stroke();
+
+            // Arrow
+            const angle = shooter.angle || Math.PI / 2;
+            const aLen = cs * 0.65;
+            const aX = sx - Math.cos(angle) * aLen;
+            const aY = sy - Math.sin(angle) * aLen;
+
+            this.ctx.strokeStyle = this.getTheme().accent;
+            this.ctx.lineWidth = 3;
+            this.ctx.lineCap = 'round';
+            this.ctx.beginPath();
+            this.ctx.moveTo(sx, sy - cs * 0.35);
+            this.ctx.lineTo(aX, aY);
+            this.ctx.stroke();
+
+            // Frog on Lily Pad
+            if (!shooter.isFiring && shooter.currentBlock) {
+                this.drawFrog(this.ctx, sx - cs / 2, sy - cs / 2 - 2, cs, shooter.currentBlock.value, 1, 1);
+            }
+
+            // NEXT Frog
+            if (shooter.nextBlock) {
+                const nSize = cs * 0.62;
+                const nX = sx + padR + 24;
+                const nY = sy - 4;
+
+                this.ctx.fillStyle = (this.theme === 'night') ? '#1B4A3A' : '#78B88C';
+                this.ctx.beginPath();
+                this.ctx.arc(nX + nSize / 2, nY + nSize / 2, nSize * 0.65, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                this.ctx.fillStyle = this.getTheme().text;
+                this.ctx.font = 'bold 11px Segoe UI, sans-serif';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('NEXT', nX + nSize / 2, nY - 3);
+
+                this.drawFrog(this.ctx, nX, nY, nSize, shooter.nextBlock.value, 1, 1);
+            }
+        },
+
+        drawTrajectory(pts) {
+            if (!this.ctx || !pts || pts.length === 0) return;
+            this.ctx.save();
+            for (let i = 0; i < pts.length; i++) {
+                const pt = pts[i];
+                const alpha = Math.max(0.2, 0.85 - 0.55 * (i / pts.length));
+                this.ctx.globalAlpha = alpha;
+                this.ctx.fillStyle = this.getTheme().accent;
+                this.ctx.beginPath();
+                this.ctx.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            this.ctx.restore();
+        },
+
+        drawProjectile(p) {
+            if (!this.ctx || !p) return;
+            const cs = CONFIG.CELL_SIZE;
+            this.drawFrog(this.ctx, p.x - cs / 2, p.y - cs / 2, cs, p.value, 1.05, 1, { eating: true });
+        },
+
+        drawComboTexts(combos) {
+            if (!this.ctx || !combos || combos.length === 0) return;
+            for (let i = 0; i < combos.length; i++) {
+                const c = combos[i];
+                const p = Math.max(0, Math.min(1, c.progress || 0));
+                this.ctx.save();
+                this.ctx.globalAlpha = 1.0 - p;
+                this.ctx.font = '900 20px "Segoe UI", sans-serif';
+                this.ctx.textAlign = 'center';
+                this.ctx.strokeStyle = '#1B4332';
+                this.ctx.lineWidth = 3;
+                this.ctx.strokeText(c.text, c.x, c.y - p * 35);
+                this.ctx.fillStyle = '#FFEAA7';
+                this.ctx.fillText(c.text, c.x, c.y - p * 35);
+                this.ctx.restore();
+            }
+        },
+
+        drawMenu() {
+            if (!this.ctx) return;
+            const w = this.canvas.width, h = this.canvas.height;
+            this.ctx.fillStyle = (this.theme === 'night') ? 'rgba(15,30,36,0.92)' : 'rgba(234,247,238,0.94)';
+            this.ctx.fillRect(0, 0, w, h);
+
+            const cy = h / 2 - 30;
+            this.drawFrog(this.ctx, w / 2 - 45, cy - 120, 90, 1, 1, 1);
+
+            this.ctx.font = '900 34px Segoe UI, sans-serif';
+            this.ctx.fillStyle = this.getTheme().accent;
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('FROG MATCH', w / 2, cy);
+
+            this.ctx.font = '600 15px Segoe UI, sans-serif';
+            this.ctx.fillStyle = this.getTheme().text;
+            this.ctx.fillText('Aim & shoot matching frogs!', w / 2, cy + 30);
+            this.ctx.fillText('Watch them catch & eat with their tongues! 👅', w / 2, cy + 54);
+
+            const btnW = 200, btnH = 48, btnX = (w - btnW) / 2, btnY = cy + 90;
+            this.roundRect(btnX, btnY, btnW, btnH, 24);
+            this.ctx.fillStyle = this.getTheme().accent;
+            this.ctx.fill();
+
+            this.ctx.font = 'bold 17px Segoe UI, sans-serif';
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.fillText('Tap to Play! 🐸', w / 2, btnY + btnH / 2 + 1);
+        },
+
+        drawGameOver(score = 0, best = 0) {
+            if (!this.ctx) return;
+            const w = this.canvas.width, h = this.canvas.height;
+            this.ctx.fillStyle = 'rgba(0,0,0,0.75)';
+            this.ctx.fillRect(0, 0, w, h);
+
+            const cardW = 300, cardH = 250;
+            const cX = (w - cardW) / 2, cY = (h - cardH) / 2;
+            this.roundRect(cX, cY, cardW, cardH, 20);
+            this.ctx.fillStyle = (this.theme === 'night') ? '#162C35' : '#FFFFFF';
+            this.ctx.fill();
+
+            this.ctx.font = '900 28px Segoe UI, sans-serif';
+            this.ctx.fillStyle = '#FF4757';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('POND OVER! 🐸', w / 2, cY + 42);
+
+            this.ctx.font = 'bold 20px Segoe UI, sans-serif';
+            this.ctx.fillStyle = this.getTheme().text;
+            this.ctx.fillText(`Score: ${score}`, w / 2, cY + 90);
+
+            this.ctx.font = '600 15px Segoe UI, sans-serif';
+            this.ctx.fillStyle = (this.theme === 'night') ? '#A4B0BE' : '#747D8C';
+            this.ctx.fillText(`Best: ${best}`, w / 2, cY + 122);
+
+            const btnW = 180, btnH = 44, btnX = (w - btnW) / 2, btnY = cY + 168;
+            this.roundRect(btnX, btnY, btnW, btnH, 22);
+            this.ctx.fillStyle = this.getTheme().accent;
+            this.ctx.fill();
+
+            this.ctx.font = 'bold 16px Segoe UI, sans-serif';
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.fillText('Play Again ↺', w / 2, btnY + btnH / 2 + 1);
+        },
+
+        roundRect(x, y, w, h, r) {
+            if (this.ctx.roundRect) {
+                this.ctx.beginPath();
+                this.ctx.roundRect(x, y, w, h, r);
+                return;
+            }
+            const radius = Math.min(r, w / 2, h / 2);
+            this.ctx.beginPath();
+            this.ctx.moveTo(x + radius, y);
+            this.ctx.arcTo(x + w, y, x + w, y + h, radius);
+            this.ctx.arcTo(x + w, y + h, x, y + h, radius);
+            this.ctx.arcTo(x, y + h, x, y, radius);
+            this.ctx.arcTo(x, y, x + w, y, radius);
+            this.ctx.closePath();
         }
+    };
 
-        perspectiveSvg.addEventListener('mousedown', startDrag);
-        perspectiveSvg.addEventListener('touchstart', startDrag, {passive: false});
-        perspectiveImg.onload = renderPerspectiveUI;
-        window.addEventListener('resize', renderPerspectiveUI);
+    // ============================================================
+    // 9. UI MANAGER
+    // ============================================================
+    const UI = {
+        comboTexts: [],
 
-        function extractPerspectiveCanvas(imgElement, ptsPercent, outW, outH) {
-            const natW = imgElement.naturalWidth; const natH = imgElement.naturalHeight;
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = natW; tempCanvas.height = natH;
-            const tCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-            
-            // Bake BEAUTIFY
-            let beauty = imgBeautifySlider.value;
-            let blurVal = (beauty / 100) * 1.5;
-            let satVal = 100 + (beauty * 0.5);
-            tCtx.filter = `brightness(${imgExposureSlider.value}%) contrast(${imgContrastSlider.value}%) saturate(${satVal}%) blur(${blurVal}px)`;
-            tCtx.drawImage(imgElement, 0, 0);
-            const srcData = tCtx.getImageData(0, 0, natW, natH);
+        init() {
+            this.comboTexts = [];
+        },
 
-            const outCanvas = document.createElement('canvas');
-            outCanvas.width = outW; outCanvas.height = outH;
-            const oCtx = outCanvas.getContext('2d');
-            const outData = oCtx.createImageData(outW, outH);
-            const pts = ptsPercent.map(p => ({ x: p.x * natW, y: p.y * natH }));
+        addComboText(text, x, y) {
+            this.comboTexts.push({
+                text: String(text),
+                x: Number(x) || 0,
+                y: Number(y) || 0,
+                startTime: performance.now(),
+                duration: CONFIG.COMBO_DISPLAY_TIME
+            });
+        },
 
-            for (let y = 0; y < outH; y++) {
-                const ny = y / outH;
-                for (let x = 0; x < outW; x++) {
-                    const nx = x / outW;
-                    const srcX = pts[0].x * (1 - nx) * (1 - ny) + pts[1].x * nx * (1 - ny) + pts[2].x * nx * ny + pts[3].x * (1 - nx) * ny;
-                    const srcY = pts[0].y * (1 - nx) * (1 - ny) + pts[1].y * nx * (1 - ny) + pts[2].y * nx * ny + pts[3].y * (1 - nx) * ny;
-                    const sx = Math.floor(srcX); const sy = Math.floor(srcY);
-                    const outIndex = (y * outW + x) * 4;
-                    if (sx >= 0 && sx < natW && sy >= 0 && sy < natH) {
-                        const srcIndex = (sy * natW + sx) * 4;
-                        // Handle transparency properly
-                        outData.data[outIndex] = srcData.data[srcIndex];
-                        outData.data[outIndex+1] = srcData.data[srcIndex+1];
-                        outData.data[outIndex+2] = srcData.data[srcIndex+2];
-                        outData.data[outIndex+3] = srcData.data[srcIndex+3];
+        updateComboTexts() {
+            const now = performance.now();
+            this.comboTexts = this.comboTexts.filter(item => (now - item.startTime) <= item.duration);
+        },
+
+        getActiveComboTexts() {
+            const now = performance.now();
+            return this.comboTexts.map(item => ({
+                text: item.text,
+                x: item.x,
+                y: item.y,
+                progress: Math.min(1, (now - item.startTime) / item.duration)
+            }));
+        },
+
+        toggleTheme() {
+            const curr = Storage.getTheme();
+            const next = (curr === 'day') ? 'night' : 'day';
+            Storage.setTheme(next);
+            Renderer.setTheme(next);
+            return next;
+        }
+    };
+
+    // ============================================================
+    // 10. INPUT HANDLER
+    // ============================================================
+    const Input = {
+        canvas: null,
+        isAiming: false,
+
+        init(c) {
+            this.canvas = c || document.getElementById('gameCanvas');
+            if (!this.canvas) return;
+
+            this.onDown = this.onDown.bind(this);
+            this.onMove = this.onMove.bind(this);
+            this.onUp = this.onUp.bind(this);
+
+            this.canvas.addEventListener('mousedown', this.onDown);
+            window.addEventListener('mousemove', this.onMove);
+            window.addEventListener('mouseup', this.onUp);
+
+            this.canvas.addEventListener('touchstart', this.onDown, { passive: false });
+            window.addEventListener('touchmove', this.onMove, { passive: false });
+            window.addEventListener('touchend', this.onUp, { passive: false });
+        },
+
+        getPos(e) {
+            const rect = this.canvas.getBoundingClientRect();
+            let cx, cy;
+            if (e.touches && e.touches.length > 0) {
+                cx = e.touches[0].clientX; cy = e.touches[0].clientY;
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                cx = e.changedTouches[0].clientX; cy = e.changedTouches[0].clientY;
+            } else {
+                cx = e.clientX; cy = e.clientY;
+            }
+            return {
+                x: (cx - rect.left) * (this.canvas.width / rect.width),
+                y: (cy - rect.top) * (this.canvas.height / rect.height)
+            };
+        },
+
+        calcAngle(pos) {
+            let angle = Math.atan2(-(pos.y - Shooter.y), pos.x - Shooter.x);
+            if (angle < 0) angle = (pos.x < Shooter.x) ? CONFIG.MAX_ANGLE : CONFIG.MIN_ANGLE;
+            return Math.max(CONFIG.MIN_ANGLE, Math.min(CONFIG.MAX_ANGLE, angle));
+        },
+
+        onDown(e) {
+            if (e.type && e.type.startsWith('touch') && e.cancelable) e.preventDefault();
+            const pos = this.getPos(e);
+            if (!pos) return;
+
+            if (Game.state === 'menu' || Game.state === 'gameover') {
+                Game.startGame();
+                return;
+            }
+            if (Game.state !== 'playing' || Shooter.isFiring) return;
+
+            this.isAiming = true;
+            Game.onAimMove(this.calcAngle(pos));
+        },
+
+        onMove(e) {
+            if (!this.isAiming) return;
+            if (e.type && e.type.startsWith('touch') && e.cancelable) e.preventDefault();
+            const pos = this.getPos(e);
+            if (pos) Game.onAimMove(this.calcAngle(pos));
+        },
+
+        onUp(e) {
+            if (!this.isAiming) return;
+            if (e.type && e.type.startsWith('touch') && e.cancelable) e.preventDefault();
+            this.isAiming = false;
+            Game.onAimEnd();
+        }
+    };
+
+    // ============================================================
+    // 11. MAIN GAME CONTROLLER
+    // ============================================================
+    const Game = {
+        canvas: null,
+        ctx: null,
+        state: 'menu',
+        score: 0,
+        highScore: 0,
+        lastTimestamp: 0,
+
+        init() {
+            this.canvas = document.getElementById('gameCanvas');
+            this.ctx = this.canvas.getContext('2d');
+
+            this.bindControls();
+            this.resize();
+
+            Grid.init();
+            Shooter.init();
+            Renderer.init(this.canvas);
+            AudioFX.init();
+            Particles.init();
+            UI.init();
+            Input.init(this.canvas);
+
+            this.highScore = Storage.getHighScore();
+            this.updateScoreHUD();
+
+            this.state = 'menu';
+            this.lastTimestamp = performance.now();
+
+            window.addEventListener('resize', () => this.resize());
+            requestAnimationFrame((t) => this.loop(t));
+        },
+
+        bindControls() {
+            const btnTheme = document.getElementById('btnTheme');
+            if (btnTheme) {
+                btnTheme.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const newTheme = UI.toggleTheme();
+                    btnTheme.textContent = (newTheme === 'night') ? '☀️' : '🌙';
+                });
+            }
+            const btnSound = document.getElementById('btnSound');
+            if (btnSound) {
+                btnSound.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    btnSound.textContent = AudioFX.toggle() ? '🔊' : '🔇';
+                });
+            }
+            const btnRestart = document.getElementById('btnRestart');
+            if (btnRestart) {
+                btnRestart.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    Game.startGame();
+                });
+            }
+        },
+
+        updateScoreHUD(animate = false) {
+            const sEl = document.getElementById('hudScore');
+            const bEl = document.getElementById('hudBest');
+            if (sEl) {
+                sEl.textContent = this.score;
+                if (animate) {
+                    sEl.classList.remove('bump');
+                    void sEl.offsetWidth;
+                    sEl.classList.add('bump');
+                    setTimeout(() => sEl.classList.remove('bump'), 180);
+                }
+            }
+            if (bEl) bEl.textContent = this.highScore;
+        },
+
+        startGame() {
+            this.resize();
+            Grid.init();
+            Shooter.init();
+            Particles.init();
+            MergeEngine.init();
+
+            this.score = 0;
+            this.state = 'playing';
+            this.updateScoreHUD();
+
+            // Pre-fill 2 rows of colorful frogs
+            for (let r = 0; r < 2; r++) {
+                for (let c = 0; c < CONFIG.COLS; c++) {
+                    const t = CONFIG.INITIAL_AMMO_TIERS[Math.floor(Math.random() * CONFIG.INITIAL_AMMO_TIERS.length)];
+                    Grid.setCell(r, c, t);
+                }
+            }
+
+            AudioFX.ensureContext();
+            AudioFX.playShoot();
+        },
+
+        loop(timestamp) {
+            requestAnimationFrame((t) => this.loop(t));
+            let dt = timestamp - this.lastTimestamp;
+            this.lastTimestamp = timestamp;
+            if (dt > 50) dt = 50;
+
+            if (this.state === 'playing') this.update(dt);
+            this.render();
+        },
+
+        update(dt) {
+            if (Shooter.isFiring) {
+                const res = Shooter.updateProjectile();
+                if (res && res.landed) {
+                    AudioFX.playLand();
+                    const mergeRes = MergeEngine.processMerge(res.row, res.col);
+                    if (mergeRes.merged) {
+                        this.addScore(mergeRes.score, mergeRes.combos);
+                        const pos = Grid.getCellPixelPos(res.row, res.col);
+
+                        if (mergeRes.isBomb) {
+                            AudioFX.playBomb();
+                            Renderer.triggerShake(6, 180);
+                            Particles.spawn('bomb', pos.x, pos.y);
+                            UI.addComboText('BOOM! 💥', pos.x, pos.y);
+                        } else if (mergeRes.combos >= 2) {
+                            AudioFX.playChainCombo(mergeRes.combos);
+                            Renderer.triggerShake(4, 180);
+                            UI.addComboText(`COMBO x${mergeRes.combos}! 👅`, pos.x, pos.y - 15);
+                        } else {
+                            UI.addComboText(`+${mergeRes.score}`, pos.x, pos.y);
+                        }
+                    }
+
+                    if (Grid.isGameOver()) {
+                        this.state = 'gameover';
+                        if (this.score > this.highScore) {
+                            this.highScore = this.score;
+                            Storage.setHighScore(this.highScore);
+                        }
+                        this.updateScoreHUD();
+                        AudioFX.playGameOver();
+                    }
+                }
+            }
+
+            MergeEngine.update(dt);
+            Particles.update(dt);
+            UI.updateComboTexts();
+
+            // Animate idle frogs (blinking & sliding)
+            const blocks = Grid.getAllBlocks();
+            const now = performance.now();
+            for (let i = 0; i < blocks.length; i++) {
+                const f = blocks[i].cell;
+                if (f.y !== f.targetY) {
+                    if (f.y < f.targetY) {
+                        f.y += CONFIG.GRAVITY_SPEED;
+                        if (f.y >= f.targetY) f.y = f.targetY;
                     } else {
-                        outData.data[outIndex] = 0; outData.data[outIndex+1] = 0; outData.data[outIndex+2] = 0; outData.data[outIndex+3] = 0;
+                        f.y -= CONFIG.GRAVITY_SPEED;
+                        if (f.y <= f.targetY) f.y = f.targetY;
                     }
                 }
-            }
-            oCtx.putImageData(outData, 0, 0);
-            return outCanvas;
-        }
-
-        perspectiveToggle.addEventListener('change', function(e) {
-            isPerspectiveMode = e.target.checked;
-            if (isPerspectiveMode) {
-                modeLabelText.innerText = "Perspective Selection (Tirchi Photos)";
-                modeLabelText.classList.remove('text-blue-700'); modeLabelText.classList.add('text-purple-700');
-                cropperWrapper.classList.add('hidden'); rotationControls.classList.add('hidden');
-                perspectiveWrapper.classList.remove('hidden');
-                renderPerspectiveUI();
-            } else {
-                modeLabelText.innerText = "Flat Box Selection";
-                modeLabelText.classList.remove('text-purple-700'); modeLabelText.classList.add('text-blue-700');
-                perspectiveWrapper.classList.add('hidden'); cropperWrapper.classList.remove('hidden');
-                if (imageToCrop.src) rotationControls.classList.remove('hidden');
-            }
-        });
-
-        // --- LOAD IMAGE PIPELINE ---
-        function loadImageIntoEditor(imgSrc, keepSettings = false) {
-            updatePhotoCountDropdown();
-            if(!keepSettings) photoNumberInput.value = getNextPhotoNumber();
-            
-            if(!keepSettings) {
-                imgExposureSlider.value = 100;
-                imgContrastSlider.value = 100;
-                imgBeautifySlider.value = 0;
-                rotationSlider.value = 0;
-                imgBgColor.value = 'none';
-            }
-            
-            imageToCrop.src = imgSrc;
-            perspectiveImg.src = imgSrc;
-            
-            initialMessage.classList.add('hidden');
-            cropModeToggle.classList.remove('hidden');
-            imageAdjustmentsPanel.classList.remove('hidden');
-            cropSettings.classList.remove('hidden');
-            
-            if (isPerspectiveMode) {
-                perspectiveWrapper.classList.remove('hidden');
-                cropperWrapper.classList.add('hidden'); 
-                rotationControls.classList.add('hidden');
-            } else {
-                cropperWrapper.classList.remove('hidden');
-                perspectiveWrapper.classList.add('hidden'); 
-                rotationControls.classList.remove('hidden');
-            }
-
-            if (cropper) cropper.destroy();
-
-            cropper = new Cropper(imageToCrop, {
-                aspectRatio: 35 / 45,
-                viewMode: 1,
-                dragMode: 'move',
-                autoCropArea: 0.8,
-                restore: false,
-                guides: true,
-                center: true,
-                highlight: false,
-                cropBoxMovable: true,
-                cropBoxResizable: true,
-                toggleDragModeOnDblclick: false,
-                ready: function() {
-                    applyImageAdjustments();
+                f.blinkTimer -= dt;
+                if (f.blinkTimer <= 0) {
+                    f.isBlinking = !f.isBlinking;
+                    f.blinkTimer = f.isBlinking ? 140 : (Math.random() * 3200 + 1800);
                 }
-            });
-        }
-
-        function processFile(file) {
-            if (!file || !file.type.startsWith('image/')) { alert("Sirf tasweer (image) upload ki ja sakti hai!"); return; }
-            if (printSheetSlots.length >= MAX_SLOTS) { alert("Sheet full hai. Pehle 'Sheet Saaf Karein'."); return; }
-            const reader = new FileReader();
-            reader.onload = function(event) { loadImageIntoEditor(event.target.result); };
-            reader.readAsDataURL(file);
-        }
-
-        imageUpload.addEventListener('change', function(e) {
-            if (e.target.files && e.target.files.length > 0) {
-                processFile(e.target.files[0]); imageUpload.value = '';
-            }
-        });
-
-        pasteBtn.addEventListener('click', async () => {
-            try {
-                const clipboardItems = await navigator.clipboard.read();
-                for (const clipboardItem of clipboardItems) {
-                    const imageTypes = clipboardItem.types.filter(type => type.startsWith('image/'));
-                    if (imageTypes.length > 0) {
-                        const blob = await clipboardItem.getType(imageTypes[0]); processFile(blob); return;
-                    }
-                }
-                alert("Clipboard mein image nahi mili (Ctrl+C karein pehle).");
-            } catch (err) { alert("Paste ki ijazat nahi mili. 'Ctrl + V' dabayen."); }
-        });
-
-        window.addEventListener('paste', e => {
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let index in items) {
-                const item = items[index];
-                if (item.kind === 'file' && item.type.startsWith('image/')) {
-                    processFile(item.getAsFile()); e.preventDefault(); break;
+                if (f.merging) {
+                    const age = now - f.spawnTime;
+                    if (age < 90) f.scale = 1.0 + 0.3 * (age / 90);
+                    else if (age < 180) f.scale = 1.3 - 0.3 * ((age - 90) / 90);
+                    else { f.scale = 1; f.merging = false; }
                 }
             }
-        });
+        },
 
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            document.body.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
-            dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
-        });
+        render() {
+            Renderer.clear();
+            Renderer.drawGrid();
 
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => { dropZone.classList.add('dragover'); dragOverlay.classList.remove('hidden'); }, false);
-        });
+            const allBlocks = Grid.getAllBlocks();
+            const blockData = [];
+            for (let i = 0; i < allBlocks.length; i++) {
+                const b = allBlocks[i];
+                blockData.push({
+                    x: b.cell.x - CONFIG.CELL_SIZE / 2,
+                    y: b.cell.y - CONFIG.CELL_SIZE / 2,
+                    value: b.cell.value,
+                    scale: b.cell.scale,
+                    eating: b.cell.eating,
+                    merging: b.cell.merging,
+                    beingEaten: b.cell.beingEaten,
+                    isBlinking: b.cell.isBlinking
+                });
+            }
+            Renderer.drawBlocks(blockData);
+            Renderer.drawTongues();
 
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => { dropZone.classList.remove('dragover'); dragOverlay.classList.add('hidden'); }, false);
-        });
-
-        dropZone.addEventListener('drop', e => { if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]); }, false);
-        document.body.addEventListener('drop', e => { if (e.dataTransfer.files.length > 0 && !dropZone.contains(e.target)) processFile(e.dataTransfer.files[0]); }, false);
-
-        function renderFinalSheet() {
-            const sheetWidth = 1200; const sheetHeight = 1800;
-            const rotW = 531; const rotH = 413; 
-
-            const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = sheetWidth; finalCanvas.height = sheetHeight;
-            const fCtx = finalCanvas.getContext('2d');
-
-            fCtx.fillStyle = '#ffffff'; fCtx.fillRect(0, 0, sheetWidth, sheetHeight);
-            const marginX = (sheetWidth - (2 * rotW)) / 3;
-            const marginY = (sheetHeight - (4 * rotH)) / 5;
-
-            for (let i = 0; i < printSheetSlots.length; i++) {
-                let slot = printSheetSlots[i];
-                let c = i % 2; let r = Math.floor(i / 2); 
-                let posX = marginX + (c * (rotW + marginX));
-                let posY = marginY + (r * (rotH + marginY));
-
-                fCtx.drawImage(slot.canvas, posX, posY);
-                fCtx.strokeStyle = '#cccccc'; fCtx.lineWidth = 2; fCtx.strokeRect(posX, posY, rotW, rotH);
-                
-                fCtx.save(); fCtx.fillStyle = '#666666'; fCtx.font = '16px monospace';
-                fCtx.textAlign = 'center'; fCtx.textBaseline = 'middle';
-                let textX = c === 0 ? posX + rotW + (marginX / 2) - 8 : posX - (marginX / 2) + 8;
-                let textY = posY + (rotH / 2);
-                fCtx.translate(textX, textY); fCtx.rotate(Math.PI / 2); 
-                fCtx.fillText(slot.metaText, 0, 0); fCtx.restore();
+            if (!Shooter.isFiring && this.state === 'playing') {
+                Renderer.drawTrajectory(Shooter.getTrajectory());
             }
 
-            finalOutputDataUrl = finalCanvas.toDataURL('image/jpeg', 1.0);
-            resultPreview.src = finalOutputDataUrl;
-            resultPlaceholder.classList.add('hidden'); resultContainer.classList.remove('hidden');
-            previewSlotsText.innerText = printSheetSlots.length;
+            Renderer.drawShooter(Shooter);
+
+            if (Shooter.isFiring && Shooter.projectile) {
+                Renderer.drawProjectile(Shooter.projectile);
+            }
+
+            Particles.draw(this.ctx);
+            Renderer.drawComboTexts(UI.getActiveComboTexts());
+
+            if (this.state === 'menu') Renderer.drawMenu();
+            else if (this.state === 'gameover') Renderer.drawGameOver(this.score, this.highScore);
+        },
+
+        addScore(pts) {
+            this.score += pts;
+            if (this.score > this.highScore) {
+                this.highScore = this.score;
+                Storage.setHighScore(this.highScore);
+            }
+            this.updateScoreHUD(true);
+        },
+
+        resize() {
+            const maxW = 450;
+            const w = Math.min(window.innerWidth || 400, maxW);
+            const hdr = document.getElementById('gameHeader');
+            const hdrH = hdr ? hdr.offsetHeight : 54;
+            const h = Math.max(500, (window.innerHeight || 700) - hdrH - 8);
+
+            this.canvas.width = w;
+            this.canvas.height = h;
+            this.canvas.style.width = w + 'px';
+            this.canvas.style.height = h + 'px';
+
+            const availW = w - CONFIG.GRID_PADDING * 2;
+            CONFIG.CELL_SIZE = Math.floor(availW / CONFIG.COLS);
+            CONFIG.GRID_WIDTH = CONFIG.COLS * CONFIG.CELL_SIZE;
+            CONFIG.GRID_HEIGHT = CONFIG.ROWS * CONFIG.CELL_SIZE;
+
+            Grid.offsetX = Math.floor((w - CONFIG.GRID_WIDTH) / 2);
+            Grid.offsetY = 16;
+
+            Shooter.x = w / 2;
+            Shooter.y = Grid.offsetY + CONFIG.GRID_HEIGHT + CONFIG.CELL_SIZE * 0.95;
+
+            const blocks = Grid.getAllBlocks();
+            for (let i = 0; i < blocks.length; i++) {
+                const pos = Grid.getCellPixelPos(blocks[i].row, blocks[i].col);
+                blocks[i].cell.x = pos.x;
+                blocks[i].cell.y = pos.y;
+                blocks[i].cell.targetY = pos.y;
+            }
+        },
+
+        onAimMove(angle) {
+            if (this.state !== 'playing' || Shooter.isFiring) return;
+            Shooter.setAngle(angle);
+        },
+
+        onAimEnd() {
+            if (this.state !== 'playing' || Shooter.isFiring) return;
+            Shooter.fire();
+            AudioFX.playShoot();
         }
+    };
 
-        addToSheetBtn.addEventListener('click', function() {
-            if (!imageToCrop.src) return;
-
-            const cropW = 413; const cropH = 531;
-            let croppedCanvas;
-
-            if (isPerspectiveMode) {
-                croppedCanvas = extractPerspectiveCanvas(perspectiveImg, perspectivePts, cropW, cropH);
-            } else {
-                if (!cropper) return;
-                let rawCanvas = cropper.getCroppedCanvas({ width: cropW, height: cropH, imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
-                croppedCanvas = document.createElement('canvas');
-                croppedCanvas.width = cropW; croppedCanvas.height = cropH;
-                let cCtx = croppedCanvas.getContext('2d');
-                
-                // Bake Beauty Filters
-                let beauty = imgBeautifySlider.value;
-                let blurVal = (beauty / 100) * 1.5;
-                let satVal = 100 + (beauty * 0.5);
-                cCtx.filter = `brightness(${imgExposureSlider.value}%) contrast(${imgContrastSlider.value}%) saturate(${satVal}%) blur(${blurVal}px)`;
-                cCtx.drawImage(rawCanvas, 0, 0);
-            }
-
-            // --- Fill Actual Background Color First (For White/Blue) ---
-            let bg = imgBgColor.value;
-            let coloredBgCanvas = document.createElement('canvas');
-            coloredBgCanvas.width = cropW; coloredBgCanvas.height = cropH;
-            let finalBgCtx = coloredBgCanvas.getContext('2d');
-            
-            if(bg !== 'none') {
-                finalBgCtx.fillStyle = bg === 'blue' ? '#005bb5' : '#ffffff';
-                finalBgCtx.fillRect(0, 0, cropW, cropH);
-            }
-            finalBgCtx.drawImage(croppedCanvas, 0, 0);
-            croppedCanvas = coloredBgCanvas;
-            // -------------------------------------------------------------
-
-            const rotW = cropH; const rotH = cropW; 
-            const rotatedCanvas = document.createElement('canvas');
-            rotatedCanvas.width = rotW; rotatedCanvas.height = rotH;
-            const rCtx = rotatedCanvas.getContext('2d');
-            rCtx.translate(rotW / 2, rotH / 2); rCtx.rotate(90 * Math.PI / 180);
-            rCtx.drawImage(croppedCanvas, -cropW / 2, -cropH / 2, cropW, cropH);
-
-            const copies = parseInt(photoCountSelect.value);
-            const metaText = `${captureDateInput.value || 'No Date'} | ${photoNumberInput.value || 'No ID'}`;
-
-            for (let i = 0; i < copies; i++) {
-                if (printSheetSlots.length < MAX_SLOTS) printSheetSlots.push({ canvas: rotatedCanvas, metaText: metaText });
-            }
-
-            renderFinalSheet(); updatePhotoCountDropdown();
-
-            cropperWrapper.classList.add('hidden'); perspectiveWrapper.classList.add('hidden');
-            cropSettings.classList.add('hidden'); imageAdjustmentsPanel.classList.add('hidden');
-            cropModeToggle.classList.add('hidden'); initialMessage.classList.remove('hidden');
-            
-            const remaining = MAX_SLOTS - printSheetSlots.length;
-            if (remaining > 0) {
-                initialMessage.innerHTML = `<i class="fa-solid fa-circle-check text-green-500 text-5xl mb-3"></i>
-                    <p class="text-gray-800 font-bold text-lg mb-1">Photos Sheet Mein Add Ho Gayin!</p>
-                    <p class="text-gray-600 mb-3">Sheet par abhi bhi <span class="font-bold text-blue-600">${remaining} photos</span> ki jagah baqi hai.</p>
-                    <p class="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">Doosri photo upload karein ya camera se lein taake sheet pur ho.</p>`;
-            } else {
-                initialMessage.innerHTML = `<i class="fa-solid fa-star text-yellow-500 text-5xl mb-3"></i>
-                    <p class="text-gray-800 font-bold text-lg mb-1">Sheet Bhar Gayi Hai (8/8)</p><p class="text-gray-600">Ab aap sheet download ya print kar sakte hain.</p>`;
-            }
-            imageUpload.value = ''; imageToCrop.src = '';
-            if (cropper) { cropper.destroy(); cropper = null; }
-            if(window.innerWidth < 1024) resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-
-        clearSheetBtn.addEventListener('click', function() {
-            printSheetSlots = []; updatePhotoCountDropdown();
-            previewSlotsText.innerText = '0'; resultContainer.classList.add('hidden');
-            resultPlaceholder.classList.remove('hidden'); finalOutputDataUrl = null;
-            if (cropSettings.classList.contains('hidden')) {
-                initialMessage.innerHTML = `<i class="fa-solid fa-images text-4xl mb-3 text-blue-300"></i>
-                    <p class="font-medium text-gray-600">Nayi sheet shuru karne ke liye photo upload karein ya Camera istemal karein.</p>`;
-                initialMessage.classList.remove('hidden');
-            }
-        });
-
-        function getSafeFileName() { return `Daiba_Photosheet_${captureDateInput.value || 'Date'}`.replace(/[^a-zA-Z0-9-]/g, '_'); }
-        downloadJpgBtn.addEventListener('click', function() { if (!finalOutputDataUrl) return; const link = document.createElement('a'); link.download = `${getSafeFileName()}.jpg`; link.href = finalOutputDataUrl; link.click(); });
-        downloadPdfBtn.addEventListener('click', function() { if (!finalOutputDataUrl) return; const doc = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'in', format: [4, 6] }); doc.addImage(finalOutputDataUrl, 'JPEG', 0, 0, 4, 6); doc.save(`${getSafeFileName()}.pdf`); });
-        printBtn.addEventListener('click', function() {
-            if (!finalOutputDataUrl) return;
-            const printWindow = window.open('', '_blank');
-            if (!printWindow) { alert("Popups allow karein."); return; }
-            const html = `<!DOCTYPE html><html><head><title>Print</title><style>@page{size:4in 6in;margin:0;}body,html{margin:0;padding:0;width:4in;height:6in;}img{width:100%;height:100%;object-fit:cover;display:block;}</style></head><body><img src="${finalOutputDataUrl}" onload="window.print(); window.close();" /></body></html>`;
-            printWindow.document.open(); printWindow.document.write(html); printWindow.document.close();
-        });
+    window.Game = Game;
+    document.addEventListener('DOMContentLoaded', () => Game.init());
     </script>
 </body>
 </html>
