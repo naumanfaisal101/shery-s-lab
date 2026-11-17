@@ -10,8 +10,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Imgly AI Background Removal (Naya Feature) -->
-    <script src="https://unpkg.com/@imgly/background-removal@1.4.3/dist/browser/bundle.js"></script>
+    <!-- MediaPipe Local AI Background Removal (Pinned Version for Stability) -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/selfie_segmentation.js" crossorigin="anonymous"></script>
     
     <style>
         body {
@@ -38,13 +38,28 @@
             cursor: move;
             fill: white;
             stroke: #3b82f6;
-            stroke-width: 3px;
+            stroke-width: 4px;
             transition: r 0.1s;
+            touch-action: none;
         }
         .handle:hover, .handle.active-handle {
-            r: 13px;
+            r: 15px;
             fill: #dbeafe;
             stroke: #1d4ed8;
+        }
+        #perspectiveSvg {
+            touch-action: none;
+        }
+        .cropper-view-box {
+            background-color: #e5e7eb;
+            transition: background-color 0.2s ease;
+        }
+        .cropper-container.no-checkerboard, 
+        .cropper-container.no-checkerboard .cropper-bg {
+            background-image: none !important;
+        }
+        .cropper-crop-box .cropper-face {
+            background-color: transparent !important;
         }
         #perspectiveWrapper {
             display: flex;
@@ -65,6 +80,59 @@
         #cameraModal {
             backdrop-filter: blur(5px);
         }
+
+        /* Desktop Split-Screen UI (Screens >= 1024px) */
+        @media (min-width: 1024px) {
+            .desktop-scroll-pane {
+                max-height: calc(100vh - 120px);
+                overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: #cbd5e1 #f8fafc;
+                padding-right: 8px;
+            }
+            .desktop-scroll-pane::-webkit-scrollbar {
+                width: 7px;
+            }
+            .desktop-scroll-pane::-webkit-scrollbar-track {
+                background: #f8fafc;
+                border-radius: 8px;
+            }
+            .desktop-scroll-pane::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 8px;
+            }
+            .desktop-scroll-pane::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
+
+            .desktop-sticky-preview {
+                position: sticky;
+                top: 1rem;
+                max-height: calc(100vh - 120px);
+                overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: #cbd5e1 #f8fafc;
+            }
+            .desktop-sticky-preview::-webkit-scrollbar {
+                width: 6px;
+            }
+            .desktop-sticky-preview::-webkit-scrollbar-track {
+                background: #f8fafc;
+            }
+            .desktop-sticky-preview::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 8px;
+            }
+
+            #resultPreview {
+                max-height: min(520px, calc(100vh - 250px)) !important;
+                width: auto !important;
+                max-width: 100% !important;
+                object-fit: contain !important;
+                margin: 0 auto;
+                display: block;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen p-2 sm:p-4 md:p-8 overflow-x-hidden">
@@ -75,70 +143,71 @@
         <span id="customToastMsg" class="text-sm font-medium leading-snug">Message</span>
     </div>
 
-    <a id="floatingMobileBtn" href="../index.html" class="sm:hidden fixed bottom-6 right-6 z-[9999] bg-blue-900 hover:bg-blue-800 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-2xl transition-transform active:scale-95 border-2 border-white">
-        <i class="fa-solid fa-house text-xl"></i>
+    <!-- Compact Floating Dashboard Button positioned on bottom-LEFT to avoid overlapping print/actions on bottom-right -->
+    <a id="floatingMobileBtn" href="index.html" aria-label="Go to Home Dashboard" class="sm:hidden fixed bottom-4 left-4 z-40 bg-gray-900/85 hover:bg-gray-900 text-white w-10 h-10 flex items-center justify-center rounded-full shadow-lg backdrop-blur-sm transition-transform active:scale-95 border border-gray-700" title="Home Dashboard">
+        <i class="fa-solid fa-house text-sm pointer-events-none"></i>
     </a>
 
-    <a id="floatingDesktopBtn" href="../index.html" class="hidden sm:flex items-center gap-2 fixed bottom-8 right-8 z-[9999] bg-blue-900 hover:bg-blue-800 text-white py-3 px-6 rounded-full font-bold text-sm shadow-xl transition-all hover:scale-105 border-2 border-white">
-        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    <a id="floatingDesktopBtn" href="index.html" class="hidden sm:flex items-center gap-1.5 fixed bottom-4 left-4 z-40 bg-gray-900/80 hover:bg-gray-900 text-white py-1.5 px-3 rounded-full text-xs font-semibold shadow-lg backdrop-blur-sm transition-all hover:scale-105 border border-gray-700/80" title="Go back to Dashboard">
+        <i class="fa-solid fa-arrow-left text-[11px]"></i> Dashboard
     </a>
 
     <!-- FIX: Camera Modal overhauled for mobile AND Desktop perfect view -->
-    <div id="cameraModal" class="hidden fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 sm:p-4">
-        <div class="bg-white sm:rounded-xl shadow-2xl w-full max-w-3xl h-full sm:h-auto sm:max-h-[95vh] flex flex-col overflow-hidden">
+    <div id="cameraModal" role="dialog" aria-modal="true" aria-labelledby="cameraLiveTitle" class="hidden fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 sm:p-4">
+        <div class="bg-white sm:rounded-xl shadow-2xl w-full max-w-3xl h-full sm:h-auto sm:max-h-[92vh] flex flex-col overflow-y-auto sm:overflow-hidden">
             
             <div class="p-3 sm:p-4 bg-gray-900 text-white flex justify-between items-center shrink-0">
-                <h3 class="font-bold text-base sm:text-lg"><i class="fa-solid fa-camera mr-2"></i> Camera Live View</h3>
+                <h3 id="cameraLiveTitle" class="font-bold text-base sm:text-lg"><i class="fa-solid fa-camera mr-2"></i> Camera Live View</h3>
                 <div class="flex items-center gap-3 sm:gap-4">
-                    <button id="flipCameraBtn" class="text-blue-400 hover:text-blue-300 transition-colors p-1" title="Front/Back Camera Switch">
+                    <button id="flipCameraBtn" aria-label="Flip Camera" class="text-blue-400 hover:text-blue-300 transition-colors p-1" title="Front/Back Camera Switch">
                         <i class="fa-solid fa-camera-rotate text-xl sm:text-2xl"></i>
                     </button>
-                    <button id="closeCameraBtn" class="text-red-400 hover:text-red-300 transition-colors p-1">
+                    <button id="closeCameraBtn" aria-label="Close Camera" class="text-red-400 hover:text-red-300 transition-colors p-1">
                         <i class="fa-solid fa-times text-xl sm:text-2xl"></i>
                     </button>
                 </div>
             </div>
             
-            <!-- FIX: Added min-h-[400px] specifically for desktop to ensure the video isn't hidden -->
-            <div class="relative bg-black flex-grow w-full overflow-hidden min-h-[400px] sm:min-h-[500px]">
-                <video id="videoElement" autoplay playsinline class="absolute inset-0 w-full h-full object-contain"></video>
+            <!-- Video Container responsive for both mobile & desktop -->
+            <div class="relative bg-black flex-1 w-full overflow-hidden min-h-[220px] sm:min-h-[380px]">
+                <video id="videoElement" autoplay playsinline muted class="absolute inset-0 w-full h-full object-contain"></video>
                 <div id="camLoading" class="absolute inset-0 flex items-center justify-center text-white hidden z-10 bg-black/70 flex-col">
                     <i class="fa-solid fa-spinner fa-spin text-4xl mb-3"></i>
                     <p id="camLoadingText" class="font-bold text-lg">Camera Shuru Ho Raha Hai...</p>
                 </div>
             </div>
 
-            <!-- UPGRADE: Extended Camera Controls (Beautify & Background) -->
-            <div class="p-4 sm:p-5 bg-gray-50 shrink-0 border-t border-gray-200">
+            <!-- Extended Camera Controls (Beautify & Background) -->
+            <div class="p-3 sm:p-5 bg-gray-50 shrink-0 border-t border-gray-200 overflow-y-auto max-h-[50vh] sm:max-h-none">
                 <h4 class="text-xs sm:text-sm font-bold text-gray-700 mb-2 border-b pb-1">Camera Settings & Filters</h4>
                 
-                <div class="grid grid-cols-2 gap-x-4 gap-y-3 mb-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 mb-3">
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
+                        <label for="camExposureSlider" class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
                             <span>Exposure</span>
                             <span class="text-blue-600 font-bold"><span id="camExpVal">100</span>%</span>
                         </label>
                         <input type="range" id="camExposureSlider" min="50" max="200" value="100" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
+                        <label for="camContrastSlider" class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
                             <span>Contrast</span>
                             <span class="text-blue-600 font-bold"><span id="camContVal">100</span>%</span>
                         </label>
                         <input type="range" id="camContrastSlider" min="50" max="200" value="100" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
+                        <label for="camBeautifySlider" class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
                             <span>Beautify (Skin Smooth)</span>
                             <span class="text-pink-500 font-bold"><span id="camBeautyVal">0</span>%</span>
                         </label>
                         <input type="range" id="camBeautifySlider" min="0" max="100" value="0" class="w-full h-2 bg-pink-200 rounded-lg appearance-none cursor-pointer">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
-                            <span>Auto Background</span>
+                        <label for="camBgColor" class="block text-xs font-medium text-gray-600 mb-1 flex justify-between items-center">
+                            <span>Auto BG (Capture Ke Baad)</span>
                         </label>
-                        <select id="camBgColor" class="w-full h-[26px] text-xs border border-gray-300 rounded focus:ring-blue-500 bg-white">
+                        <select id="camBgColor" class="w-full h-[28px] text-xs border border-gray-300 rounded focus:ring-blue-500 bg-white">
                             <option value="none">Original (No Change)</option>
                             <option value="blue">Blue Background</option>
                             <option value="white">White Background</option>
@@ -146,54 +215,136 @@
                     </div>
                 </div>
                 
-                <div class="flex justify-center">
-                    <button id="capturePhotoBtn" class="bg-blue-600 text-white rounded-full w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg hover:bg-blue-700 transition transform hover:scale-105 border-4 border-white ring-2 ring-blue-600" title="Tasweer Khainchain">
-                        <i class="fa-solid fa-camera text-xl sm:text-2xl"></i>
+                <div class="flex justify-center pb-1">
+                    <button id="capturePhotoBtn" class="bg-blue-600 text-white rounded-full w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg hover:bg-blue-700 transition transform hover:scale-105 border-4 border-white ring-2 ring-blue-600 active:scale-95" title="Tasweer Khainchain">
+                        <i class="fa-solid fa-camera text-xl sm:text-2xl pointer-events-none"></i>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="max-w-5xl mx-auto w-full">
-        <header class="mb-8 sm:mb-10 flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 sm:gap-6 bg-white p-5 sm:p-8 sm:pr-40 rounded-2xl shadow-sm border border-gray-100 relative">
+    <!-- NEW: AI Prompts Modal (Updated with Tabs/Buttons for easy copying) -->
+    <div id="promptsModal" class="hidden fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden transform transition-all">
+            <div class="p-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Gemini AI Prompts</h3>
+                <button id="closePromptsBtn" class="text-white hover:text-red-200 transition-colors p-1">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-5 overflow-y-auto max-h-[70vh] bg-gray-50 flex flex-col gap-3">
+                <p class="text-sm text-gray-600 mb-3 text-center">In tabs par click karein aur prompt copy ho jayega. Phir Gemini mein Paste (Ctrl+V) karein:</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Tab 1 -->
+                    <button type="button" onclick="copyHiddenPrompt(this, 'only hd passport photo of each person bna dain with blue bk on digital gray canvas of all 1 persons with natural retouch natural face saf kr dain.')" class="group relative bg-white border border-gray-200 p-4 rounded-xl shadow-sm hover:border-indigo-400 hover:shadow-md hover:bg-indigo-50 transition-all text-left flex flex-col gap-2 focus:outline-none">
+                        <div class="flex items-center gap-2 text-indigo-700 font-bold text-sm">
+                            <i class="fa-solid fa-image-portrait text-lg"></i>
+                            <span>HD Passport & Blue BG</span>
+                        </div>
+                        <span class="text-[10px] text-gray-400 group-hover:text-indigo-600 transition-colors"><i class="fa-solid fa-copy"></i> Click to copy</span>
+                    </button>
+
+                    <!-- Tab 2 -->
+                    <button type="button" onclick="copyHiddenPrompt(this, 'only hd passport photo of each person bna dain with white bk on digital gray canvas of all 1 persons  with natural retouch natural face saf kr dain.')" class="group relative bg-white border border-gray-200 p-4 rounded-xl shadow-sm hover:border-indigo-400 hover:shadow-md hover:bg-indigo-50 transition-all text-left flex flex-col gap-2 focus:outline-none">
+                        <div class="flex items-center gap-2 text-indigo-700 font-bold text-sm">
+                            <i class="fa-regular fa-image text-lg"></i>
+                            <span>HD Passport & White BG</span>
+                        </div>
+                        <span class="text-[10px] text-gray-400 group-hover:text-indigo-600 transition-colors"><i class="fa-solid fa-copy"></i> Click to copy</span>
+                    </button>
+
+                    <!-- Tab 3 -->
+                    <button type="button" onclick="copyHiddenPrompt(this, 'only hd passport photo of each person bna dain with blue bk on digital gray canvas of all 1 persons with tie coat  with natural retouch natural face saf kr dain.')" class="group relative bg-white border border-gray-200 p-4 rounded-xl shadow-sm hover:border-indigo-400 hover:shadow-md hover:bg-indigo-50 transition-all text-left flex flex-col gap-2 focus:outline-none">
+                        <div class="flex items-center gap-2 text-indigo-700 font-bold text-sm">
+                            <i class="fa-solid fa-user-tie text-lg"></i>
+                            <span>Suit Tie & Blue BG</span>
+                        </div>
+                        <span class="text-[10px] text-gray-400 group-hover:text-indigo-600 transition-colors"><i class="fa-solid fa-copy"></i> Click to copy</span>
+                    </button>
+
+                    <!-- Tab 4 -->
+                    <button type="button" onclick="copyHiddenPrompt(this, 'only hd passport photo of each person bna dain with white bk on digital gray canvas of all 1 persons with tie coat  with natural retouch natural face saf kr dain .')" class="group relative bg-white border border-gray-200 p-4 rounded-xl shadow-sm hover:border-indigo-400 hover:shadow-md hover:bg-indigo-50 transition-all text-left flex flex-col gap-2 focus:outline-none">
+                        <div class="flex items-center gap-2 text-indigo-700 font-bold text-sm">
+                            <i class="fa-solid fa-user-tie text-lg"></i>
+                            <span>Suit Tie & White BG</span>
+                        </div>
+                        <span class="text-[10px] text-gray-400 group-hover:text-indigo-600 transition-colors"><i class="fa-solid fa-copy"></i> Click to copy</span>
+                    </button>
+
+                    <!-- Tab 5 -->
+                    <button type="button" onclick="copyHiddenPrompt(this, 'restore it to its original form.')" class="group relative bg-white border border-gray-200 p-4 rounded-xl shadow-sm hover:border-indigo-400 hover:shadow-md hover:bg-indigo-50 transition-all text-left flex flex-col gap-2 focus:outline-none">
+                        <div class="flex items-center gap-2 text-indigo-700 font-bold text-sm">
+                            <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                            <span>Photo Restoration</span>
+                        </div>
+                        <span class="text-[10px] text-gray-400 group-hover:text-indigo-600 transition-colors"><i class="fa-solid fa-copy"></i> Click to copy</span>
+                    </button>
+
+                    <!-- Tab 6 -->
+                    <button type="button" onclick="copyHiddenPrompt(this, 'ye photo akhati hai iski bk blue krain or iska size 2.7x1.7inch ho  or ye mujay digital gray canvas pr day dain har pair ki or halki si natural retouch kr dain natural face saf kr dain.')" class="group relative bg-white border border-gray-200 p-4 rounded-xl shadow-sm hover:border-indigo-400 hover:shadow-md hover:bg-indigo-50 transition-all text-left flex flex-col gap-2 focus:outline-none">
+                        <div class="flex items-center gap-2 text-indigo-700 font-bold text-sm">
+                            <i class="fa-solid fa-users text-lg"></i>
+                            <span>2.7x1.7 & Blue BG</span>
+                        </div>
+                        <span class="text-[10px] text-gray-400 group-hover:text-indigo-600 transition-colors"><i class="fa-solid fa-copy"></i> Click to copy</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-5xl lg:max-w-[1580px] mx-auto w-full">
+        <header class="mb-4 sm:mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 sm:p-5 lg:py-3 lg:px-6 rounded-2xl shadow-sm border border-gray-100 relative">
             
-            <a href="index.html" class="hidden sm:flex absolute top-6 right-6 bg-gray-50 hover:bg-gray-100 text-gray-600 px-4 py-2 rounded-full font-medium text-sm transition items-center gap-2 border border-gray-200">
+            <a href="index.html" class="hidden sm:flex absolute top-4 sm:top-5 right-4 sm:right-6 bg-gray-50 hover:bg-gray-100 text-gray-600 px-3.5 py-1.5 rounded-full font-medium text-xs sm:text-sm transition items-center gap-2 border border-gray-200">
                 <i class="fa-solid fa-house"></i> Home Page
             </a>
+            <a href="index.html" aria-label="Home" class="sm:hidden absolute top-3 right-3 bg-gray-50 hover:bg-gray-100 text-gray-600 p-2 rounded-full border border-gray-200 shadow-sm flex items-center justify-center">
+                <i class="fa-solid fa-house text-xs"></i>
+            </a>
 
-            <div class="relative shrink-0 group">
-                <a href="index.html" title="Go to Home Page">
-                    <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 via-red-400 to-yellow-400 blur-md opacity-60 scale-110 group-hover:scale-125 transition-all duration-300"></div>
-                    <img src="Gemini_Generated_Image_57wlmt57wlmt57wl.jpg" 
-                         onerror="this.onerror=null; this.src='https://placehold.co/200x200/ec4899/ffffff?text=Daiba';" 
-                         alt="Daiba Logo" 
-                         class="relative w-24 h-24 sm:w-36 sm:h-36 object-cover object-top rounded-full border-4 border-white shadow-lg z-10 bg-white">
-                </a>
-            </div>
-            
-            <div class="text-center sm:text-left mt-2 sm:mt-0 max-w-full">
-                <a href="index.html" class="inline-block hover:opacity-80 transition-opacity" title="Go to Home Page">
-                    <h1 class="text-2xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-purple-600 mb-2 sm:mb-3 tracking-tight break-words">
-                        Daiba Passport Photo Set Maker
-                    </h1>
-                </a>
-                <div class="mb-3">
-                    <span class="inline-block bg-gradient-to-r from-blue-50 to-purple-50 text-purple-800 border border-purple-100 py-1 px-4 rounded-full text-xs sm:text-sm font-semibold tracking-wide shadow-sm">
-                        by Nusrat Shaheen inc.
-                    </span>
+            <div class="flex items-center gap-4 sm:gap-5">
+                <div class="relative shrink-0 group">
+                    <a href="index.html" title="Go to Home Page">
+                        <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 via-red-400 to-yellow-400 blur-sm opacity-60 scale-105 group-hover:scale-115 transition-all duration-300"></div>
+                        <img src="Gemini_Generated_Image_57wlmt57wlmt57wl.jpg" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/200x200/ec4899/ffffff?text=Daiba';" 
+                             alt="Daiba Logo" 
+                             class="relative w-14 h-14 sm:w-16 sm:h-16 lg:w-14 lg:h-14 object-cover object-top rounded-full border-2 border-white shadow-md z-10 bg-white">
+                    </a>
                 </div>
-                <p class="text-gray-600 text-xs sm:text-base max-w-md mx-auto sm:mx-0 leading-relaxed px-2 sm:px-0">
-                    Crop to 35x45mm ya 2.7x1.7 in, Face Beautify karein, Blue/White background lagayein, aur ek hi 4x6 sheet par lagayein.
-                </p>
+                
+                <div class="text-left max-w-full">
+                    <a href="index.html" class="inline-block hover:opacity-80 transition-opacity" title="Go to Home Page">
+                        <h1 class="text-lg sm:text-2xl lg:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-purple-600 tracking-tight break-words">
+                            Daiba Passport Photo Set Maker
+                        </h1>
+                    </a>
+                    <div class="flex flex-wrap items-center gap-2 mt-0.5">
+                        <span class="inline-block bg-purple-50 text-purple-800 border border-purple-100 py-0.5 px-2.5 rounded-full text-[11px] font-semibold tracking-wide shadow-sm">
+                            by Nusrat Shaheen inc.
+                        </span>
+                        <span class="text-gray-500 text-xs hidden md:inline">
+                            • Passport (35x45mm) & 2.7x1.7 in • AI Background • Epson 4x6 Photo Sheet
+                        </span>
+                    </div>
+                </div>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            <!-- Left Column: Upload & Crop -->
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">1. Photo Chunein</h2>
+            <!-- Left Column: Upload & Crop (Independently Scrollable on Desktop) -->
+            <div class="lg:col-span-7 bg-white rounded-xl shadow-md p-5 sm:p-6 lg:max-h-[calc(100vh-130px)] lg:overflow-y-auto desktop-scroll-pane">
+                <!-- MODIFIED: Heading with AI Prompts Button -->
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h2 class="text-xl font-semibold text-gray-700">1. Photo Chunein</h2>
+                    <button id="openPromptsBtn" class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI Prompts
+                    </button>
+                </div>
 
                 <!-- NEW: Template Format Selector (Passport vs 2.7 x 1.7 in) -->
                 <div class="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-3.5 rounded-lg border border-blue-200 shadow-sm">
@@ -249,42 +400,62 @@
                             <span class="ml-3 text-sm font-bold text-blue-700" id="modeLabelText">Flat Box Selection</span>
                         </label>
                     </div>
-                    <!-- Keyboard Arrow Keys Precision Hint & Interactive Nudge Controls (Works for BOTH Passport & 2.7x1.7 Templates) -->
+                    <!-- Keyboard Arrow Keys Precision Hint, Zoom Controls & Interactive Nudge Controls -->
                     <div class="text-xs text-blue-800 bg-white/90 px-2.5 py-2 rounded border border-blue-200 flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-1.5">
                             <i class="fa-solid fa-keyboard text-blue-600"></i>
-                            <span><b>Arrow Keys (↑ ↓ ← →):</b> Bounding box 1px move karein <span id="activeTplNudgeBadge" class="text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded font-bold ml-1">Passport & 2.7x1.7</span></span>
+                            <span><b>Arrows:</b> 1px move | <b>Wheel:</b> Zoom <span id="activeTplNudgeBadge" class="text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded font-bold ml-1">Passport & 2.7x1.7</span></span>
                         </div>
-                        <div class="flex items-center gap-1">
-                            <button type="button" data-nudge="left" class="nudge-btn w-6 h-6 bg-blue-50 hover:bg-blue-200 text-blue-800 rounded border border-blue-300 flex items-center justify-center transition active:scale-95" title="Move Left 1px (←)">
-                                <i class="fa-solid fa-arrow-left text-[10px] pointer-events-none"></i>
-                            </button>
-                            <button type="button" data-nudge="up" class="nudge-btn w-6 h-6 bg-blue-50 hover:bg-blue-200 text-blue-800 rounded border border-blue-300 flex items-center justify-center transition active:scale-95" title="Move Up 1px (↑)">
-                                <i class="fa-solid fa-arrow-up text-[10px] pointer-events-none"></i>
-                            </button>
-                            <button type="button" data-nudge="down" class="nudge-btn w-6 h-6 bg-blue-50 hover:bg-blue-200 text-blue-800 rounded border border-blue-300 flex items-center justify-center transition active:scale-95" title="Move Down 1px (↓)">
-                                <i class="fa-solid fa-arrow-down text-[10px] pointer-events-none"></i>
-                            </button>
-                            <button type="button" data-nudge="right" class="nudge-btn w-6 h-6 bg-blue-50 hover:bg-blue-200 text-blue-800 rounded border border-blue-300 flex items-center justify-center transition active:scale-95" title="Move Right 1px (→)">
-                                <i class="fa-solid fa-arrow-right text-[10px] pointer-events-none"></i>
-                            </button>
+                        <div class="flex items-center gap-2">
+                            <!-- Zoom In / Zoom Out Controls for flexible framing -->
+                            <div class="flex items-center gap-1 border-r border-blue-200 pr-2 mr-0.5">
+                                <button type="button" id="zoomOutBtn" aria-label="Zoom Out Photo" class="w-8 h-8 sm:w-6 sm:h-6 bg-blue-50 hover:bg-blue-200 text-blue-800 rounded border border-blue-300 flex items-center justify-center transition active:scale-95" title="Zoom Out Photo (-)">
+                                    <i class="fa-solid fa-magnifying-glass-minus text-xs sm:text-[10px] pointer-events-none"></i>
+                                </button>
+                                <button type="button" id="zoomInBtn" aria-label="Zoom In Photo" class="w-8 h-8 sm:w-6 sm:h-6 bg-blue-50 hover:bg-blue-200 text-blue-800 rounded border border-blue-300 flex items-center justify-center transition active:scale-95" title="Zoom In Photo (+)">
+                                    <i class="fa-solid fa-magnifying-glass-plus text-xs sm:text-[10px] pointer-events-none"></i>
+                                </button>
+                                <button type="button" id="resetZoomBtn" aria-label="Reset Framing" class="px-1.5 h-8 sm:h-6 bg-blue-50 hover:bg-blue-200 text-blue-800 rounded border border-blue-300 text-[10px] font-bold flex items-center justify-center transition active:scale-95" title="Reset Zoom / Fit Framing">
+                                    Fit
+                                </button>
+                            </div>
+                            <!-- 1px Precision Nudge Controls -->
+                            <div class="flex items-center gap-1">
+                                <button type="button" data-nudge="left" aria-label="Nudge Left 1px" class="nudge-btn w-8 h-8 sm:w-6 sm:h-6 bg-blue-50 hover:bg-blue-200 text-blue-800 rounded border border-blue-300 flex items-center justify-center transition active:scale-95" title="Move Left 1px (←)">
+                                    <i class="fa-solid fa-arrow-left text-xs sm:text-[10px] pointer-events-none"></i>
+                                </button>
+                                <button type="button" data-nudge="up" aria-label="Nudge Up 1px" class="nudge-btn w-8 h-8 sm:w-6 sm:h-6 bg-blue-50 hover:bg-blue-200 text-blue-800 rounded border border-blue-300 flex items-center justify-center transition active:scale-95" title="Move Up 1px (↑)">
+                                    <i class="fa-solid fa-arrow-up text-xs sm:text-[10px] pointer-events-none"></i>
+                                </button>
+                                <button type="button" data-nudge="down" aria-label="Nudge Down 1px" class="nudge-btn w-8 h-8 sm:w-6 sm:h-6 bg-blue-50 hover:bg-blue-200 text-blue-800 rounded border border-blue-300 flex items-center justify-center transition active:scale-95" title="Move Down 1px (↓)">
+                                    <i class="fa-solid fa-arrow-down text-xs sm:text-[10px] pointer-events-none"></i>
+                                </button>
+                                <button type="button" data-nudge="right" aria-label="Nudge Right 1px" class="nudge-btn w-8 h-8 sm:w-6 sm:h-6 bg-blue-50 hover:bg-blue-200 text-blue-800 rounded border border-blue-300 flex items-center justify-center transition active:scale-95" title="Move Right 1px (→)">
+                                    <i class="fa-solid fa-arrow-right text-xs sm:text-[10px] pointer-events-none"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div tabindex="0" class="cropper-container rounded-lg overflow-hidden border border-gray-200 mb-4 hidden focus:outline-none focus:ring-2 focus:ring-blue-500" id="cropperWrapper" title="Click here and use keyboard arrow keys (↑ ↓ ← →) to move 1px">
+                <div tabindex="0" class="cropper-container rounded-lg overflow-hidden border border-gray-200 mb-4 hidden focus:outline-none focus:ring-2 focus:ring-blue-500 relative" id="cropperWrapper" title="Click here and use keyboard arrow keys (↑ ↓ ← →) to move 1px">
                     <img id="imageToCrop" src="" alt="Picture to crop" style="transition: filter 0.1s;">
+                    <div id="aiLoadingOverlay" class="absolute inset-0 bg-gray-900/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center text-white hidden">
+                        <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-400 mb-2"></i>
+                        <p class="font-bold text-sm tracking-wide">AI Background Removal Jari Hai...</p>
+                        <span class="text-xs text-gray-300">Local MediaPipe edge feathering apply ho rahi hai</span>
+                    </div>
                 </div>
 
                 <div tabindex="0" class="relative rounded-lg overflow-hidden border border-gray-200 mb-4 hidden focus:outline-none focus:ring-2 focus:ring-blue-500" id="perspectiveWrapper" title="Click here and use keyboard arrow keys (↑ ↓ ← →) to move 1px">
                     <div class="relative inline-block" id="perspectiveImgContainer" style="line-height: 0;">
                         <img id="perspectiveImg" src="" class="max-w-full max-h-[500px] pointer-events-none" style="display:block; transition: filter 0.1s;">
                         <svg id="perspectiveSvg" class="absolute top-0 left-0 w-full h-full pointer-events-auto" style="z-index: 10;">
-                            <polygon id="perspectivePoly" points="0,0 0,0 0,0 0,0" fill="rgba(59, 130, 246, 0.2)" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4"/>
-                            <circle cx="0" cy="0" r="10" class="handle" data-index="0" />
-                            <circle cx="0" cy="0" r="10" class="handle" data-index="1" />
-                            <circle cx="0" cy="0" r="10" class="handle" data-index="2" />
-                            <circle cx="0" cy="0" r="10" class="handle" data-index="3" />
+                            <polygon id="perspectivePoly" points="0,0 0,0 0,0" fill="rgba(59, 130, 246, 0.2)" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4"/>
+                            <circle cx="0" cy="0" r="12" class="handle" data-index="0" />
+                            <circle cx="0" cy="0" r="12" class="handle" data-index="1" />
+                            <circle cx="0" cy="0" r="12" class="handle" data-index="2" />
+                            <circle cx="0" cy="0" r="12" class="handle" data-index="3" />
                         </svg>
                     </div>
                 </div>
@@ -293,17 +464,54 @@
                 <div id="imageAdjustmentsPanel" class="mb-4 hidden bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                     <h3 class="text-sm font-bold text-gray-700 mb-3 border-b pb-1">Photo Adjustments & AI Options</h3>
                     
+                    <!-- LIVE MINI-PREVIEW CARD -->
+                    <div class="mb-4 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 p-3 rounded-lg border border-blue-200 flex items-center justify-between gap-3 shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="relative w-16 h-20 sm:w-20 sm:h-24 rounded border border-gray-300 shadow-md overflow-hidden bg-white shrink-0 flex items-center justify-center" id="miniPreviewContainer">
+                                <canvas id="miniCropPreviewCanvas" width="160" height="200" class="w-full h-full object-cover"></canvas>
+                                <div id="miniPreviewBadge" class="absolute bottom-0 inset-x-0 bg-black/60 text-[9px] text-white text-center py-0.5 font-mono">Passport</div>
+                            </div>
+                            <div>
+                                <h4 class="text-xs sm:text-sm font-bold text-gray-800 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-eye text-blue-600"></i> Live Single Photo Preview
+                                </h4>
+                                <p class="text-[11px] text-gray-500 mt-0.5 leading-snug">
+                                    Background color aur beauty glow ka instant live print preview.
+                                </p>
+                                <div class="flex flex-wrap items-center gap-1.5 mt-1.5 text-[10px] font-medium">
+                                    <span id="previewBgBadge" class="px-2 py-0.5 rounded bg-gray-200 text-gray-700">Original BG</span>
+                                    <span id="previewCutoutBadge" class="px-2 py-0.5 rounded bg-amber-100 text-amber-800">Original Photo</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Cutout Before/After & Undo Bar -->
+                    <div id="cutoutControlsBar" class="hidden mb-4 p-2.5 bg-indigo-50 rounded-lg border border-indigo-200 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5 text-xs text-indigo-950 font-bold">
+                            <i class="fa-solid fa-scissors text-indigo-600"></i> AI Cutout Active
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="compareCutoutBtn" class="px-2.5 py-1 text-xs bg-white text-indigo-700 font-bold border border-indigo-300 rounded shadow-sm hover:bg-indigo-50 active:scale-95 transition select-none" title="Daba kar rakhein taake original photo nazar aaye">
+                                <i class="fa-solid fa-code-compare mr-1"></i> Hold: Original Dekhein
+                            </button>
+                            <button type="button" id="revertCutoutBtn" class="px-2.5 py-1 text-xs bg-red-50 text-red-700 font-bold border border-red-200 rounded hover:bg-red-100 transition active:scale-95" title="Original photo wapas layen">
+                                <i class="fa-solid fa-rotate-left mr-1"></i> Undo AI
+                            </button>
+                        </div>
+                    </div>
+                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
                             <div class="flex justify-between items-center mb-1">
-                                <label class="text-xs font-medium text-gray-600"><i class="fa-solid fa-sun mr-1"></i> Exposure</label>
+                                <label for="imgExposureSlider" class="text-xs font-medium text-gray-600"><i class="fa-solid fa-sun mr-1"></i> Exposure</label>
                                 <span id="imgExpVal" class="text-xs text-blue-600 font-bold">100%</span>
                             </div>
                             <input type="range" id="imgExposureSlider" min="50" max="200" value="100" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
                         </div>
                         <div>
                             <div class="flex justify-between items-center mb-1">
-                                <label class="text-xs font-medium text-gray-600"><i class="fa-solid fa-circle-half-stroke mr-1"></i> Contrast</label>
+                                <label for="imgContrastSlider" class="text-xs font-medium text-gray-600"><i class="fa-solid fa-circle-half-stroke mr-1"></i> Contrast</label>
                                 <span id="imgContVal" class="text-xs text-blue-600 font-bold">100%</span>
                             </div>
                             <input type="range" id="imgContrastSlider" min="50" max="200" value="100" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
@@ -312,7 +520,7 @@
                         <!-- Beautify Feature -->
                         <div>
                             <div class="flex justify-between items-center mb-1">
-                                <label class="text-xs font-medium text-pink-600"><i class="fa-solid fa-wand-magic mr-1"></i> Beautify (Glow)</label>
+                                <label for="imgBeautifySlider" class="text-xs font-medium text-pink-600"><i class="fa-solid fa-wand-magic mr-1"></i> Beautify (Glow)</label>
                                 <span id="imgBeautyVal" class="text-xs text-pink-600 font-bold">0%</span>
                             </div>
                             <input type="range" id="imgBeautifySlider" min="0" max="100" value="0" class="w-full h-2 bg-pink-200 rounded-lg appearance-none cursor-pointer">
@@ -320,31 +528,33 @@
 
                         <!-- AI Background Feature -->
                         <div class="flex flex-col justify-end">
-                            <label class="text-xs font-medium text-indigo-600 mb-1"><i class="fa-solid fa-fill-drip mr-1"></i> Background Color</label>
+                            <label for="imgBgColor" class="text-xs font-medium text-indigo-600 mb-1"><i class="fa-solid fa-fill-drip mr-1"></i> Background Color</label>
                             <div class="flex gap-2">
-                                <select id="imgBgColor" class="flex-grow text-xs border border-gray-300 rounded h-8">
+                                <select id="imgBgColor" class="flex-grow text-xs border border-gray-300 rounded h-8 bg-white">
                                     <option value="none">Original (Transparent)</option>
                                     <option value="blue">Blue (#005bb5)</option>
                                     <option value="white">White (#ffffff)</option>
                                 </select>
-                                <button id="removeBgBtn" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-1 rounded text-xs hover:opacity-90 transition whitespace-nowrap shadow-sm font-bold" title="AI se Background Hatayein">
-                                    <i class="fa-solid fa-scissors"></i> AI Remove
+                                <button type="button" id="removeBgBtn" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-1 rounded text-xs hover:opacity-90 transition whitespace-nowrap shadow-sm font-bold active:scale-95" title="Fast Local AI se Background Hatayein">
+                                    <i class="fa-solid fa-scissors"></i> AI Remove BG
                                 </button>
                             </div>
                         </div>
                     </div>
 
                     <div id="rotationControls">
-                        <label class="block text-xs font-medium text-gray-600 mb-2"><i class="fa-solid fa-rotate mr-1"></i> Rotate Photo (Seedha Karein)</label>
-                        <div class="flex items-center gap-3">
-                            <button id="rotateLeftBtn" class="w-10 h-10 flex items-center justify-center bg-gray-50 border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="Rotate Left 1 Degree">
-                                <i class="fa-solid fa-rotate-left text-gray-600"></i>
-                            </button>
-                            <input type="range" id="rotationSlider" min="-45" max="45" value="0" step="0.1" class="flex-grow h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
-                            <button id="rotateRightBtn" class="w-10 h-10 flex items-center justify-center bg-gray-50 border border-gray-300 rounded hover:bg-gray-100 transition-colors" title="Rotate Right 1 Degree">
-                                <i class="fa-solid fa-rotate-right text-gray-600"></i>
-                            </button>
-                            <button id="resetAdjustmentsBtn" class="px-3 h-10 flex items-center justify-center bg-red-50 border border-red-200 text-red-600 rounded hover:bg-red-100 transition-colors text-sm font-medium" title="Reset All Adjustments">
+                        <label for="rotationSlider" class="block text-xs font-medium text-gray-600 mb-2"><i class="fa-solid fa-rotate mr-1"></i> Rotate Photo (Seedha Karein)</label>
+                        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
+                            <div class="flex items-center gap-2 flex-grow min-w-[200px]">
+                                <button type="button" id="rotateLeftBtn" aria-label="Rotate Left 1 Degree" class="w-10 h-10 flex items-center justify-center bg-gray-50 border border-gray-300 rounded hover:bg-gray-100 transition-colors shrink-0" title="Rotate Left 1 Degree">
+                                    <i class="fa-solid fa-rotate-left text-gray-600 pointer-events-none"></i>
+                                </button>
+                                <input type="range" id="rotationSlider" min="-45" max="45" value="0" step="0.1" class="flex-grow h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
+                                <button type="button" id="rotateRightBtn" aria-label="Rotate Right 1 Degree" class="w-10 h-10 flex items-center justify-center bg-gray-50 border border-gray-300 rounded hover:bg-gray-100 transition-colors shrink-0" title="Rotate Right 1 Degree">
+                                    <i class="fa-solid fa-rotate-right text-gray-600 pointer-events-none"></i>
+                                </button>
+                            </div>
+                            <button type="button" id="resetAdjustmentsBtn" class="px-3 h-10 flex items-center justify-center bg-red-50 border border-red-200 text-red-600 rounded hover:bg-red-100 transition-colors text-xs sm:text-sm font-medium w-full sm:w-auto" title="Reset All Adjustments">
                                 Reset Sab
                             </button>
                         </div>
@@ -370,9 +580,14 @@
                         </div>
                     </div>
 
-                    <button id="addToSheetBtn" class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium flex justify-center items-center gap-2 text-lg shadow-md">
-                        <i class="fa-solid fa-plus-circle"></i> Sheet Mein Shamil Karein
-                    </button>
+                    <div class="flex gap-2">
+                        <button id="addToSheetBtn" class="flex-grow bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium flex justify-center items-center gap-2 text-base sm:text-lg shadow-md active:scale-[0.99]">
+                            <i class="fa-solid fa-plus-circle"></i> Sheet Mein Shamil Karein
+                        </button>
+                        <button type="button" id="clearEditorBtn" class="px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md border border-gray-300 font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 transition active:scale-95" title="Editor saaf kar ke nayi photo upload karein">
+                            <i class="fa-solid fa-rotate-left"></i> Nayi Photo
+                        </button>
+                    </div>
                 </div>
                 
                 <div id="initialMessage" class="text-center py-12 text-gray-400 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
@@ -381,38 +596,44 @@
                 </div>
             </div>
 
-            <!-- Right Column: Preview & Actions -->
-            <div class="bg-white rounded-xl shadow-md p-6 flex flex-col">
-                <h2 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">2. Preview & Download</h2>
+            <!-- Right Column: Preview & Actions (Sticky & Visible on Desktop) -->
+            <div class="lg:col-span-5 bg-white rounded-xl shadow-md p-5 sm:p-6 lg:sticky lg:top-4 lg:max-h-[calc(100vh-130px)] lg:overflow-y-auto flex flex-col desktop-sticky-preview">
+                <h2 class="text-xl font-semibold text-gray-700 mb-3 border-b pb-2 flex items-center justify-between">
+                    <span>2. Preview & Download</span>
+                    <span class="text-xs text-blue-600 font-bold bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">Epson 4x6 Sheet</span>
+                </h2>
                 
-                <div id="resultContainer" class="flex-grow flex flex-col items-center justify-center hidden">
+                <div id="resultContainer" class="flex-grow flex flex-col items-center justify-between hidden">
                     
-                    <div class="w-full flex justify-between items-center mb-3">
-                        <span class="text-sm font-medium text-gray-700">Sheet Preview (<span id="previewSlotsText">0</span>/<span id="previewMaxSlotsText">8</span> bhari hui)</span>
-                        <button id="clearSheetBtn" class="text-xs text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1 rounded border border-red-200 transition-colors flex items-center gap-1">
+                    <div class="w-full flex justify-between items-center mb-2.5">
+                        <span class="text-xs sm:text-sm font-bold text-gray-700">Sheet Preview (<span id="previewSlotsText" class="text-blue-600 font-extrabold">0</span>/<span id="previewMaxSlotsText">8</span> bhari hui)</span>
+                        <button id="clearSheetBtn" class="text-xs text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1 rounded border border-red-200 transition-colors flex items-center gap-1 active:scale-95">
                             <i class="fa-solid fa-trash-can"></i> Sheet Saaf Karein
                         </button>
                     </div>
 
-                    <img id="resultPreview" alt="4x6 Print Sheet Preview">
+                    <div class="w-full flex items-center justify-center my-auto py-1">
+                        <img id="resultPreview" alt="4x6 Print Sheet Preview" class="rounded shadow-md border border-gray-200">
+                    </div>
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full mt-6">
-                        <button id="downloadJpgBtn" class="bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-900 transition flex justify-center items-center gap-2 text-sm shadow">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full mt-3 pt-2 border-t border-gray-100">
+                        <button id="downloadJpgBtn" class="bg-gray-800 text-white py-2 px-3 rounded hover:bg-gray-900 transition flex justify-center items-center gap-1.5 text-xs sm:text-sm shadow font-medium active:scale-95">
                             <i class="fa-solid fa-file-image"></i> Save JPG
                         </button>
-                        <button id="downloadPdfBtn" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition flex justify-center items-center gap-2 text-sm shadow">
+                        <button id="downloadPdfBtn" class="bg-red-600 text-white py-2 px-3 rounded hover:bg-red-700 transition flex justify-center items-center gap-1.5 text-xs sm:text-sm shadow font-medium active:scale-95">
                             <i class="fa-solid fa-file-pdf"></i> Save PDF
                         </button>
-                        <button id="printBtn" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition flex justify-center items-center gap-2 text-sm shadow">
+                        <button id="printBtn" class="bg-green-600 text-white py-2 px-3 rounded hover:bg-green-700 transition flex justify-center items-center gap-1.5 text-xs sm:text-sm shadow font-bold active:scale-95">
                             <i class="fa-solid fa-print"></i> Quick Print
                         </button>
                     </div>
                 </div>
 
-                <div id="resultPlaceholder" class="flex-grow flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-300 rounded-lg min-h-[400px] bg-gray-50">
-                    <div class="text-center">
-                        <i class="fa-regular fa-file-image text-5xl mb-4 text-gray-300"></i>
-                        <p class="font-medium text-gray-500">Aapki tayar karda print sheet yahan aayegi.</p>
+                <div id="resultPlaceholder" class="flex-grow flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-300 rounded-lg min-h-[300px] lg:min-h-[440px] bg-gray-50 my-auto">
+                    <div class="text-center p-6">
+                        <i class="fa-regular fa-file-image text-5xl mb-3 text-gray-300"></i>
+                        <p class="font-bold text-gray-600 text-sm mb-1">Aapki tayar karda print sheet yahan aayegi.</p>
+                        <p class="text-xs text-gray-400">Photo add karein aur real-time 4x6 sheet yahan dekhein.</p>
                     </div>
                 </div>
             </div>
@@ -449,9 +670,101 @@
 
         let cropper = null;
         let finalOutputDataUrl = null;
+        let finalPrintDataUrl = null;
         let isPerspectiveMode = false;
         
         let printSheetSlots = [];
+
+        // --- NEW: Google MediaPipe Local AI Background Removal (Pinned Version & Adaptive Feathering) ---
+        let selfieSegmentation = null;
+        let bgRemovalResolver = null;
+        let bgRemovalRejecter = null;
+        let bgRemovalTimeout = null;
+        
+        try {
+            if (typeof SelfieSegmentation !== 'undefined') {
+                selfieSegmentation = new SelfieSegmentation({locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/${file}`;
+                }});
+                selfieSegmentation.setOptions({ modelSelection: 1 }); // 1 = landscape/portrait higher quality
+                selfieSegmentation.onResults((results) => {
+                    if (bgRemovalTimeout) { clearTimeout(bgRemovalTimeout); bgRemovalTimeout = null; }
+                    if (!bgRemovalResolver) return;
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = results.image.width;
+                        canvas.height = results.image.height;
+                        const ctx = canvas.getContext('2d');
+                        
+                        ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+                        ctx.globalCompositeOperation = 'destination-in';
+                        
+                        // Adaptive feathering based on canvas resolution (prevents jagged edges on 12MP photos)
+                        const blurRadius = Math.max(1.5, Math.min(6, Math.round(canvas.width / 500)));
+                        ctx.filter = `blur(${blurRadius}px)`;
+                        ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
+                        ctx.filter = 'none';
+
+                        const resultUrl = canvas.toDataURL('image/png', 1.0);
+                        bgRemovalResolver(resultUrl);
+                    } catch(err) {
+                        if (bgRemovalRejecter) bgRemovalRejecter(err);
+                    } finally {
+                        bgRemovalResolver = null;
+                        bgRemovalRejecter = null;
+                    }
+                });
+            }
+        } catch(e) {
+            console.error("MediaPipe initialization error", e);
+        }
+
+        async function removeBgWithMediaPipe(imgSrc, timeoutMs = 15000) {
+            return new Promise((resolve, reject) => {
+                if (!selfieSegmentation) return reject("AI Library load nahi hui. Refresh karein.");
+                
+                bgRemovalResolver = resolve;
+                bgRemovalRejecter = reject;
+
+                if (bgRemovalTimeout) clearTimeout(bgRemovalTimeout);
+                bgRemovalTimeout = setTimeout(() => {
+                    bgRemovalResolver = null;
+                    bgRemovalRejecter = null;
+                    reject("AI background removal timeout ho gaya (15 seconds).");
+                }, timeoutMs);
+
+                const img = new Image();
+                img.onload = async () => {
+                    try {
+                        // Optimize input size for fast & accurate MediaPipe inference without freezing UI
+                        const maxDim = 1400;
+                        let w = img.naturalWidth || img.width;
+                        let h = img.naturalHeight || img.height;
+                        const scale = Math.min(1, maxDim / Math.max(w, h));
+                        
+                        const workCanvas = document.createElement('canvas');
+                        workCanvas.width = Math.round(w * scale);
+                        workCanvas.height = Math.round(h * scale);
+                        const wCtx = workCanvas.getContext('2d');
+                        wCtx.drawImage(img, 0, 0, workCanvas.width, workCanvas.height);
+
+                        await selfieSegmentation.send({image: workCanvas});
+                    } catch(e) {
+                        if (bgRemovalTimeout) { clearTimeout(bgRemovalTimeout); bgRemovalTimeout = null; }
+                        bgRemovalResolver = null;
+                        bgRemovalRejecter = null;
+                        reject(e);
+                    }
+                };
+                img.onerror = (e) => {
+                    if (bgRemovalTimeout) { clearTimeout(bgRemovalTimeout); bgRemovalTimeout = null; }
+                    bgRemovalResolver = null;
+                    bgRemovalRejecter = null;
+                    reject("Image load error: " + e);
+                };
+                img.src = imgSrc;
+            });
+        }
 
         // --- TEMPLATES CONFIGURATION ---
         // 1. Passport (35x45mm): Cropped at 413x531 (0 deg), rotated 90 deg on sheet to 531x413 (Max 8 slots: 2 cols x 4 rows)
@@ -558,6 +871,13 @@
         // --- TEMPLATE SWITCHING LOGIC ---
         function setTemplate(templateKey) {
             if (currentTemplateKey === templateKey) return;
+
+            // Prevent accidental data loss if photos are already added to sheet
+            if (printSheetSlots.length > 0) {
+                const confirmed = window.confirm("Template badalne se mojooda tayar shuda sheet saaf ho jayegi. Kya aap jari rakhna chahte hain?");
+                if (!confirmed) return;
+            }
+
             currentTemplateKey = templateKey;
             const tpl = TEMPLATES[currentTemplateKey];
             MAX_SLOTS = tpl.maxSlots;
@@ -670,10 +990,18 @@
                     perspectivePts[lastSelectedHandle].x = Math.max(0, Math.min(1, perspectivePts[lastSelectedHandle].x + nxStep));
                     perspectivePts[lastSelectedHandle].y = Math.max(0, Math.min(1, perspectivePts[lastSelectedHandle].y + nyStep));
                 } else {
-                    // Move the entire perspective bounding box by 1px
+                    // Move the entire perspective bounding box without shearing
+                    const minX = Math.min(...perspectivePts.map(p => p.x));
+                    const maxX = Math.max(...perspectivePts.map(p => p.x));
+                    const minY = Math.min(...perspectivePts.map(p => p.y));
+                    const maxY = Math.max(...perspectivePts.map(p => p.y));
+
+                    const clampedDx = Math.max(-minX, Math.min(1 - maxX, nxStep));
+                    const clampedDy = Math.max(-minY, Math.min(1 - maxY, nyStep));
+
                     perspectivePts = perspectivePts.map(pt => ({
-                        x: Math.max(0, Math.min(1, pt.x + nxStep)),
-                        y: Math.max(0, Math.min(1, pt.y + nyStep))
+                        x: pt.x + clampedDx,
+                        y: pt.y + clampedDy
                     }));
                 }
                 renderPerspectiveUI();
@@ -694,6 +1022,36 @@
             perspectiveWrapper.focus({ preventScroll: true });
         });
 
+        // Zoom Controls for flexible subject framing
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const resetZoomBtn = document.getElementById('resetZoomBtn');
+
+        if (zoomInBtn) {
+            zoomInBtn.addEventListener('click', () => {
+                if (cropper && !isPerspectiveMode) {
+                    cropper.zoom(0.1);
+                    updateLiveMiniPreview();
+                }
+            });
+        }
+        if (zoomOutBtn) {
+            zoomOutBtn.addEventListener('click', () => {
+                if (cropper && !isPerspectiveMode) {
+                    cropper.zoom(-0.1);
+                    updateLiveMiniPreview();
+                }
+            });
+        }
+        if (resetZoomBtn) {
+            resetZoomBtn.addEventListener('click', () => {
+                if (cropper && !isPerspectiveMode) {
+                    cropper.reset();
+                    updateLiveMiniPreview();
+                }
+            });
+        }
+
         // On-screen 1px nudge buttons support (in addition to keyboard arrows)
         document.querySelectorAll('.nudge-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -706,22 +1064,47 @@
         });
 
         window.addEventListener('keydown', function(e) {
-            if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+            // Escape key dismisses modals
+            if (e.key === 'Escape') {
+                if (!cameraModal.classList.contains('hidden')) stopCamera();
+                if (promptsModal && !promptsModal.classList.contains('hidden')) promptsModal.classList.add('hidden');
+                return;
+            }
 
             // Check if editor is visible and active
             const isEditorActive = !cropSettings.classList.contains('hidden');
             if (!isEditorActive) return;
 
-            // Only ignore if the user is actively typing in a date/text input
+            // Only ignore if the user is actively typing in a date/text input or navigating a select dropdown
             const activeEl = document.activeElement;
             const activeTag = activeEl ? activeEl.tagName.toLowerCase() : '';
-            if (activeTag === 'textarea' || (activeTag === 'input' && activeEl.type !== 'file' && activeEl.type !== 'checkbox')) {
+            if (activeTag === 'select' || activeTag === 'textarea' || (activeTag === 'input' && activeEl.type !== 'file' && activeEl.type !== 'checkbox')) {
                 return;
             }
-            // If a <select> or <button> had focus after clicking, blur it so Arrow keys move the bounding box instead of changing dropdowns
-            if (activeTag === 'select' || activeTag === 'button' || (activeTag === 'input' && activeEl.type === 'file')) {
+            // If a button or file input had focus, blur it
+            if (activeTag === 'button' || (activeTag === 'input' && activeEl.type === 'file')) {
                 activeEl.blur();
             }
+
+            // Keyboard zoom shortcuts: +/= and -/_
+            if (e.key === '+' || e.key === '=') {
+                if (cropper && !isPerspectiveMode) {
+                    e.preventDefault();
+                    cropper.zoom(0.08);
+                    updateLiveMiniPreview();
+                    return;
+                }
+            }
+            if (e.key === '-' || e.key === '_') {
+                if (cropper && !isPerspectiveMode) {
+                    e.preventDefault();
+                    cropper.zoom(-0.08);
+                    updateLiveMiniPreview();
+                    return;
+                }
+            }
+
+            if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
 
             e.preventDefault();
             e.stopPropagation();
@@ -738,7 +1121,12 @@
         }, true);
 
         // --- CAMERA LOGIC ---
+        let cameraSessionId = 0;
+        let isCameraActive = false;
+
         async function startCamera(facingMode = currentFacingMode) {
+            const currentSession = ++cameraSessionId;
+            isCameraActive = true;
             cameraModal.classList.remove('hidden');
             camLoading.classList.remove('hidden');
             camLoadingText.innerText = "Camera Shuru Ho Raha Hai...";
@@ -748,13 +1136,41 @@
             
             if (cameraStream) {
                 cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
             }
 
             try {
-                const constraints = { video: { facingMode: { ideal: facingMode }, width: { ideal: 1920 }, height: { ideal: 1080 } } };
-                cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error("Camera API is not supported in this browser context (HTTPS zaroori hai).");
+                }
+
+                // If desktop PC/laptop, prefer user facing mode for selfie view
+                const isDesktop = !/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+                const desiredMode = isDesktop ? "user" : facingMode;
+
+                const isPortrait = window.innerHeight > window.innerWidth;
+                const idealW = isPortrait ? 1080 : 1920;
+                const idealH = isPortrait ? 1920 : 1080;
+
+                const constraints = { 
+                    video: { 
+                        facingMode: { ideal: desiredMode }, 
+                        width: { ideal: idealW }, 
+                        height: { ideal: idealH } 
+                    } 
+                };
+
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+                // If modal was closed or switched while waiting for user permission
+                if (!isCameraActive || currentSession !== cameraSessionId) {
+                    stream.getTracks().forEach(t => t.stop());
+                    return;
+                }
+
+                cameraStream = stream;
                 videoElement.srcObject = cameraStream;
-                currentFacingMode = facingMode; 
+                currentFacingMode = desiredMode; 
                 
                 if (currentFacingMode === "user") videoElement.style.transform = "scaleX(-1)";
                 else videoElement.style.transform = "scaleX(1)";
@@ -767,23 +1183,37 @@
                 applyCameraFilters();
             } catch (err) {
                 console.error("Camera error:", err);
-                camLoading.classList.add('hidden');
-                showAppMessage("Camera permission denied ya error aya hai.", 'error');
-                stopCamera();
+                if (currentSession === cameraSessionId) {
+                    camLoading.classList.add('hidden');
+                    showAppMessage("Camera permission denied ya camera nahi mila.", 'error');
+                    stopCamera();
+                }
             }
         }
 
         function stopCamera() {
+            cameraSessionId++;
+            isCameraActive = false;
             if (cameraStream) {
                 cameraStream.getTracks().forEach(track => track.stop());
                 cameraStream = null;
             }
-            videoElement.srcObject = null;
+            if (videoElement) {
+                try { videoElement.pause(); } catch(e){}
+                videoElement.srcObject = null;
+            }
             cameraModal.classList.add('hidden');
             
             if(floatingMobileBtn) floatingMobileBtn.style.display = '';
             if(floatingDesktopBtn) floatingDesktopBtn.style.display = '';
         }
+
+        // Teardown camera on tab change or page unload to save battery and release hardware
+        window.addEventListener('pagehide', stopCamera);
+        window.addEventListener('beforeunload', stopCamera);
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && cameraStream) stopCamera();
+        });
 
         function applyCameraFilters() {
             let exp = camExposureSlider.value;
@@ -823,6 +1253,12 @@
         capturePhotoBtn.addEventListener('click', async () => {
             if (!cameraStream) return;
             
+            // Prevent index size error if video frame is not yet decoded
+            if (!videoElement.videoWidth || !videoElement.videoHeight || videoElement.readyState < 2) {
+                showAppMessage("Camera stream ready ho rahi hai, 1 second intezar karein.", 'info');
+                return;
+            }
+
             const canvas = document.createElement('canvas');
             canvas.width = videoElement.videoWidth;
             canvas.height = videoElement.videoHeight;
@@ -841,28 +1277,85 @@
             ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
             let dataUrl = canvas.toDataURL('image/jpeg', 1.0);
             
-            // Auto Remove Background Logic if Blue/White selected during capture!
             let chosenBg = camBgColor.value;
+
+            // Immediately release hardware camera before heavy AI computation
+            stopCamera();
+
+            // Auto Remove Background Logic if Blue/White selected during capture!
             if (chosenBg !== 'none') {
-                camLoadingText.innerText = "Background hataya ja raha hai (AI)...";
-                camLoading.classList.remove('hidden');
-                try {
-                    let config = { publicPath: 'https://unpkg.com/@imgly/background-removal@1.4.3/dist/' };
-                    let blob = await imglyRemoveBackground(dataUrl, config);
-                    dataUrl = URL.createObjectURL(blob);
-                } catch(e) {
-                    console.error(e);
-                    showAppMessage("AI Background removal fail ho gaya. Original photo load ho rahi hai.", 'error');
+                if (!selfieSegmentation) {
+                    showAppMessage("AI Library load nahi hui. Photo original load ho rahi hai.", 'error');
+                } else {
+                    showAppMessage("Local AI se background hataya ja raha hai...", 'info');
+                    try {
+                        dataUrl = await removeBgWithMediaPipe(dataUrl);
+                    } catch(e) {
+                        console.error(e);
+                        showAppMessage("AI Background removal fail ho gaya. Original photo load ho rahi hai.", 'error');
+                    }
                 }
             }
 
-            stopCamera();
-            
             // Load and keep the BG setting in sync
             loadImageIntoEditor(dataUrl, false);
             imgBgColor.value = chosenBg;
             applyImageAdjustments();
         });
+
+        let originalRawDataUrl = null;
+        let cutoutDataUrl = null;
+        let miniPreviewDebounce = null;
+
+        function updateLiveMiniPreview() {
+            if (miniPreviewDebounce) clearTimeout(miniPreviewDebounce);
+            miniPreviewDebounce = setTimeout(() => {
+                const miniCanvas = document.getElementById('miniCropPreviewCanvas');
+                if (!miniCanvas || !imageToCrop.src) return;
+                const mCtx = miniCanvas.getContext('2d');
+                const mW = miniCanvas.width;
+                const mH = miniCanvas.height;
+                
+                mCtx.clearRect(0, 0, mW, mH);
+                
+                const bg = imgBgColor.value;
+                if (bg === 'blue') {
+                    mCtx.fillStyle = '#005bb5';
+                    mCtx.fillRect(0, 0, mW, mH);
+                } else if (bg === 'white') {
+                    mCtx.fillStyle = '#ffffff';
+                    mCtx.fillRect(0, 0, mW, mH);
+                } else {
+                    mCtx.fillStyle = '#f3f4f6';
+                    mCtx.fillRect(0, 0, mW, mH);
+                }
+                
+                if (!isPerspectiveMode && cropper) {
+                    try {
+                        const croppedSrcCanvas = cropper.getCroppedCanvas({
+                            width: mW,
+                            height: mH,
+                            fillColor: bg === 'blue' ? '#005bb5' : (bg === 'white' ? '#ffffff' : 'transparent'),
+                            imageSmoothingQuality: 'medium'
+                        });
+                        if (croppedSrcCanvas) {
+                            let exp = imgExposureSlider.value;
+                            let con = imgContrastSlider.value;
+                            let beauty = imgBeautifySlider.value;
+                            let blurVal = (beauty / 100) * 1.5;
+                            let satVal = 100 + (beauty * 0.5);
+                            mCtx.filter = `brightness(${exp}%) contrast(${con}%) saturate(${satVal}%) blur(${blurVal}px)`;
+                            mCtx.drawImage(croppedSrcCanvas, 0, 0, mW, mH);
+                            mCtx.filter = 'none';
+                        }
+                    } catch(e) {}
+                } else if (isPerspectiveMode && perspectiveImg) {
+                    try {
+                        mCtx.drawImage(perspectiveImg, 0, 0, mW, mH);
+                    } catch(e) {}
+                }
+            }, 60);
+        }
 
         // --- IMAGE ADJUSTMENT LOGIC ---
         function applyImageAdjustments() {
@@ -887,13 +1380,41 @@
             cropperWrapper.style.backgroundColor = actualBgColor;
             perspectiveWrapper.style.backgroundColor = actualBgColor;
 
+            const cropperContainer = document.querySelector('.cropper-container');
+            if (cropperContainer) {
+                if (bg !== 'none') {
+                    cropperContainer.classList.add('no-checkerboard');
+                    cropperContainer.style.backgroundColor = actualBgColor;
+                } else {
+                    cropperContainer.classList.remove('no-checkerboard');
+                    cropperContainer.style.backgroundColor = '#e5e7eb';
+                }
+            }
+
             document.querySelectorAll('.cropper-container img').forEach(img => {
                 img.style.filter = filterString;
                 img.style.transition = 'filter 0.1s';
             });
-            document.querySelectorAll('.cropper-wrap-box, .cropper-canvas').forEach(el => {
+            document.querySelectorAll('.cropper-view-box, .cropper-wrap-box, .cropper-canvas').forEach(el => {
                 el.style.backgroundColor = actualBgColor;
             });
+
+            // Update Preview Badge text
+            const previewBgBadge = document.getElementById('previewBgBadge');
+            if (previewBgBadge) {
+                if (bg === 'blue') {
+                    previewBgBadge.innerText = 'Blue BG (#005bb5)';
+                    previewBgBadge.className = 'px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold';
+                } else if (bg === 'white') {
+                    previewBgBadge.innerText = 'White BG (#ffffff)';
+                    previewBgBadge.className = 'px-2 py-0.5 rounded bg-gray-100 text-gray-800 font-bold border border-gray-300';
+                } else {
+                    previewBgBadge.innerText = 'Original BG';
+                    previewBgBadge.className = 'px-2 py-0.5 rounded bg-gray-200 text-gray-700';
+                }
+            }
+
+            updateLiveMiniPreview();
         }
 
         imgExposureSlider.addEventListener('input', applyImageAdjustments);
@@ -904,24 +1425,109 @@
         // AI Background Removal Button Event
         removeBgBtn.addEventListener('click', async () => {
             if (!imageToCrop.src) return;
+
+            if (!selfieSegmentation) {
+                showAppMessage("AI Library load nahi hui. Page refresh karein ya internet check karein.", 'error');
+                return;
+            }
+
+            const aiLoadingOverlay = document.getElementById('aiLoadingOverlay');
+            if (aiLoadingOverlay) aiLoadingOverlay.classList.remove('hidden');
+
             removeBgBtn.disabled = true;
-            removeBgBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            removeBgBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Wait...';
             
             try {
-                let config = { publicPath: 'https://unpkg.com/@imgly/background-removal@1.4.3/dist/' };
-                let blob = await imglyRemoveBackground(imageToCrop.src, config);
-                let url = URL.createObjectURL(blob);
+                let savedCropBox = null;
+                if (cropper && !isPerspectiveMode) {
+                    savedCropBox = cropper.getCropBoxData();
+                }
+
+                let url = await removeBgWithMediaPipe(imageToCrop.src);
                 
-                // Keep the current rotation and sliders intact
-                loadImageIntoEditor(url, true);
+                cutoutDataUrl = url;
+
+                // Keep the current crop framing intact instead of destroying it
+                if (cropper && !isPerspectiveMode) {
+                    cropper.replace(url, false);
+                    imageToCrop.src = url;
+                    perspectiveImg.src = url;
+                    if (savedCropBox) {
+                        setTimeout(() => { if (cropper) cropper.setCropBoxData(savedCropBox); }, 150);
+                    }
+                } else {
+                    loadImageIntoEditor(url, true);
+                }
+
+                // Show cutout controls & update badges
+                const cutoutControlsBar = document.getElementById('cutoutControlsBar');
+                if (cutoutControlsBar) cutoutControlsBar.classList.remove('hidden');
+                
+                const previewCutoutBadge = document.getElementById('previewCutoutBadge');
+                if (previewCutoutBadge) {
+                    previewCutoutBadge.innerText = 'AI Cutout Ready';
+                    previewCutoutBadge.className = 'px-2 py-0.5 rounded bg-green-100 text-green-800 font-bold';
+                }
+
+                // Auto-suggest blue background if none selected
+                if (imgBgColor.value === 'none') {
+                    imgBgColor.value = 'blue';
+                    applyImageAdjustments();
+                }
+
+                showAppMessage("Local AI se Background hat gaya hai!", 'success');
             } catch(e) {
                 console.error(e);
-                showAppMessage("Background hatane mein masla pesh aya. Internet connection check karein.", 'error');
+                showAppMessage("Background hatane mein masla pesh aya.", 'error');
+            } finally {
+                if (aiLoadingOverlay) aiLoadingOverlay.classList.add('hidden');
+                removeBgBtn.disabled = false;
+                removeBgBtn.innerHTML = '<i class="fa-solid fa-scissors"></i> AI Remove BG';
             }
-            
-            removeBgBtn.disabled = false;
-            removeBgBtn.innerHTML = '<i class="fa-solid fa-scissors"></i> AI Remove';
         });
+
+        // Before / After Compare and Undo AI Cutout Event Listeners
+        const compareCutoutBtn = document.getElementById('compareCutoutBtn');
+        if (compareCutoutBtn) {
+            const showOriginal = () => {
+                if (originalRawDataUrl && cropper && !isPerspectiveMode) {
+                    const box = cropper.getCropBoxData();
+                    cropper.replace(originalRawDataUrl, false);
+                    setTimeout(() => { if (cropper) cropper.setCropBoxData(box); }, 50);
+                }
+            };
+            const showCutout = () => {
+                if (cutoutDataUrl && cropper && !isPerspectiveMode) {
+                    const box = cropper.getCropBoxData();
+                    cropper.replace(cutoutDataUrl, false);
+                    setTimeout(() => { if (cropper) cropper.setCropBoxData(box); }, 50);
+                }
+            };
+            compareCutoutBtn.addEventListener('mousedown', showOriginal);
+            compareCutoutBtn.addEventListener('mouseup', showCutout);
+            compareCutoutBtn.addEventListener('mouseleave', showCutout);
+            compareCutoutBtn.addEventListener('touchstart', (e) => { e.preventDefault(); showOriginal(); });
+            compareCutoutBtn.addEventListener('touchend', (e) => { e.preventDefault(); showCutout(); });
+        }
+
+        const revertCutoutBtn = document.getElementById('revertCutoutBtn');
+        if (revertCutoutBtn) {
+            revertCutoutBtn.addEventListener('click', () => {
+                if (!originalRawDataUrl) return;
+                cutoutDataUrl = null;
+                loadImageIntoEditor(originalRawDataUrl, true);
+                const cutoutControlsBar = document.getElementById('cutoutControlsBar');
+                if (cutoutControlsBar) cutoutControlsBar.classList.add('hidden');
+                const previewCutoutBadge = document.getElementById('previewCutoutBadge');
+                if (previewCutoutBadge) {
+                    previewCutoutBadge.innerText = 'Original Photo';
+                    previewCutoutBadge.className = 'px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-medium';
+                }
+                imgBgColor.value = 'none';
+                applyImageAdjustments();
+                showAppMessage("Original photo wapas restore ho gayi.", 'info');
+            });
+        }
 
         // Rotation
         function updateRotation() {
@@ -974,6 +1580,7 @@
                 document.addEventListener('touchmove', drag, {passive: false});
                 document.addEventListener('mouseup', endDrag);
                 document.addEventListener('touchend', endDrag);
+                document.addEventListener('touchcancel', endDrag);
             } else {
                 lastSelectedHandle = null;
                 renderPerspectiveUI();
@@ -997,6 +1604,8 @@
             activeHandle = null;
             document.removeEventListener('mousemove', drag); document.removeEventListener('touchmove', drag);
             document.removeEventListener('mouseup', endDrag); document.removeEventListener('touchend', endDrag);
+            document.removeEventListener('touchcancel', endDrag);
+            updateLiveMiniPreview();
         }
 
         perspectiveSvg.addEventListener('mousedown', startDrag);
@@ -1004,18 +1613,55 @@
         perspectiveImg.onload = renderPerspectiveUI;
         window.addEventListener('resize', renderPerspectiveUI);
 
+        // 3x3 Projective Homography from Unit Square [0,1]^2 to Quadrilateral (x0..x3, y0..y3)
+        function getSquareToQuadHomography(p) {
+            const dx1 = p[1].x - p[2].x;
+            const dx2 = p[3].x - p[2].x;
+            const dy1 = p[1].y - p[2].y;
+            const dy2 = p[3].y - p[2].y;
+            const sx = p[0].x - p[1].x + p[2].x - p[3].x;
+            const sy = p[0].y - p[1].y + p[2].y - p[3].y;
+
+            if (Math.abs(sx) < 1e-6 && Math.abs(sy) < 1e-6) {
+                return {
+                    a: p[1].x - p[0].x, b: p[3].x - p[0].x, c: p[0].x,
+                    d: p[1].y - p[0].y, e: p[3].y - p[0].y, f: p[0].y,
+                    g: 0, h: 0
+                };
+            }
+            const denom = dx1 * dy2 - dy1 * dx2;
+            const safeDenom = Math.abs(denom) < 1e-6 ? (denom < 0 ? -1e-6 : 1e-6) : denom;
+            const g = (sx * dy2 - sy * dx2) / safeDenom;
+            const h = (dx1 * sy - dy1 * sx) / safeDenom;
+            const a = p[1].x - p[0].x + g * p[1].x;
+            const b = p[3].x - p[0].x + h * p[3].x;
+            const c = p[0].x;
+            const d = p[1].y - p[0].y + g * p[1].y;
+            const e = p[3].y - p[0].y + h * p[3].y;
+            const f = p[0].y;
+            return { a, b, c, d, e, f, g, h };
+        }
+
         function extractPerspectiveCanvas(imgElement, ptsPercent, outW, outH) {
-            const natW = imgElement.naturalWidth; const natH = imgElement.naturalHeight;
+            const rawW = imgElement.naturalWidth || imgElement.width;
+            const rawH = imgElement.naturalHeight || imgElement.height;
+            
+            // Constrain working resolution to prevent out-of-memory heap crash on 12-48MP mobile photos
+            const maxWorkingDim = 1600;
+            const scale = Math.min(1, maxWorkingDim / Math.max(rawW, rawH));
+            const natW = Math.round(rawW * scale);
+            const natH = Math.round(rawH * scale);
+
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = natW; tempCanvas.height = natH;
             const tCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
             
-            // Bake BEAUTIFY
+            // Bake BEAUTIFY & Adjustments
             let beauty = imgBeautifySlider.value;
             let blurVal = (beauty / 100) * 1.5;
             let satVal = 100 + (beauty * 0.5);
             tCtx.filter = `brightness(${imgExposureSlider.value}%) contrast(${imgContrastSlider.value}%) saturate(${satVal}%) blur(${blurVal}px)`;
-            tCtx.drawImage(imgElement, 0, 0);
+            tCtx.drawImage(imgElement, 0, 0, natW, natH);
             const srcData = tCtx.getImageData(0, 0, natW, natH);
 
             const outCanvas = document.createElement('canvas');
@@ -1024,17 +1670,21 @@
             const outData = oCtx.createImageData(outW, outH);
             const pts = ptsPercent.map(p => ({ x: p.x * natW, y: p.y * natH }));
 
+            // True Projective Perspective Homography
+            const H = getSquareToQuadHomography(pts);
+
             for (let y = 0; y < outH; y++) {
                 const ny = y / outH;
                 for (let x = 0; x < outW; x++) {
                     const nx = x / outW;
-                    const srcX = pts[0].x * (1 - nx) * (1 - ny) + pts[1].x * nx * (1 - ny) + pts[2].x * nx * ny + pts[3].x * (1 - nx) * ny;
-                    const srcY = pts[0].y * (1 - nx) * (1 - ny) + pts[1].y * nx * (1 - ny) + pts[2].y * nx * ny + pts[3].y * (1 - nx) * ny;
+                    const w = H.g * nx + H.h * ny + 1.0;
+                    const srcX = (H.a * nx + H.b * ny + H.c) / w;
+                    const srcY = (H.d * nx + H.e * ny + H.f) / w;
+                    
                     const sx = Math.floor(srcX); const sy = Math.floor(srcY);
                     const outIndex = (y * outW + x) * 4;
                     if (sx >= 0 && sx < natW && sy >= 0 && sy < natH) {
                         const srcIndex = (sy * natW + sx) * 4;
-                        // Handle transparency properly
                         outData.data[outIndex] = srcData.data[srcIndex];
                         outData.data[outIndex+1] = srcData.data[srcIndex+1];
                         outData.data[outIndex+2] = srcData.data[srcIndex+2];
@@ -1070,6 +1720,15 @@
             if(!keepSettings) photoNumberInput.value = getNextPhotoNumber();
             
             if(!keepSettings) {
+                originalRawDataUrl = imgSrc;
+                cutoutDataUrl = null;
+                const cutoutControlsBar = document.getElementById('cutoutControlsBar');
+                if (cutoutControlsBar) cutoutControlsBar.classList.add('hidden');
+                const previewCutoutBadge = document.getElementById('previewCutoutBadge');
+                if (previewCutoutBadge) {
+                    previewCutoutBadge.innerText = 'Original Photo';
+                    previewCutoutBadge.className = 'px-2 py-0.5 rounded bg-gray-200 text-gray-700';
+                }
                 imgExposureSlider.value = 100;
                 imgContrastSlider.value = 100;
                 imgBeautifySlider.value = 0;
@@ -1089,6 +1748,7 @@
                 perspectiveWrapper.classList.remove('hidden');
                 cropperWrapper.classList.add('hidden'); 
                 rotationControls.classList.add('hidden');
+                renderPerspectiveUI();
             } else {
                 cropperWrapper.classList.remove('hidden');
                 perspectiveWrapper.classList.add('hidden'); 
@@ -1101,7 +1761,7 @@
 
             cropper = new Cropper(imageToCrop, {
                 aspectRatio: activeTpl.aspectRatio,
-                viewMode: 1,
+                viewMode: 0, // Unrestricted zoom-out & frame boundaries: Allows subject to be zoomed out freely to fit varying proportions
                 dragMode: 'move',
                 autoCropArea: 0.8,
                 restore: false,
@@ -1111,8 +1771,21 @@
                 cropBoxMovable: true,
                 cropBoxResizable: true,
                 toggleDragModeOnDblclick: false,
+                zoomable: true,
+                zoomOnWheel: true,
+                zoomOnTouch: true,
+                wheelZoomRatio: 0.1,
+                minContainerWidth: 200,
+                minContainerHeight: 200,
+                crop: function() {
+                    updateLiveMiniPreview();
+                },
+                zoom: function() {
+                    updateLiveMiniPreview();
+                },
                 ready: function() {
                     applyImageAdjustments();
+                    updateLiveMiniPreview();
                     if (document.activeElement && document.activeElement !== document.body) {
                         document.activeElement.blur();
                     }
@@ -1189,35 +1862,44 @@
             const fCtx = finalCanvas.getContext('2d');
 
             fCtx.fillStyle = '#ffffff'; fCtx.fillRect(0, 0, sheetWidth, sheetHeight);
-            const marginX = (sheetWidth - (cols * rotW)) / (cols + 1);
-            const marginY = (sheetHeight - (rows * rotH)) / (rows + 1);
+            
+            // Integer coordinate calculations to eliminate canvas sub-pixel bilinear blur
+            const marginX = Math.round((sheetWidth - (cols * rotW)) / (cols + 1));
+            const marginY = Math.floor((sheetHeight - (rows * rotH)) / (rows + 1));
+            const extraYSlack = Math.floor((sheetHeight - (rows * rotH) - (marginY * (rows + 1))) / 2);
 
             for (let i = 0; i < printSheetSlots.length; i++) {
                 let slot = printSheetSlots[i];
                 let c = i % cols;
                 let r = Math.floor(i / cols); 
-                let posX = marginX + (c * (rotW + marginX));
-                let posY = marginY + (r * (rotH + marginY));
+                let posX = Math.round(marginX + (c * (rotW + marginX)));
+                let posY = Math.round(marginY + extraYSlack + (r * (rotH + marginY)));
 
                 fCtx.drawImage(slot.canvas, posX, posY);
 
-                // Outside square stroke (Neat, subtle, not too thick)
+                // Precise outside border stroke without 0.25px gap
                 fCtx.save();
                 fCtx.strokeStyle = '#374151'; // Clean dark charcoal stroke
                 fCtx.lineWidth = 2.5;
-                // Draw outside of the photo boundaries by offsetting by half of lineWidth
-                fCtx.strokeRect(posX - 1.5, posY - 1.5, rotW + 3, rotH + 3);
+                fCtx.strokeRect(posX - 1.25, posY - 1.25, rotW + 2.5, rotH + 2.5);
                 fCtx.restore();
                 
-                fCtx.save(); fCtx.fillStyle = '#666666'; fCtx.font = '16px monospace';
-                fCtx.textAlign = 'center'; fCtx.textBaseline = 'middle';
-                let textX = c === 0 ? posX + rotW + (marginX / 2) - 8 : posX - (marginX / 2) + 8;
+                // Decoupled metadata text anchors: Column 0 in left margin, Column 1 in right margin
+                fCtx.save();
+                fCtx.fillStyle = '#666666';
+                fCtx.font = '14px monospace';
+                fCtx.textAlign = 'center';
+                fCtx.textBaseline = 'middle';
+                let textX = c === 0 ? posX - (marginX / 2) : posX + rotW + (marginX / 2);
                 let textY = posY + (rotH / 2);
-                fCtx.translate(textX, textY); fCtx.rotate(Math.PI / 2); 
-                fCtx.fillText(slot.metaText, 0, 0); fCtx.restore();
+                fCtx.translate(textX, textY);
+                fCtx.rotate(Math.PI / 2); 
+                fCtx.fillText(slot.metaText, 0, 0);
+                fCtx.restore();
             }
 
             finalOutputDataUrl = finalCanvas.toDataURL('image/jpeg', 1.0);
+            finalPrintDataUrl = finalCanvas.toDataURL('image/png');
             resultPreview.src = finalOutputDataUrl;
             resultPlaceholder.classList.add('hidden'); resultContainer.classList.remove('hidden');
             previewSlotsText.innerText = printSheetSlots.length;
@@ -1226,17 +1908,29 @@
 
         addToSheetBtn.addEventListener('click', function() {
             if (!imageToCrop.src) return;
+            if (printSheetSlots.length >= MAX_SLOTS) {
+                showAppMessage(`Sheet pehle hi full hai (${MAX_SLOTS}/${MAX_SLOTS}). Mazeed photos ke liye pehle 'Sheet Saaf Karein' ya print karein.`, 'info');
+                return;
+            }
 
             const activeTpl = TEMPLATES[currentTemplateKey];
             const cropW = activeTpl.cropW;
             const cropH = activeTpl.cropH;
             let croppedCanvas;
 
+            let bg = imgBgColor.value;
+
             if (isPerspectiveMode) {
                 croppedCanvas = extractPerspectiveCanvas(perspectiveImg, perspectivePts, cropW, cropH);
             } else {
                 if (!cropper) return;
-                let rawCanvas = cropper.getCroppedCanvas({ width: cropW, height: cropH, imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
+                let rawCanvas = cropper.getCroppedCanvas({
+                    width: cropW,
+                    height: cropH,
+                    fillColor: bg === 'blue' ? '#005bb5' : (bg === 'white' ? '#ffffff' : 'transparent'),
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high'
+                });
                 croppedCanvas = document.createElement('canvas');
                 croppedCanvas.width = cropW; croppedCanvas.height = cropH;
                 let cCtx = croppedCanvas.getContext('2d');
@@ -1250,14 +1944,25 @@
             }
 
             // --- Fill Actual Background Color First (For White/Blue) ---
-            let bg = imgBgColor.value;
             let coloredBgCanvas = document.createElement('canvas');
             coloredBgCanvas.width = cropW; coloredBgCanvas.height = cropH;
             let finalBgCtx = coloredBgCanvas.getContext('2d');
             
             if(bg !== 'none') {
-                finalBgCtx.fillStyle = bg === 'blue' ? '#005bb5' : '#ffffff';
-                finalBgCtx.fillRect(0, 0, cropW, cropH);
+                // Check if image actually has transparency before attempting to fill background color
+                const testCtx = croppedCanvas.getContext('2d');
+                const sampleData = testCtx.getImageData(0, 0, Math.min(30, cropW), Math.min(30, cropH)).data;
+                let hasAlpha = false;
+                for (let i = 3; i < sampleData.length; i += 4) {
+                    if (sampleData[i] < 240) { hasAlpha = true; break; }
+                }
+
+                if (!hasAlpha) {
+                    showAppMessage("Dhyan dain: Background remove nahi tha, isliye background rang tabdeel nahi ho saka. Pehle 'AI Remove BG' dabayein.", 'info');
+                } else {
+                    finalBgCtx.fillStyle = bg === 'blue' ? '#005bb5' : '#ffffff';
+                    finalBgCtx.fillRect(0, 0, cropW, cropH);
+                }
             }
             finalBgCtx.drawImage(croppedCanvas, 0, 0);
             croppedCanvas = coloredBgCanvas;
@@ -1278,48 +1983,320 @@
                 if (printSheetSlots.length < MAX_SLOTS) printSheetSlots.push({ canvas: rotatedCanvas, metaText: metaText });
             }
 
-            renderFinalSheet(); updatePhotoCountDropdown();
+            renderFinalSheet();
+            updatePhotoCountDropdown();
+            photoNumberInput.value = getNextPhotoNumber();
 
-            cropperWrapper.classList.add('hidden'); perspectiveWrapper.classList.add('hidden');
-            cropSettings.classList.add('hidden'); imageAdjustmentsPanel.classList.add('hidden');
-            cropModeToggle.classList.add('hidden'); initialMessage.classList.remove('hidden');
-            
+            // NON-DESTRUCTIVE WORKFLOW:
+            // Keep the active cropper & image intact so the studio operator can change background (e.g. 4 Blue -> 4 White)
+            // or add more copies without re-uploading and re-cropping!
             const remaining = MAX_SLOTS - printSheetSlots.length;
             if (remaining > 0) {
-                initialMessage.innerHTML = `<i class="fa-solid fa-circle-check text-green-500 text-5xl mb-3"></i>
-                    <p class="text-gray-800 font-bold text-lg mb-1">Photos Sheet Mein Add Ho Gayin!</p>
-                    <p class="text-gray-600 mb-3">Sheet par abhi bhi <span class="font-bold text-blue-600">${remaining} photos</span> ki jagah baqi hai.</p>
-                    <p class="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">Doosri photo upload karein ya camera se lein taake sheet pur ho.</p>`;
+                showAppMessage(`${copies} photos sheet mein shamil ho gayin! (${printSheetSlots.length}/${MAX_SLOTS}). Ab aap background badal kar mazeed copies add kar sakte hain ya nayi photo upload karein.`, 'success');
             } else {
-                initialMessage.innerHTML = `<i class="fa-solid fa-star text-yellow-500 text-5xl mb-3"></i>
-                    <p class="text-gray-800 font-bold text-lg mb-1">Sheet Bhar Gayi Hai (${MAX_SLOTS}/${MAX_SLOTS})</p><p class="text-gray-600">Ab aap sheet download ya print kar sakte hain.</p>`;
+                showAppMessage(`Zabardast! Sheet mukammal bhar gayi hai (${MAX_SLOTS}/${MAX_SLOTS})! Ab aap Quick Print ya Download kar sakte hain.`, 'success');
             }
-            imageUpload.value = ''; imageToCrop.src = '';
-            if (cropper) { cropper.destroy(); cropper = null; }
             if(window.innerWidth < 1024) resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
+
+        const clearEditorBtn = document.getElementById('clearEditorBtn');
+        if (clearEditorBtn) {
+            clearEditorBtn.addEventListener('click', function() {
+                imageUpload.value = '';
+                imageToCrop.src = '';
+                perspectiveImg.src = '';
+                originalRawDataUrl = null;
+                cutoutDataUrl = null;
+                if (cropper) { cropper.destroy(); cropper = null; }
+                cropperWrapper.classList.add('hidden');
+                perspectiveWrapper.classList.add('hidden');
+                cropSettings.classList.add('hidden');
+                imageAdjustmentsPanel.classList.add('hidden');
+                cropModeToggle.classList.add('hidden');
+                initialMessage.classList.remove('hidden');
+                initialMessage.innerHTML = `<i class="fa-solid fa-images text-4xl mb-3 text-blue-300"></i>
+                    <p class="font-medium text-gray-600">Nayi photo upload karein ya Camera istemal karein.</p>`;
+                showAppMessage("Editor reset ho gaya. Nayi photo upload karein.", 'info');
+            });
+        }
 
         clearSheetBtn.addEventListener('click', function() {
             printSheetSlots = []; updatePhotoCountDropdown();
             previewSlotsText.innerText = '0'; resultContainer.classList.add('hidden');
-            resultPlaceholder.classList.remove('hidden'); finalOutputDataUrl = null;
+            resultPlaceholder.classList.remove('hidden');
+            finalOutputDataUrl = null;
+            finalPrintDataUrl = null;
             if (cropSettings.classList.contains('hidden')) {
                 initialMessage.innerHTML = `<i class="fa-solid fa-images text-4xl mb-3 text-blue-300"></i>
                     <p class="font-medium text-gray-600">Nayi sheet shuru karne ke liye photo upload karein ya Camera istemal karein.</p>`;
                 initialMessage.classList.remove('hidden');
             }
+            showAppMessage("Sheet saaf ho gayi.", 'info');
         });
 
         function getSafeFileName() { return `Daiba_Photosheet_${captureDateInput.value || 'Date'}`.replace(/[^a-zA-Z0-9-]/g, '_'); }
         downloadJpgBtn.addEventListener('click', function() { if (!finalOutputDataUrl) return; const link = document.createElement('a'); link.download = `${getSafeFileName()}.jpg`; link.href = finalOutputDataUrl; link.click(); });
         downloadPdfBtn.addEventListener('click', function() { if (!finalOutputDataUrl) return; const doc = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'in', format: [4, 6] }); doc.addImage(finalOutputDataUrl, 'JPEG', 0, 0, 4, 6); doc.save(`${getSafeFileName()}.pdf`); });
+
+        // --- EPSON 4x6 HIGH-QUALITY GLOSSY QUICK PRINT PIPELINE ---
         printBtn.addEventListener('click', function() {
-            if (!finalOutputDataUrl) return;
+            const printData = finalPrintDataUrl || finalOutputDataUrl;
+            if (!printData) {
+                showAppMessage("Pehle tasweer sheet mein shamil karein.", 'error');
+                return;
+            }
+            
             const printWindow = window.open('', '_blank');
-            if (!printWindow) { showAppMessage("Popups allow karein.", 'error'); return; }
-            const html = `<!DOCTYPE html><html><head><title>Print</title><style>@page{size:4in 6in;margin:0;}body,html{margin:0;padding:0;width:4in;height:6in;}img{width:100%;height:100%;object-fit:cover;display:block;}</style></head><body><img src="${finalOutputDataUrl}" onload="window.print(); window.close();" /></body></html>`;
-            printWindow.document.open(); printWindow.document.write(html); printWindow.document.close();
+            if (!printWindow) {
+                showAppMessage("Popups allow karein taake print dialog khul sake.", 'error');
+                return;
+            }
+            
+            const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epson 4x6 Photo Print - Daiba Passport</title>
+    <style>
+        /* Strict 4x6 inches output layout with zero margin */
+        @page {
+            size: 4in 6in;
+            margin: 0 !important;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 4in !important;
+            height: 6in !important;
+            background: #ffffff !important;
+            overflow: hidden !important;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Epson High-Quality 4x6 Print Container */
+        .epson-print-container {
+            width: 4in !important;
+            height: 6in !important;
+            max-width: 4in !important;
+            max-height: 6in !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            overflow: hidden !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+            background: #ffffff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        /* Strict 300 DPI high quality uncompressed raster rendering */
+        .epson-print-img {
+            width: 4in !important;
+            height: 6in !important;
+            max-width: 4in !important;
+            max-height: 6in !important;
+            display: block !important;
+            object-fit: fill !important;
+            image-rendering: high-quality !important;
+            image-rendering: -webkit-optimize-contrast !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        /* Studio Operator Guidance Bar (Disappears on print) */
+        .operator-guidance-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 10px 16px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 13px;
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .operator-guidance-bar .badge {
+            background: #0284c7;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+            margin-right: 8px;
+        }
+        .operator-guidance-bar .highlight {
+            color: #38bdf8;
+            font-weight: bold;
+        }
+        .manual-print-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.15s;
+        }
+        .manual-print-btn:hover { background: #1d4ed8; }
+
+        @media print {
+            .operator-guidance-bar {
+                display: none !important;
+            }
+            @page {
+                size: 4in 6in;
+                margin: 0 !important;
+            }
+            html, body {
+                width: 4in !important;
+                height: 6in !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+            }
+            .epson-print-container {
+                width: 4in !important;
+                height: 6in !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .epson-print-img {
+                width: 4in !important;
+                height: 6in !important;
+                image-rendering: high-quality !important;
+                image-rendering: -webkit-optimize-contrast !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="operator-guidance-bar">
+        <div>
+            <span class="badge">EPSON 4x6 GLOSSY</span>
+            Paper: <span class="highlight">4x6 in (10x15cm)</span> | Margins: <span class="highlight">None (0)</span> | Scale: <span class="highlight">100% (Actual)</span> | Type: <span class="highlight">Premium Glossy</span>
+        </div>
+        <button class="manual-print-btn" onclick="triggerPrint()">Print Dialog</button>
+    </div>
+    <div class="epson-print-container">
+        <img id="printImage" class="epson-print-img" src="${printData}" alt="Epson 4x6 Passport Photo Sheet" />
+    </div>
+    <script>
+        function triggerPrint() {
+            window.focus();
+            window.print();
+        }
+
+        const img = document.getElementById('printImage');
+        let printed = false;
+        function runPrint() {
+            if (printed) return;
+            printed = true;
+            // Ensure full raster buffer is decoded before invoking browser spooler
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    window.focus();
+                    window.print();
+                }, 250);
+            });
+        }
+
+        if (img.complete) {
+            if (img.decode) {
+                img.decode().then(runPrint).catch(runPrint);
+            } else {
+                runPrint();
+            }
+        } else {
+            img.onload = () => {
+                if (img.decode) {
+                    img.decode().then(runPrint).catch(runPrint);
+                } else {
+                    runPrint();
+                }
+            };
+        }
+
+        // Prevent race condition: do not dismiss window immediately while spooling
+        window.onafterprint = function() {
+            setTimeout(() => {
+                window.close();
+            }, 800);
+        };
+    <\/script>
+</body>
+</html>`;
+            printWindow.document.open();
+            printWindow.document.write(html);
+            printWindow.document.close();
         });
+
+        // --- PROMPTS MODAL LOGIC ---
+        const openPromptsBtn = document.getElementById('openPromptsBtn');
+        const closePromptsBtn = document.getElementById('closePromptsBtn');
+        const promptsModal = document.getElementById('promptsModal');
+
+        if(openPromptsBtn) openPromptsBtn.addEventListener('click', () => promptsModal.classList.remove('hidden'));
+        if(closePromptsBtn) closePromptsBtn.addEventListener('click', () => promptsModal.classList.add('hidden'));
+
+        // Advanced copy function for Hidden/Button Prompts
+        window.copyHiddenPrompt = function(btnElement, textToCopy) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    showAppMessage("Prompt copied! Now Paste (Ctrl+V) in Gemini.", 'success');
+                    flashButton(btnElement);
+                }).catch(err => {
+                    fallbackCopy(textToCopy);
+                    flashButton(btnElement);
+                });
+            } else {
+                fallbackCopy(textToCopy);
+                flashButton(btnElement);
+            }
+        };
+
+        function flashButton(btn) {
+            btn.classList.add('ring-2', 'ring-green-400', 'bg-green-50');
+            setTimeout(() => {
+                btn.classList.remove('ring-2', 'ring-green-400', 'bg-green-50');
+            }, 800);
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showAppMessage("Prompt copied! Now Paste (Ctrl+V) in Gemini.", 'success');
+            } catch (err) {
+                showAppMessage("Copy failed.", 'error');
+            }
+            document.body.removeChild(textArea);
+        }
     </script>
 </body>
 </html>
